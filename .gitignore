@@ -1,17 +1,18 @@
-# Ignore dependency folders
+# Dependency folders
 node_modules/
 */node_modules/
 
-# Ignore build/output
+# Build/output
 dist/
 build/
 .next/
 out/
 
-# Ignore environment/config files
+# Environment/config files
 .env
 .env.local
 
 # OS + logs
 .DS_Store
 npm-debug.log*
+

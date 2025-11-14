@@ -4,7 +4,7 @@
   "routes": [
     {
       "routeId": "main",
-      "name": "Main Corridor (LB Nagar - Miyapur)",
+      "name": "Main Corridor",
       "coords": [
         [17.348, 78.557],
         [17.365, 78.535],

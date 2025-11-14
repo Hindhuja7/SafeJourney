@@ -13,8 +13,11 @@
     "tailwindcss": "^4.1.17"
   },
   "dependencies": {
+    "@mapbox/polyline": "^1.2.1",
+    "axios": "^1.13.2",
     "leaflet": "^1.9.4",
     "next": "^14.2.33",
+    "polyline": "^0.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-leaflet": "^4.2.1"
