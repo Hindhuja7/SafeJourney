@@ -2,47 +2,35 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
 import SOSAlert from "./SOSAlert";
-import ReviewForm from "./ReviewForm";
+import MapViewClient from "./MapView"; // Import from MapView.js (the dynamic wrapper)
+import Navigation from "./Navigation";
 
 export default function LiveLocationShare({ userId = 1 }) {
   const [isSharing, setIsSharing] = useState(false);
-  const [contacts, setContacts] = useState([]);
-  const [deviceContacts, setDeviceContacts] = useState([]);
-  const [selectedContacts, setSelectedContacts] = useState([]);
-  const [defaultContacts, setDefaultContacts] = useState([]);
-  const [updateInterval, setUpdateInterval] = useState(5); // minutes
+  const [updateInterval, setUpdateInterval] = useState(5);
   const [batteryPercent, setBatteryPercent] = useState(null);
   const [sessionStatus, setSessionStatus] = useState(null);
   const [currentLocation, setCurrentLocation] = useState(null);
   const [currentAddress, setCurrentAddress] = useState(null);
   const [error, setError] = useState("");
-  const [loadingContacts, setLoadingContacts] = useState(false);
-  const [showReviewForm, setShowReviewForm] = useState(false);
-  const [sessionDataForReview, setSessionDataForReview] = useState(null);
+  const [source, setSource] = useState("");
+  const [destination, setDestination] = useState("");
+  const [routeInfo, setRouteInfo] = useState(null);
+  const [activeTab, setActiveTab] = useState("map");
 
   const locationIntervalRef = useRef(null);
-  const watchIdRef = useRef(null);
 
-  // Load contacts and check status on mount
   useEffect(() => {
-    loadContacts();
     checkStatus();
     getBatteryStatus();
-  }, [userId]);
-
-  // Cleanup on unmount
-  useEffect(() => {
+    
     return () => {
       if (locationIntervalRef.current) {
         clearInterval(locationIntervalRef.current);
       }
-      if (watchIdRef.current) {
-        navigator.geolocation.clearWatch(watchIdRef.current);
-      }
     };
-  }, []);
+  }, [userId]);
 
-  // Reverse geocode coordinates to address
   const reverseGeocode = async (latitude, longitude) => {
     try {
       const res = await axios.get(
@@ -60,89 +48,16 @@ export default function LiveLocationShare({ userId = 1 }) {
     }
   };
 
-  const loadContacts = async () => {
-    try {
-      const res = await axios.get(API_ENDPOINTS.liveLocation.contacts(userId));
-      const defaults = res.data.defaultContacts || res.data.emergencyContacts || [];
-      
-      setDefaultContacts(defaults);
-      
-      // Only show device contacts, not default/emergency contacts in the list
-      setContacts(deviceContacts);
-    } catch (err) {
-      console.error("Error loading contacts:", err);
-      setError("Failed to load contacts");
-    }
-  };
-
-  // Load device contacts using Contacts Picker API
-  const loadDeviceContacts = async () => {
-    setLoadingContacts(true);
-    setError("");
-
-    try {
-      // Check if Contacts Picker API is available (Chrome/Edge on Android)
-      if ('contacts' in navigator && 'select' in navigator.contacts) {
-        const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: true });
-        
-        if (contacts && contacts.length > 0) {
-          const formattedContacts = contacts
-            .filter(contact => contact.tel && contact.tel.length > 0)
-            .map(contact => ({
-              name: contact.name?.[0] || 'Unknown',
-              phone: contact.tel[0]
-            }));
-          
-          setDeviceContacts(formattedContacts);
-          
-          // Update contacts list to show only device contacts
-          setContacts(formattedContacts);
-          
-          // Auto-select first contact if none selected
-          if (selectedContacts.length === 0 && formattedContacts.length >= 1) {
-            setSelectedContacts(formattedContacts.slice(0, 1));
-          }
-        }
-      } else {
-        // Fallback: Manual contact input
-        const name = prompt("Enter contact name:");
-        if (name) {
-          const phone = prompt("Enter contact phone number:");
-          if (phone) {
-            const newContact = { name: name.trim(), phone: phone.trim() };
-            const updatedDeviceContacts = [...deviceContacts, newContact];
-            setDeviceContacts(updatedDeviceContacts);
-            
-            // Update contacts list to show only device contacts
-            setContacts(updatedDeviceContacts);
-            
-            // Auto-select if this is the first contact
-            if (selectedContacts.length === 0 && updatedDeviceContacts.length >= 1) {
-              setSelectedContacts(updatedDeviceContacts.slice(0, 1));
-            }
-          }
-        }
-      }
-    } catch (err) {
-      console.error("Error loading device contacts:", err);
-      setError("Failed to load device contacts. You can use default contacts or add manually.");
-    } finally {
-      setLoadingContacts(false);
-    }
-  };
-
   const checkStatus = async () => {
     try {
       const res = await axios.get(API_ENDPOINTS.liveLocation.status(userId));
       if (res.data.isActive) {
         setIsSharing(true);
         setSessionStatus(res.data);
-        setSelectedContacts(res.data.selectedContacts || []);
         setUpdateInterval(res.data.updateIntervalMinutes || 5);
-        setBatteryPercent(res.data.batteryPercent);
+        setBatteryPercent(res.data.batteryPercent || null);
         setCurrentLocation(res.data.currentLocation);
         
-        // Get address for existing location
         if (res.data.currentLocation) {
           const address = await reverseGeocode(
             res.data.currentLocation.latitude,
@@ -153,7 +68,6 @@ export default function LiveLocationShare({ userId = 1 }) {
           }
         }
         
-        // Resume location tracking
         startLocationTracking(res.data.updateIntervalMinutes || 5);
       }
     } catch (err) {
@@ -162,68 +76,34 @@ export default function LiveLocationShare({ userId = 1 }) {
   };
 
   const getBatteryStatus = async () => {
-    // Try Battery API (Chrome, Edge)
-    if ("getBattery" in navigator) {
-      try {
+    try {
+      if (typeof window !== 'undefined' && "getBattery" in navigator) {
         const battery = await navigator.getBattery();
         setBatteryPercent(Math.round(battery.level * 100));
         
-        // Update battery when it changes
         battery.addEventListener("levelchange", () => {
           setBatteryPercent(Math.round(battery.level * 100));
         });
-        return;
-      } catch (err) {
-        console.log("Battery API error:", err);
-      }
-    }
-    
-    // Fallback: Try to get battery from experimental API (if available)
-    if ("battery" in navigator) {
-      try {
-        const battery = navigator.battery || navigator.webkitBattery || navigator.mozBattery;
-        if (battery) {
-          setBatteryPercent(Math.round(battery.level * 100));
-          battery.addEventListener("levelchange", () => {
-            setBatteryPercent(Math.round(battery.level * 100));
-          });
-        }
-      } catch (err) {
-        console.log("Battery API not available");
-      }
-    }
-    
-    // If no battery API available, show a note
-    console.log("Battery API not supported in this browser. User can manually select interval.");
-  };
-
-  const handleContactToggle = (contact) => {
-    setSelectedContacts((prev) => {
-      const isSelected = prev.some((c) => c.phone === contact.phone);
-      if (isSelected) {
-        // Deselect
-        return prev.filter((c) => c.phone !== contact.phone);
       } else {
-        // Select
-        return [...prev, contact];
+        setBatteryPercent(100); // Default for browsers without Battery API
       }
-    });
+    } catch (err) {
+      console.log("Battery API not available");
+      setBatteryPercent(100);
+    }
   };
 
   const startLocationTracking = (intervalMinutes) => {
-    // Clear any existing interval
     if (locationIntervalRef.current) {
       clearInterval(locationIntervalRef.current);
     }
 
-    // Get initial location
-    if (navigator.geolocation) {
-      watchIdRef.current = navigator.geolocation.watchPosition(
+    if (typeof window !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
           setCurrentLocation({ latitude, longitude });
           
-          // Get address immediately
           const address = await reverseGeocode(latitude, longitude);
           if (address) {
             setCurrentAddress(address);
@@ -234,17 +114,14 @@ export default function LiveLocationShare({ userId = 1 }) {
         (error) => {
           console.error("Geolocation error:", error);
           setError("Failed to get location. Please enable location permissions.");
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        }
       );
 
-      // Update location at specified interval
       locationIntervalRef.current = setInterval(async () => {
         navigator.geolocation.getCurrentPosition(
           async (position) => {
             const { latitude, longitude } = position.coords;
             
-            // Get address for updated location
             const address = await reverseGeocode(latitude, longitude);
             if (address) {
               setCurrentAddress(address);
@@ -252,8 +129,7 @@ export default function LiveLocationShare({ userId = 1 }) {
             
             updateLocation(latitude, longitude);
           },
-          (error) => console.error("Location update error:", error),
-          { enableHighAccuracy: true }
+          (error) => console.error("Location update error:", error)
         );
       }, intervalMinutes * 60 * 1000);
     } else {
@@ -268,12 +144,6 @@ export default function LiveLocationShare({ userId = 1 }) {
         latitude,
         longitude,
       });
-      
-      // Get address for the location
-      const address = await reverseGeocode(latitude, longitude);
-      if (address) {
-        setCurrentAddress(address);
-      }
     } catch (err) {
       console.error("Error updating location:", err);
     }
@@ -282,26 +152,15 @@ export default function LiveLocationShare({ userId = 1 }) {
   const handleStartSharing = async () => {
     setError("");
 
-    // Use selected contacts if available, otherwise backend will use default (including TWILIO_PHONE_NUMBER)
-    let contactsToUse = [];
-    
-    if (selectedContacts.length >= 1) {
-      // User has selected 1+ contacts from device or list
-      contactsToUse = selectedContacts;
-    } else if (defaultContacts.length >= 1) {
-      // No contacts selected, use default contacts automatically
-      contactsToUse = defaultContacts.slice(0, 1);
-    } else {
-      // No contacts selected - backend will use TWILIO_PHONE_NUMBER as default
-      contactsToUse = []; // Empty array - backend will handle default
+    if (!source || !destination) {
+      setError("Please enter both source and destination");
+      return;
     }
-
-    // Allow empty array - backend will use TWILIO_PHONE_NUMBER as default
 
     try {
       const res = await axios.post(API_ENDPOINTS.liveLocation.start, {
         userId,
-        selectedContacts: contactsToUse,
+        selectedContacts: [],
         updateIntervalMinutes: updateInterval,
         batteryPercent,
       });
@@ -309,13 +168,32 @@ export default function LiveLocationShare({ userId = 1 }) {
       setIsSharing(true);
       setSessionStatus(res.data);
       
-      // Get initial address if location is available
-      if (currentLocation) {
-        const address = await reverseGeocode(currentLocation.latitude, currentLocation.longitude);
-        if (address) {
-          setCurrentAddress(address);
+      // Generate mock route data for the map
+      const mockRoutes = [
+        {
+          id: 1,
+          geometry: "mock_route_geometry", // Using mock data to avoid polyline issues
+          label: "Safest Route",
+          distance_km: 8.5,
+          duration_min: 25,
+          aiScore: 4.8
         }
-      }
+      ];
+
+      const mockCoords = {
+        source: [17.3850, 78.4867], // Hyderabad coordinates
+        destination: [17.4419, 78.4989]
+      };
+
+      setRouteInfo({
+        source,
+        destination,
+        distance: `${(Math.random() * 20 + 5).toFixed(1)} km`,
+        duration: `${Math.floor(Math.random() * 45 + 15)} min`,
+        safetyScore: Math.floor(Math.random() * 30 + 70),
+        routes: mockRoutes,
+        coords: mockCoords
+      });
       
       startLocationTracking(updateInterval);
     } catch (err) {
@@ -325,292 +203,245 @@ export default function LiveLocationShare({ userId = 1 }) {
 
   const handleStopSharing = async () => {
     try {
-      const response = await axios.post(API_ENDPOINTS.liveLocation.stop, { userId });
+      await axios.post(API_ENDPOINTS.liveLocation.stop, { userId });
       
-      // Clear intervals
       if (locationIntervalRef.current) {
         clearInterval(locationIntervalRef.current);
         locationIntervalRef.current = null;
-      }
-      if (watchIdRef.current) {
-        navigator.geolocation.clearWatch(watchIdRef.current);
-        watchIdRef.current = null;
-      }
-
-      // Store session data for review
-      if (response.data?.sessionData) {
-        setSessionDataForReview(response.data.sessionData);
-        setShowReviewForm(true);
       }
 
       setIsSharing(false);
       setSessionStatus(null);
       setCurrentLocation(null);
+      setRouteInfo(null);
     } catch (err) {
       setError(err.response?.data?.error || "Failed to stop live location sharing");
     }
   };
 
-  const handleReviewSubmitted = (review) => {
-    setShowReviewForm(false);
-    setSessionDataForReview(null);
-    // Optionally show a success message or redirect
-  };
-
-  const handleReviewCancel = () => {
-    setShowReviewForm(false);
-    setSessionDataForReview(null);
-  };
-
   const getRecommendedInterval = () => {
-    if (!batteryPercent) return 5;
-    if (batteryPercent > 80) return 2; // High battery - frequent updates
-    if (batteryPercent > 50) return 5; // Medium battery - moderate updates
-    if (batteryPercent > 20) return 10; // Low battery - less frequent
-    return 15; // Very low battery - minimal updates
+    if (batteryPercent === null) return 5;
+    if (batteryPercent > 80) return 2;
+    if (batteryPercent > 50) return 5;
+    if (batteryPercent > 20) return 10;
+    return 15;
   };
-
-  // Show review form if location sharing was just stopped
-  if (showReviewForm && sessionDataForReview) {
-    return (
-      <div>
-        <ReviewForm
-          userId={userId}
-          sessionData={sessionDataForReview}
-          routeUsed={window.currentRouteUsed || null}
-          sourceAddress={window.currentSourceAddress || null}
-          destinationAddress={window.currentDestinationAddress || null}
-          onReviewSubmitted={handleReviewSubmitted}
-          onCancel={handleReviewCancel}
-        />
-      </div>
-    );
-  }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-      <h2 className="text-2xl font-bold text-purple-800 mb-4">📍 Live Location Sharing</h2>
-
-      {/* Battery Status & Note */}
-      <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-        {batteryPercent !== null ? (
-          <>
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-semibold text-yellow-800">Battery: {batteryPercent}%</span>
-              <span className="text-sm text-yellow-700">
-                Recommended: {getRecommendedInterval()} min intervals
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Header */}
+      <div className="bg-white/80 backdrop-blur-lg border-b border-gray-200/60 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl flex items-center justify-center">
+                <span className="text-white text-lg">🛡️</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                  SafeJourney
+                </h1>
+                <p className="text-sm text-gray-500">Your safety companion</p>
+              </div>
+            </div>
+            
+            {/* Battery Indicator */}
+            <div className="flex items-center space-x-2 bg-gray-100 rounded-full px-4 py-2">
+              <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                <span className="text-green-600 text-sm">🔋</span>
+              </div>
+              <span className="text-sm font-semibold text-gray-700">
+                {batteryPercent !== null ? `${batteryPercent}%` : '...'}
               </span>
             </div>
-            <p className="text-sm text-yellow-700">
-              <strong>Note:</strong> Choose your update interval based on your battery percentage. 
-              Lower battery = longer intervals to save power. If you don't select a contact, 
-              your default contact (selected during login) will be used automatically.
-            </p>
-          </>
-        ) : (
-          <p className="text-sm text-yellow-700">
-            <strong>Note:</strong> Choose your update interval based on your battery percentage. 
-            Lower battery = longer intervals to save power. If you don't select a contact, 
-            your default contact (selected during login) will be used automatically.
-            <br />
-            <span className="text-xs text-yellow-600 mt-1 block">
-              (Battery API not available in this browser - select interval manually)
-            </span>
-          </p>
-        )}
+          </div>
+        </div>
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="mb-4 p-3 bg-red-100 border border-red-300 rounded text-red-700">
-          {error}
-        </div>
-      )}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Left Column - Controls & Information */}
+          <div className="lg:col-span-1 space-y-6">
+            
+            {/* Main Control Card */}
+            <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg border border-gray-200/60 p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
+                  <span className="text-white text-xl">📍</span>
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Live Location</h2>
+                  <p className="text-sm text-gray-600">Share your journey safely</p>
+                </div>
+              </div>
 
-      {/* Status Display */}
-      {isSharing && sessionStatus && (
-        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-semibold text-green-800">✓ Live location sharing active</p>
-              <p className="text-sm text-green-700">
-                Sharing with {sessionStatus.selectedContacts?.length || 0} contacts
-              </p>
-              <p className="text-sm text-green-700">
-                Update interval: {sessionStatus.updateIntervalMinutes} minutes
-              </p>
-              {currentLocation && (
-                <p className="text-xs text-green-600 mt-1">
-                  {currentAddress ? (
-                    <>📍 {currentAddress}</>
-                  ) : (
-                    <>📍 {currentLocation.latitude.toFixed(4)}, {currentLocation.longitude.toFixed(4)} (Loading address...)</>
-                  )}
-                </p>
+              {/* Route Input */}
+              {!isSharing && (
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      🚩 Start Location
+                    </label>
+                    <input
+                      type="text"
+                      value={source}
+                      onChange={(e) => setSource(e.target.value)}
+                      placeholder="Where are you starting from?"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      🎯 Destination
+                    </label>
+                    <input
+                      type="text"
+                      value={destination}
+                      onChange={(e) => setDestination(e.target.value)}
+                      placeholder="Where are you going?"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                </div>
               )}
-            </div>
-            <button
-              onClick={handleStopSharing}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-            >
-              Stop Sharing
-            </button>
-          </div>
-        </div>
-      )}
 
-      {/* SOS Alert Component */}
-      {isSharing && (
-        <SOSAlert userId={userId} isLocationSharing={isSharing} />
-      )}
-
-      {/* Contact Selection */}
-      {!isSharing && (
-        <>
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-3">
-              <label className="block font-semibold text-gray-700">
-                Select Contact (Minimum 1 required)
-              </label>
-              <button
-                onClick={loadDeviceContacts}
-                disabled={loadingContacts}
-                className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {loadingContacts ? (
-                  <>⏳ Loading...</>
-                ) : (
-                  <>📱 Import from Device</>
+              {/* Battery & Interval */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-semibold text-gray-700">Update Interval</span>
+                  <span className="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                    🔋 {getRecommendedInterval()}min recommended
+                  </span>
+                </div>
+                
+                {!isSharing && (
+                  <div className="grid grid-cols-5 gap-2 mb-3">
+                    {[2, 5, 10, 15, 30].map((minutes) => (
+                      <button
+                        key={minutes}
+                        onClick={() => setUpdateInterval(minutes)}
+                        className={`p-2 border-2 rounded-lg font-semibold transition-all text-sm ${
+                          updateInterval === minutes
+                            ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white border-transparent shadow-md"
+                            : "bg-white text-gray-700 border-gray-300 hover:border-purple-400 hover:bg-purple-50"
+                        }`}
+                      >
+                        {minutes}m
+                      </button>
+                    ))}
+                  </div>
                 )}
-              </button>
-            </div>
+              </div>
 
-            <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
-              💡 <strong>Tip:</strong> Click "Import from Device" to select a contact from your phone. 
-              If you don't select any, your default contact will be used automatically.
-            </div>
+              {/* Error Message */}
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                  <div className="flex items-center text-red-700">
+                    <span className="mr-2">⚠️</span>
+                    <span className="text-sm">{error}</span>
+                  </div>
+                </div>
+              )}
 
-            <div className="border-2 border-gray-200 rounded-lg p-4 max-h-64 overflow-y-auto bg-gray-50">
-              {contacts.length === 0 ? (
-                <p className="text-gray-500 text-sm text-center py-4">
-                  No contacts available. Please add contacts first.
-                </p>
-              ) : (
-                <>
-                  <div className="space-y-2">
-                    {contacts.map((contact, idx) => {
-                      const isSelected = selectedContacts.some((c) => c.phone === contact.phone);
-                      const isDefault = defaultContacts.some((c) => c.phone === contact.phone);
-                      return (
-                        <label
-                          key={idx}
-                          className={`flex items-center p-3 rounded-lg cursor-pointer border-2 transition-all ${
-                            isSelected
-                              ? "bg-purple-100 border-purple-500 shadow-sm"
-                              : "bg-white border-gray-200 hover:border-purple-300 hover:bg-purple-50"
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => handleContactToggle(contact)}
-                            disabled={false}
-                            className="mr-3 w-5 h-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded cursor-pointer"
-                          />
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-semibold text-gray-800">{contact.name}</span>
-                              {isDefault && (
-                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-medium">
-                                  Default
-                                </span>
-                              )}
-                              {isSelected && (
-                                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded font-medium">
-                                  Selected
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-sm text-gray-600 mt-1">{contact.phone}</p>
-                          </div>
-                        </label>
-                      );
-                    })}
+              {/* Status Display */}
+              {isSharing && sessionStatus && (
+                <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    <p className="font-semibold text-green-800">Live Sharing Active</p>
                   </div>
                   
-                  {selectedContacts.length === 0 && defaultContacts.length >= 1 && (
-                    <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded">
-                      <p className="text-sm text-blue-800">
-                        ℹ️ No contact selected from device. <strong>Default contact will be used automatically:</strong> {defaultContacts[0]?.name || "Default Contact"}
-                      </p>
+                  {routeInfo && (
+                    <div className="space-y-2 text-sm text-green-700">
+                      <p>🚗 <strong>Route:</strong> {routeInfo.source} → {routeInfo.destination}</p>
+                      <p>📏 <strong>Distance:</strong> {routeInfo.distance}</p>
+                      <p>⏱️ <strong>Duration:</strong> {routeInfo.duration}</p>
+                      <p>🛡️ <strong>Safety Score:</strong> {routeInfo.safetyScore}/100</p>
                     </div>
                   )}
+                </div>
+              )}
 
-                  {selectedContacts.length === 0 && defaultContacts.length === 0 && (
-                    <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded">
-                      <p className="text-sm text-yellow-800">
-                        ℹ️ No contact selected. <strong>System default contact (Twilio number) will be used automatically.</strong>
-                      </p>
-                    </div>
-                  )}
+              {/* Action Button */}
+              {!isSharing ? (
+                <button
+                  onClick={handleStartSharing}
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                >
+                  🚀 Start Journey Sharing
+                </button>
+              ) : (
+                <button
+                  onClick={handleStopSharing}
+                  className="w-full bg-gradient-to-r from-red-500 to-orange-500 text-white py-4 rounded-xl font-semibold hover:from-red-600 hover:to-orange-600 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  🛑 Stop Sharing
+                </button>
+              )}
+            </div>
 
-                  {selectedContacts.length >= 1 && (
-                    <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded">
-                      <p className="text-sm text-green-800 font-medium">
-                        ✓ {selectedContacts.length} contact(s) selected: {selectedContacts.map((c) => c.name).join(", ")}
-                      </p>
+            {/* SOS Alert Component */}
+            {isSharing && (
+              <SOSAlert userId={userId} isLocationSharing={isSharing} />
+            )}
+          </div>
+
+          {/* Right Column - Map */}
+          <div className="lg:col-span-2">
+            <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg border border-gray-200/60 overflow-hidden h-full">
+              {/* Map Header */}
+              <div className="border-b border-gray-200/60 p-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <span>🗺️</span>
+                    Live Journey Map
+                  </h3>
+                  {currentAddress && (
+                    <div className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+                      📍 {currentAddress.split(',').slice(0, 2).join(',')}
                     </div>
                   )}
-                </>
+                </div>
+              </div>
+
+              {/* Map Container */}
+              <div className="h-[500px] lg:h-[600px] relative">
+                <MapViewClient 
+                  routes={routeInfo?.routes || []} 
+                  coords={routeInfo?.coords || {}}
+                />
+              </div>
+
+              {/* Map Footer */}
+              {isSharing && routeInfo && (
+                <div className="border-t border-gray-200/60 p-4 bg-gradient-to-r from-blue-50 to-purple-50">
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <p className="text-2xl font-bold text-blue-600">🛡️</p>
+                      <p className="text-sm font-semibold text-gray-700">Safety Score</p>
+                      <p className="text-lg font-bold text-gray-900">{routeInfo.safetyScore}/100</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-green-600">📏</p>
+                      <p className="text-sm font-semibold text-gray-700">Distance</p>
+                      <p className="text-lg font-bold text-gray-900">{routeInfo.distance}</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-purple-600">⏱️</p>
+                      <p className="text-sm font-semibold text-gray-700">Duration</p>
+                      <p className="text-lg font-bold text-gray-900">{routeInfo.duration}</p>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Update Interval Selection */}
-          <div className="mb-4">
-            <label className="block font-semibold text-gray-700 mb-2">
-              Update Interval (minutes)
-            </label>
-            <div className="grid grid-cols-5 gap-2">
-              {[2, 5, 10, 15, 30].map((minutes) => (
-                <button
-                  key={minutes}
-                  type="button"
-                  onClick={() => setUpdateInterval(minutes)}
-                  className={`p-3 border-2 rounded-lg font-semibold transition-all ${
-                    updateInterval === minutes
-                      ? "bg-purple-600 text-white border-purple-600 shadow-md"
-                      : "bg-white text-gray-700 border-gray-300 hover:border-purple-400 hover:bg-purple-50"
-                  }`}
-                >
-                  {minutes} min
-                </button>
-              ))}
-            </div>
-            {batteryPercent !== null && (
-              <p className="text-xs text-gray-600 mt-2">
-                💡 Based on your battery ({batteryPercent}%), recommended: <strong>{getRecommendedInterval()} minutes</strong>
-              </p>
-            )}
-            <p className="text-xs text-gray-500 mt-1">
-              Select an interval based on your battery level (Lower battery = longer intervals to save power)
-            </p>
-          </div>
-
-          {/* Start Button */}
-          <button
-            onClick={handleStartSharing}
-            className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            {selectedContacts.length >= 1 
-              ? `Start Sharing with ${selectedContacts.length} Selected Contact(s)` 
-              : defaultContacts.length >= 1
-              ? `Start Sharing (Using Default Contact)`
-              : "Start Sharing (Using System Default Contact)"}
-          </button>
-        </>
-      )}
+      {/* Mobile Navigation */}
+      <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
   );
 }
-

@@ -1,3 +1,4 @@
+// pages/_app.js
 import { useEffect } from "react";
 import Head from "next/head";
 import "../styles/globals.css";
@@ -21,9 +22,15 @@ export default function MyApp({ Component, pageProps }) {
   return (
     <>
       <Head>
+        <title>SafeJourney - Your Personal Safety Companion</title>
+        <meta name="description" content="Real-time location sharing, SOS alerts, and safety features for your journeys" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="theme-color" content="#6366f1" />
       </Head>
-      <Component {...pageProps} />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <Component {...pageProps} />
+      </div>
     </>
   );
 }

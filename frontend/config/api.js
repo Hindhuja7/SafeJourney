@@ -1,3 +1,4 @@
+// config/api.js
 // API Configuration for SafeJourney
 // Works for both web and mobile (Capacitor)
 
@@ -8,18 +9,18 @@ const getBackendUrl = () => {
     // Mobile app - use environment variable or production URL
     return process.env.NEXT_PUBLIC_API_URL || 
            process.env.REACT_APP_API_URL || 
-           'https://your-backend-url.com'; // Replace with your deployed backend URL
+           'https://your-backend-url.com';
   }
   
   // Web development - use localhost or environment variable
   if (typeof window !== 'undefined') {
     return process.env.NEXT_PUBLIC_API_URL || 
            process.env.REACT_APP_API_URL || 
-           'http://localhost:5000';
+           'http://localhost:5010';
   }
   
   // Server-side (Next.js SSR)
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5010';
 };
 
 export const API_BASE_URL = getBackendUrl();
@@ -33,7 +34,12 @@ export const apiUrl = (endpoint) => {
 
 // Export commonly used endpoints
 export const API_ENDPOINTS = {
-  auth: apiUrl('api/auth'),
+  auth: {
+    login: apiUrl('api/auth/login'),
+    register: apiUrl('api/auth/register'),
+    logout: apiUrl('api/auth/logout'),
+    verify: apiUrl('api/auth/verify'),
+  },
   health: apiUrl('api/health'),
   routes: apiUrl('api/routes'),
   liveLocation: {
@@ -57,4 +63,3 @@ export const API_ENDPOINTS = {
 };
 
 export default API_BASE_URL;
-

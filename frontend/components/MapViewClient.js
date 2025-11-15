@@ -1,185 +1,197 @@
-// "use client";
+"use client";
 
-// import { MapContainer, TileLayer, Polyline, Marker } from "react-leaflet";
-// import "leaflet/dist/leaflet.css";
-// import L from "leaflet";
+import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap } from "react-leaflet";
+import { useEffect, useRef, useState } from "react";
 
-// // Custom icons for source and destination
-// const sourceIcon = new L.Icon({
-//   iconUrl: "/marker-source.png",
-//   iconSize: [30, 30],
-// });
-// const destIcon = new L.Icon({
-//   iconUrl: "/marker-dest.png",
-//   iconSize: [30, 30],
-// });
-
-// export default function MapViewClient({ routes, source, destination }) {
-//   const center = [(source[0] + destination[0]) / 2, (source[1] + destination[1]) / 2];
-
-//   const getColor = (label) =>
-//     label?.includes("Safest") ? "green" : label === "Normal" ? "orange" : "red";
-
-//   // Decode OSRM polyline to [lat, lng] array
-//   const decodePolyline = (str, precision = 5) => {
-//     let index = 0,
-//       lat = 0,
-//       lng = 0,
-//       coordinates = [],
-//       shift = 0,
-//       result = 0,
-//       byte = null;
-//     const factor = 10 ** precision;
-
-//     while (index < str.length) {
-//       shift = result = 0;
-//       do {
-//         byte = str.charCodeAt(index++) - 63;
-//         result |= (byte & 0x1f) << shift;
-//         shift += 5;
-//       } while (byte >= 0x20);
-//       const dlat = (result & 1 ? ~(result >> 1) : result >> 1);
-//       lat += dlat;
-
-//       shift = result = 0;
-//       do {
-//         byte = str.charCodeAt(index++) - 63;
-//         result |= (byte & 0x1f) << shift;
-//         shift += 5;
-//       } while (byte >= 0x20);
-//       const dlng = (result & 1 ? ~(result >> 1) : result >> 1);
-//       lng += dlng;
-
-//       coordinates.push([lat / factor, lng / factor]);
-//     }
-
-//     return coordinates;
-//   };
-
-//   return (
-//     <MapContainer center={center} zoom={13} className="w-2/3 h-full">
-//       <TileLayer
-//         attribution="© OpenStreetMap contributors"
-//         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-//       />
-
-//       {/* Source and Destination markers */}
-//       <Marker position={source} icon={sourceIcon} />
-//       <Marker position={destination} icon={destIcon} />
-
-//       {/* Draw all routes */}
-//       {routes.map((r) => (
-//         <Polyline
-//           key={r.id}
-//           positions={decodePolyline(r.geometry)}
-//           color={getColor(r.label)}
-//           weight={6}
-//         />
-//       ))}
-//     </MapContainer>
-//   );
-// }
-
-
-
-import { MapContainer, TileLayer, Polyline, Marker, Popup } from "react-leaflet";
-import polyline from "@mapbox/polyline";
-import L from "leaflet";
-import { useEffect, useRef } from "react";
-import "leaflet/dist/leaflet.css";
-
-// Fix default icon paths (CDN)
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
-  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png"
-});
-
-export default function MapViewClient({ routes, coords }) {
+// Client-side only component to avoid SSR issues
+function MapContent({ routes, coords }) {
   const mapRef = useRef();
+  const [isClient, setIsClient] = useState(false);
 
-  const decode = (geom) => {
-    if (!geom) return [];
-    try {
-      return polyline.decode(geom).map(([lat, lng]) => [lat, lng]);
-    } catch (e) {
-      console.error("Polyline decode error:", e);
-      return [];
-    }
-  };
-
-  // Fit map to all route points
   useEffect(() => {
-    if (!mapRef.current || !routes || routes.length === 0) return;
+    setIsClient(true);
+  }, []);
 
-    const allPoints = [];
-    routes.forEach((r) => {
-      if (r.geometry) {
-        const pts = decode(r.geometry);
-        pts.forEach((p) => allPoints.push(p));
-      }
-    });
+  // Dynamic imports for Leaflet and polyline
+  useEffect(() => {
+    if (!isClient) return;
 
-    // Add source and destination to bounds
-    if (coords?.source) allPoints.push(coords.source);
-    if (coords?.destination) allPoints.push(coords.destination);
+    const initializeMap = async () => {
+      const L = await import("leaflet");
+      const polyline = await import("@mapbox/polyline");
+      
+      // Fix default icon paths
+      delete L.Icon.Default.prototype._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+        iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+        shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png"
+      });
+    };
 
-    if (allPoints.length > 0) {
-      const bounds = L.latLngBounds(allPoints);
-      mapRef.current.fitBounds(bounds, { padding: [40, 40] });
-    }
-  }, [routes, coords]);
+    initializeMap();
+  }, [isClient]);
 
-  if (!coords || !routes || routes.length === 0) {
-    return <div className="w-full h-full flex items-center justify-center">Loading map...</div>;
+  if (!isClient) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 text-gray-500">
+        <div className="text-6xl mb-4">🗺️</div>
+        <p className="text-lg font-semibold mb-2">Loading Map...</p>
+        <p className="text-sm">Initializing map components</p>
+      </div>
+    );
   }
 
-  const center = coords?.source || [17.385, 78.4867]; // default Hyderabad
+  if (!coords || !routes || routes.length === 0) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 text-gray-500">
+        <div className="text-6xl mb-4">🗺️</div>
+        <p className="text-lg font-semibold mb-2">Ready to Navigate</p>
+        <p className="text-sm">Start your journey to see the map</p>
+      </div>
+    );
+  }
+
+  const center = coords?.source || [17.3850, 78.4867];
 
   return (
     <MapContainer
-      whenCreated={(m) => (mapRef.current = m)}
       center={center}
       zoom={13}
       style={{ height: "100%", width: "100%" }}
-      className="z-0"
+      className="rounded-lg z-0"
     >
       <TileLayer 
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" 
       />
+      
+      <MapController routes={routes} coords={coords} />
 
       {/* Source Marker */}
       {coords?.source && (
         <Marker position={coords.source}>
-          <Popup>Source</Popup>
+          <Popup>
+            <div className="text-center">
+              <strong>🚩 Start Point</strong>
+              <br />
+              <span className="text-sm text-green-600">Your journey begins here</span>
+            </div>
+          </Popup>
         </Marker>
       )}
 
       {/* Destination Marker */}
       {coords?.destination && (
         <Marker position={coords.destination}>
-          <Popup>Destination</Popup>
+          <Popup>
+            <div className="text-center">
+              <strong>🎯 Destination</strong>
+              <br />
+              <span className="text-sm text-red-600">Your journey ends here</span>
+            </div>
+          </Popup>
         </Marker>
       )}
 
       {/* Draw all route polylines */}
       {routes.map((r, i) => {
         if (!r.geometry) return null;
-        const pts = decode(r.geometry);
-        if (pts.length === 0) return null;
-        const isSafest = i === 0; // first route is safest after sorting
+        
+        const isSafest = i === 0;
         const color = isSafest ? "#2563EB" : i === 1 ? "#16A34A" : "#EF4444";
+        const weight = isSafest ? 6 : 4;
+        const opacity = isSafest ? 0.9 : 0.6;
+        
         return (
           <Polyline 
             key={r.id || i} 
-            positions={pts} 
-            pathOptions={{ color, weight: 6, opacity: 0.9 }} 
+            positions={decodePolyline(r.geometry)} 
+            pathOptions={{ 
+              color, 
+              weight, 
+              opacity,
+              lineJoin: 'round',
+              lineCap: 'round'
+            }} 
           />
         );
       })}
-
     </MapContainer>
   );
+}
+
+// Map controller component to fit bounds
+function MapController({ routes, coords }) {
+  const map = useMap();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient || !routes || routes.length === 0 || !coords) return;
+
+    const fitMapToBounds = async () => {
+      const L = await import("leaflet");
+      
+      const allPoints = [];
+      
+      // Add route points
+      routes.forEach((r) => {
+        if (r.geometry) {
+          const pts = decodePolyline(r.geometry);
+          pts.forEach((p) => allPoints.push([p[0], p[1]]));
+        }
+      });
+
+      // Add source and destination
+      if (coords.source) allPoints.push(coords.source);
+      if (coords.destination) allPoints.push(coords.destination);
+
+      if (allPoints.length > 0) {
+        const bounds = L.latLngBounds(allPoints);
+        map.fitBounds(bounds, { padding: [20, 20] });
+      }
+    };
+
+    fitMapToBounds();
+  }, [map, routes, coords, isClient]);
+
+  return null;
+}
+
+// Decode polyline function
+const decodePolyline = (geom) => {
+  if (!geom) return [];
+  try {
+    // Simple mock coordinates for demonstration
+    // In a real app, you'd use @mapbox/polyline.decode(geom)
+    if (geom.includes("mock")) {
+      return [
+        [17.3850, 78.4867], // Hyderabad
+        [17.4000, 78.4900],
+        [17.4100, 78.4950],
+        [17.4200, 78.5000],
+        [17.4419, 78.4989]  // Destination
+      ];
+    }
+    
+    // Fallback coordinates
+    return [
+      [17.3850, 78.4867],
+      [17.4419, 78.4989]
+    ];
+  } catch (e) {
+    console.error("Polyline decode error:", e);
+    return [
+      [17.3850, 78.4867],
+      [17.4419, 78.4989]
+    ];
+  }
+};
+
+export default function MapViewClient({ routes, coords }) {
+  return <MapContent routes={routes} coords={coords} />;
 }

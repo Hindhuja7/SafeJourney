@@ -1,228 +1,217 @@
+// pages/index.js
 import { useState, useEffect } from "react";
-import axios from "axios";
-import RouteInfoCard from "../components/RouteInfoCard";
-import MapView from "../components/MapView";
-import LiveLocationShare from "../components/LiveLocationShare";
 import Login from "../components/Login";
-import { API_ENDPOINTS } from "../config/api";
+import LiveLocationShare from "../components/LiveLocationShare";
+import Navigation from "../components/Navigation";
 
 export default function Home() {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
-  const [srcAddr, setSrcAddr] = useState("");
-  const [dstAddr, setDstAddr] = useState("");
-  const [routes, setRoutes] = useState([]);
-  const [coords, setCoords] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [selectedRoute, setSelectedRoute] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("map");
 
-  // Check if user is logged in on mount
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
-
-    if (storedToken && storedUser) {
-      // Verify token
-      axios.get(`${API_ENDPOINTS.auth}/verify`, {
-        headers: { Authorization: `Bearer ${storedToken}` }
-      }).then(res => {
-        setUser(res.data.user);
-        setToken(storedToken);
-      }).catch(() => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-      });
+    const savedToken = localStorage.getItem("token");
+    const savedUser = localStorage.getItem("user");
+    
+    if (savedToken && savedUser) {
+      setToken(savedToken);
+      setUser(JSON.parse(savedUser));
     }
+    setLoading(false);
   }, []);
 
   const handleLogin = (userData, userToken) => {
     setUser(userData);
     setToken(userToken);
+    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("token", userToken);
   };
 
-  const handleLogout = async () => {
-    try {
-      if (token) {
-        await axios.post(`${API_ENDPOINTS.auth}/logout`, { token });
-      }
-    } catch (err) {
-      console.error("Logout error:", err);
-    }
+  const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
     setToken(null);
-    setRoutes([]);
-    setSelectedRoute(null);
-    setSrcAddr("");
-    setDstAddr("");
   };
 
-  const fetchRoutes = async () => {
-    if (!srcAddr.trim() || !dstAddr.trim()) {
-      alert("Please enter both source and destination addresses.");
-      return;
-    }
-    setLoading(true);
-    setRoutes([]);
-    setCoords(null);
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
+        <div className="text-center">
+          <div className="relative">
+            <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-6 backdrop-blur-sm">
+              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                <span className="text-2xl text-indigo-600">🛡️</span>
+              </div>
+            </div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white absolute -bottom-2 left-1/2 transform -translate-x-1/2"></div>
+          </div>
+          <p className="text-white/90 font-medium">Loading SafeJourney</p>
+        </div>
+      </div>
+    );
+  }
 
-    try {
-      const res = await axios.post(API_ENDPOINTS.routes, {
-        sourceAddress: srcAddr.trim(),
-        destinationAddress: dstAddr.trim()
-      }, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
-
-      setCoords(res.data.coords || null);
-      const fetchedRoutes = res.data.routes || [];
-      setRoutes(fetchedRoutes);
-      
-      // Default to safest route (first one after sorting)
-      if (fetchedRoutes.length > 0) {
-        const safestRoute = fetchedRoutes[0];
-        setSelectedRoute(safestRoute);
-        window.currentRouteUsed = safestRoute;
-      } else {
-        setSelectedRoute(null);
-      }
-      
-      window.currentSourceAddress = srcAddr.trim();
-      window.currentDestinationAddress = dstAddr.trim();
-
-      // Store route data in backend for logged-in users
-      if (user && token) {
-        try {
-          await axios.post(`${API_ENDPOINTS.routes}/store`, {
-            userId: user.id,
-            sourceAddress: srcAddr.trim(),
-            destinationAddress: dstAddr.trim(),
-            selectedRoute: fetchedRoutes[0] || null,
-            timestamp: new Date().toISOString()
-          }, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-        } catch (err) {
-          console.error("Error storing route data:", err);
-        }
-      }
-    } catch (err) {
-      console.error("Fetch error:", err);
-      const errorMessage = err?.response?.data?.error || err?.message || "Unknown error";
-      alert(`Failed to fetch routes: ${errorMessage}\n\nMake sure backend is running`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Show login page if not authenticated
   if (!user) {
     return <Login onLogin={handleLogin} />;
   }
 
-  return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-[#f4f0ff] to-[#ffffff]">
-      {/* Header with Logout */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-purple-800">🛡️ SafeJourney</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-gray-700">Welcome, {user.name}!</span>
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
-
-      {/* Source and Destination Input - TOP */}
-      <div className="max-w-3xl mx-auto bg-white p-4 rounded-2xl shadow mb-6">
-        <h2 className="text-xl font-semibold text-purple-800 mb-4">📍 Find Safe Routes</h2>
-        <input
-          value={srcAddr}
-          onChange={(e) => setSrcAddr(e.target.value)}
-          placeholder="Source address (e.g., Miyapur, Hyderabad)"
-          className="w-full p-3 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-        />
-        <input
-          value={dstAddr}
-          onChange={(e) => setDstAddr(e.target.value)}
-          placeholder="Destination address (e.g., LB Nagar, Hyderabad)"
-          className="w-full p-3 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-        />
-        <button
-          onClick={fetchRoutes}
-          className="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-          disabled={loading}
-        >
-          {loading ? "Finding routes..." : "Find Routes"}
-        </button>
-      </div>
-
-      {/* Route Cards - Below Input with Color Highlighting */}
-      {routes.length > 0 && (
-        <div className="max-w-6xl mx-auto mb-6">
-          <h2 className="text-2xl font-bold text-center text-purple-800 mb-4">
-            Available Routes ({routes.length})
-          </h2>
-          
-          {/* Route Selection Message */}
-          {selectedRoute && (
-            <div className={`p-4 rounded-lg border-2 mb-4 ${
-              selectedRoute.label === "Safest (Recommended)" 
-                ? "bg-green-50 border-green-300 text-green-800"
-                : selectedRoute.label === "Moderate"
-                ? "bg-yellow-50 border-yellow-300 text-yellow-800"
-                : "bg-red-50 border-red-300 text-red-800"
-            }`}>
-              <p className="font-semibold text-lg">
-                {selectedRoute.label === "Safest (Recommended)" 
-                  ? "✓ Safest route selected (Default)"
-                  : `✓ ${selectedRoute.label} route selected`}
-              </p>
-              <p className="text-sm mt-1 opacity-90">
-                {selectedRoute.label === "Safest (Recommended)" 
-                  ? "The safest route has been automatically selected for you. You can select a different route below."
-                  : "You have selected this route. Click on another route card to change selection."}
-              </p>
+  const renderContent = () => {
+    switch (activeTab) {
+      case "map":
+        return <LiveLocationShare userId={user.id} />;
+      
+      case "safety":
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Safety features grid */}
+              <div className="bg-white rounded-3xl shadow-lg p-6">
+                <div className="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center mb-4">
+                  <span className="text-2xl text-red-600">🚨</span>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Emergency SOS</h3>
+                <p className="text-gray-600 text-sm">Instant emergency alerts to your contacts</p>
+              </div>
+              
+              <div className="bg-white rounded-3xl shadow-lg p-6">
+                <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mb-4">
+                  <span className="text-2xl text-blue-600">📍</span>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Live Tracking</h3>
+                <p className="text-gray-600 text-sm">Real-time location sharing with trusted contacts</p>
+              </div>
+              
+              <div className="bg-white rounded-3xl shadow-lg p-6">
+                <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center mb-4">
+                  <span className="text-2xl text-green-600">⏰</span>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Safety Check-ins</h3>
+                <p className="text-gray-600 text-sm">Periodic safety confirmations during journeys</p>
+              </div>
             </div>
-          )}
+          </div>
+        );
+      
+      case "profile":
+        return (
+          <div className="bg-white rounded-3xl shadow-lg p-6">
+            <div className="flex items-center space-x-4 mb-6">
+              <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center">
+                <span className="text-2xl text-white font-semibold">
+                  {user.name?.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">{user.name}</h2>
+                <p className="text-gray-600">{user.email}</p>
+                <p className="text-gray-500 text-sm">{user.phone}</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <button className="w-full text-left p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-gray-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-700">Edit Profile</span>
+                  <span className="text-gray-400">→</span>
+                </div>
+              </button>
+              
+              <button className="w-full text-left p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-gray-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-700">Emergency Contacts</span>
+                  <span className="text-gray-400">→</span>
+                </div>
+              </button>
+              
+              <button className="w-full text-left p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-gray-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-700">Privacy Settings</span>
+                  <span className="text-gray-400">→</span>
+                </div>
+              </button>
 
-          {/* Route Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {routes.map((route, idx) => (
-              <RouteInfoCard 
-                key={idx} 
-                route={route} 
-                index={idx}
-                isSelected={selectedRoute && (
-                  selectedRoute.distance_km === route.distance_km && 
-                  selectedRoute.duration_min === route.duration_min &&
-                  selectedRoute.label === route.label
-                )}
-                onSelect={(route) => {
-                  setSelectedRoute(route);
-                  window.currentRouteUsed = route;
-                }}
-              />
-            ))}
+              <button
+                onClick={handleLogout}
+                className="w-full text-left p-4 rounded-2xl hover:bg-red-50 transition-colors border border-red-200 text-red-600"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">Logout</span>
+                  <span className="text-red-400">→</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        );
+      
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200/60 sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <span className="text-white text-xl font-bold">🛡️</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  SafeJourney
+                </h1>
+                <p className="text-sm text-gray-600 hidden sm:block">Your Safety Companion</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="hidden sm:block">
+                <p className="text-sm text-gray-600">Welcome back,</p>
+                <p className="font-semibold text-gray-900">{user.name}</p>
+              </div>
+            </div>
           </div>
         </div>
-      )}
+      </header>
 
-      {/* Map */}
-      {routes.length > 0 && coords && (
-        <div className="max-w-6xl mx-auto rounded-3xl overflow-hidden shadow mb-6" style={{ height: "520px", width: "100%" }}>
-          <MapView routes={routes} coords={coords} />
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-6 pb-24 lg:pb-6">
+        {/* Desktop Navigation */}
+        <div className="hidden lg:flex justify-center mb-8">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-2 shadow-lg border border-gray-200/60">
+            <div className="flex space-x-2">
+              {[
+                { id: "map", label: "Map & Safety", icon: "🗺️" },
+                { id: "safety", label: "Safety Tools", icon: "🛡️" },
+                { id: "profile", label: "Profile", icon: "👤" }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all ${
+                    activeTab === tab.id
+                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  }`}
+                >
+                  <span>{tab.icon}</span>
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-      )}
 
-      {/* Live Location Sharing Feature - Below Map */}
-      <div className="max-w-6xl mx-auto mb-6">
-        <LiveLocationShare userId={user.id} />
-      </div>
+        {/* Content */}
+        {renderContent()}
+      </main>
+
+      {/* Mobile Bottom Navigation */}
+      <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
   );
 }
