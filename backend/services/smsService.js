@@ -58,15 +58,15 @@ async function sendSMS(phoneNumber, message) {
         console.log(`🔑 Twilio credentials found`);
         console.log(`📡 Calling Twilio API`);
         
-        const twilio = await import("twilio");
-        const client = twilio.default(
-          process.env.TWILIO_ACCOUNT_SID,
-          process.env.TWILIO_AUTH_TOKEN
-        );
+      const twilio = await import("twilio");
+      const client = twilio.default(
+        process.env.TWILIO_ACCOUNT_SID,
+        process.env.TWILIO_AUTH_TOKEN
+      );
 
         // Use MessagingServiceSid if available (recommended), otherwise use From number
         const messageParams = {
-          body: message,
+        body: message,
           to: formattedPhone,
         };
 
@@ -372,12 +372,12 @@ async function sendSMS(phoneNumber, message) {
     // Option 7: Generic SMS API service
     if (process.env.SMS_API_KEY && process.env.SMS_API_URL) {
       try {
-        const response = await axios.post(process.env.SMS_API_URL, {
-          apiKey: process.env.SMS_API_KEY,
+      const response = await axios.post(process.env.SMS_API_URL, {
+        apiKey: process.env.SMS_API_KEY,
           numbers: formattedPhone,
-          message: message,
-          sender: process.env.SMS_SENDER_ID || "SafeJourney",
-        });
+        message: message,
+        sender: process.env.SMS_SENDER_ID || "SafeJourney",
+      });
         console.log(`✅ SMS sent via SMS API to ${formattedPhone}`);
         return { success: true, method: "SMS API", phone: formattedPhone, response: response.data };
       } catch (apiError) {
@@ -518,8 +518,8 @@ export async function sendEmergencyAlert(contacts, location, userName = "User", 
       };
     } else {
       return {
-        contact: contacts[index].name,
-        phone: contacts[index].phone,
+    contact: contacts[index].name,
+    phone: contacts[index].phone,
         success: false,
         error: result.reason?.message || "Unknown error",
       };

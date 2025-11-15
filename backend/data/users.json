@@ -4,14 +4,40 @@
     "name": "Hindhuja",
     "phone": "+91XXXXXXXXXX",
     "emergencyContacts": [
-      { "name": "Devika", "phone": "+91XXXXXXX1" },
-      { "name": "Rohit", "phone": "+91XXXXXXX2" },
-      { "name": "Sravya", "phone": "+91XXXXXXX3" }
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      }
     ],
     "defaultContacts": [
-      { "name": "Devika", "phone": "+91XXXXXXX1" },
-      { "name": "Rohit", "phone": "+91XXXXXXX2" },
-      { "name": "Sravya", "phone": "+91XXXXXXX3" }
+      {
+        "name": "indu",
+        "phone": "+17254449844"
+      },
+      {
+        "name": "hindhuja",
+        "phone": "9381503017"
+      },
+      {
+        "name": "hindu",
+        "phone": "+18046046553"
+      },
+      {
+        "name": "hin",
+        "phone": "8046046553"
+      },
+      {
+        "name": "indu",
+        "phone": "+16362181973"
+      }
     ],
     "preferences": {
       "autoSelectSafest": true,

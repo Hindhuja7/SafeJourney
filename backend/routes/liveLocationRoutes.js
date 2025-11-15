@@ -218,42 +218,59 @@ router.post("/update", async (req, res) => {
 
     await writeJSON(LIVE_SESSIONS_FILE, sessions);
 
-    // Send location to selected contacts via SMS
+    // Send location to selected contacts via SMS (only at intervals to prevent spam)
     const session = sessions[sessionIndex];
     if (session.selectedContacts && session.selectedContacts.length > 0) {
-      // Get user info for personalized message
-      const users = await readJSON(USERS_FILE);
-      const user = users.find((u) => u.id === session.userId);
-      const userName = user?.name || "User";
+      // Check if we should send SMS (only if enough time has passed since last SMS)
+      const lastSmsTime = session.lastSmsSent ? new Date(session.lastSmsSent).getTime() : 0;
+      const timeSinceLastSms = Date.now() - lastSmsTime;
+      const minIntervalMs = (session.updateIntervalMinutes || 5) * 60 * 1000; // Minimum interval between SMS
+      
+      // Only send SMS if enough time has passed (respect the update interval)
+      if (timeSinceLastSms >= minIntervalMs) {
+        // Get user info for personalized message
+        const users = await readJSON(USERS_FILE);
+        const user = users.find((u) => u.id === session.userId);
+        const userName = user?.name || "User";
 
-      // Reverse geocode to get address
-      let address = null;
-      try {
-        const axios = (await import("axios")).default;
-        const geoRes = await axios.get(
-          `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
-          { headers: { "User-Agent": "SafeJourneyApp" } }
-        );
-        if (geoRes.data && geoRes.data.display_name) {
-          address = geoRes.data.display_name;
+        // Reverse geocode to get address
+        let address = null;
+        try {
+          const axios = (await import("axios")).default;
+          const geoRes = await axios.get(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+            { headers: { "User-Agent": "SafeJourneyApp" } }
+          );
+          if (geoRes.data && geoRes.data.display_name) {
+            address = geoRes.data.display_name;
+          }
+        } catch (err) {
+          console.error("Geocoding error:", err);
         }
-      } catch (err) {
-        console.error("Geocoding error:", err);
-      }
 
-      // Send SMS to all selected contacts
-      const smsResults = await sendLocationToContacts(
-        session.selectedContacts,
-        { latitude, longitude, address },
-        userName
-      );
+        // Send SMS to all selected contacts
+        const smsResults = await sendLocationToContacts(
+          session.selectedContacts,
+          { latitude, longitude, address },
+          userName
+        );
 
-      // Log SMS results (only if there are failures)
-      const failedSMS = smsResults.filter(r => !r.success);
-      if (failedSMS.length > 0) {
-        console.error(`❌ Failed to send ${failedSMS.length} SMS message(s):`, failedSMS);
+        // Update last SMS sent time
+        sessions[sessionIndex].lastSmsSent = new Date().toISOString();
+        await writeJSON(LIVE_SESSIONS_FILE, sessions);
+
+        // Log SMS results (only if there are failures)
+        const failedSMS = smsResults.filter(r => !r.success);
+        if (failedSMS.length > 0) {
+          console.error(`❌ Failed to send ${failedSMS.length} SMS message(s):`, failedSMS);
+        } else {
+          console.log(`✅ Location SMS sent to ${session.selectedContacts.length} contact(s) (interval: ${session.updateIntervalMinutes} min)`);
+        }
+      } else {
+        // Skip SMS - too soon since last one
+        const remainingSeconds = Math.ceil((minIntervalMs - timeSinceLastSms) / 1000);
+        console.log(`⏭️  Skipping SMS - ${remainingSeconds}s remaining until next interval (${session.updateIntervalMinutes} min)`);
       }
-      // Success messages are logged by SMS service itself
     }
 
     res.json({
@@ -342,8 +359,8 @@ router.post("/sos/start", async (req, res) => {
       return res.status(400).json({ error: "userId required" });
     }
 
-    if (!checkInIntervalMinutes || ![5, 10, 20].includes(parseInt(checkInIntervalMinutes))) {
-      return res.status(400).json({ error: "checkInIntervalMinutes must be 5, 10, or 20" });
+    if (!checkInIntervalMinutes || ![2, 5, 10, 20].includes(parseInt(checkInIntervalMinutes))) {
+      return res.status(400).json({ error: "checkInIntervalMinutes must be 2, 5, 10, or 20" });
     }
 
     const sessions = await readJSON(LIVE_SESSIONS_FILE);
