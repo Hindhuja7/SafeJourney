@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import safetyRoutes from "./routes/safetyRoutes.js";
 import liveLocationRoutes from "./routes/liveLocationRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.get("/api/health", (req, res) => {
 });
 
 // mount API routes under /api
+app.use("/api/auth", authRoutes);
 app.use("/api", safetyRoutes);
 app.use("/api/live-location", liveLocationRoutes);
 app.use("/api/reviews", reviewRoutes);

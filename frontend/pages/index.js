@@ -1,102 +1,62 @@
-// "use client";
-
-// import { useState } from "react";
-// import axios from "axios";
-// import dynamic from "next/dynamic";
-// import RouteInfoCard from "../components/RouteInfoCard";
-
-// // Dynamic import to fix "window is not defined"
-// const MapView = dynamic(() => import("../components/MapViewClient"), { ssr: false });
-
-// export default function Home() {
-//   const [routes, setRoutes] = useState([]);
-//   const [source] = useState([17.385, 78.4867]); // Hyderabad example
-//   const [destination] = useState([17.45, 78.45]);
-
-//   const fetchRoutes = async () => {
-//     try {
-//       const res = await axios.post("http://localhost:5000/api/routes", { source, destination });
-
-//       // Sort routes by score descending
-//       const sorted = [...res.data.routes].sort((a, b) => b.score - a.score);
-
-//       // Assign labels and scoring method
-//       const labeled = sorted.slice(0, 3).map((r, i) => {
-//         let label = "";
-//         if (i === 0) label = "Safest (Recommended)";
-//         else if (i === 1) label = "Normal";
-//         else label = "Unsafe";
-
-//         return { ...r, label, scoringMethod: r.scoringMethod || "Fallback" };
-//       });
-
-//       setRoutes(labeled);
-//     } catch (err) {
-//       console.error(err.message);
-//     }
-//   };
-
-//   return (
-//     <div className="flex flex-col h-screen">
-//       <h1 className="text-2xl font-bold text-center mt-4">
-//         🚦 SafeJourney — Route Safety Map
-//       </h1>
-
-//       <button
-//         onClick={fetchRoutes}
-//         className="bg-purple-600 text-white px-4 py-2 rounded-lg m-4 self-center"
-//       >
-//         Fetch & Score Routes
-//       </button>
-
-//       <div className="flex flex-1">
-//         <MapView routes={routes} source={source} destination={destination} />
-
-//         <div className="w-1/3 overflow-y-auto p-4 relative">
-//           {routes.map((r) => (
-//             <div key={r.id} className="bg-white shadow-lg rounded-2xl p-4 mb-4">
-//               <h2 className="text-lg font-semibold">{r.label}</h2>
-//               <p><b>Name:</b> {r.name}</p>
-//               <p><b>Distance:</b> {r.distance_km} km</p>
-//               <p><b>Duration:</b> {r.duration_min} min</p>
-//               <p><b>AI Score:</b> {r.score}</p>
-//               <p><b>Reason:</b> {r.reason}</p>
-//               <p><b>Scoring Method:</b> {r.scoringMethod}</p>
-//             </div>
-//           ))}
-
-//           {/* Legend */}
-//           <div className="absolute bottom-4 left-4 bg-white p-2 rounded shadow-lg">
-//             <div><span className="inline-block w-4 h-4 bg-green-500 mr-2"></span> Safest</div>
-//             <div><span className="inline-block w-4 h-4 bg-orange-500 mr-2"></span> Normal</div>
-//             <div><span className="inline-block w-4 h-4 bg-red-500 mr-2"></span> Unsafe</div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
-
-
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import RouteInfoCard from "../components/RouteInfoCard";
 import MapView from "../components/MapView";
 import LiveLocationShare from "../components/LiveLocationShare";
+import Login from "../components/Login";
 import { API_ENDPOINTS } from "../config/api";
 
 export default function Home() {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [srcAddr, setSrcAddr] = useState("");
   const [dstAddr, setDstAddr] = useState("");
   const [routes, setRoutes] = useState([]);
   const [coords, setCoords] = useState(null);
   const [loading, setLoading] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState(null);
-  const [userId] = useState(1); // In a real app, this would come from auth context
+
+  // Check if user is logged in on mount
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+
+    if (storedToken && storedUser) {
+      // Verify token
+      axios.get(`${API_ENDPOINTS.auth}/verify`, {
+        headers: { Authorization: `Bearer ${storedToken}` }
+      }).then(res => {
+        setUser(res.data.user);
+        setToken(storedToken);
+      }).catch(() => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      });
+    }
+  }, []);
+
+  const handleLogin = (userData, userToken) => {
+    setUser(userData);
+    setToken(userToken);
+  };
+
+  const handleLogout = async () => {
+    try {
+      if (token) {
+        await axios.post(`${API_ENDPOINTS.auth}/logout`, { token });
+      }
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    setToken(null);
+    setRoutes([]);
+    setSelectedRoute(null);
+    setSrcAddr("");
+    setDstAddr("");
+  };
 
   const fetchRoutes = async () => {
     if (!srcAddr.trim() || !dstAddr.trim()) {
@@ -111,6 +71,8 @@ export default function Home() {
       const res = await axios.post(API_ENDPOINTS.routes, {
         sourceAddress: srcAddr.trim(),
         destinationAddress: dstAddr.trim()
+      }, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
 
       setCoords(res.data.coords || null);
@@ -121,7 +83,6 @@ export default function Home() {
       if (fetchedRoutes.length > 0) {
         const safestRoute = fetchedRoutes[0];
         setSelectedRoute(safestRoute);
-        // Store route and address info globally for review form
         window.currentRouteUsed = safestRoute;
       } else {
         setSelectedRoute(null);
@@ -129,26 +90,54 @@ export default function Home() {
       
       window.currentSourceAddress = srcAddr.trim();
       window.currentDestinationAddress = dstAddr.trim();
+
+      // Store route data in backend for logged-in users
+      if (user && token) {
+        try {
+          await axios.post(`${API_ENDPOINTS.routes}/store`, {
+            userId: user.id,
+            sourceAddress: srcAddr.trim(),
+            destinationAddress: dstAddr.trim(),
+            selectedRoute: fetchedRoutes[0] || null,
+            timestamp: new Date().toISOString()
+          }, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        } catch (err) {
+          console.error("Error storing route data:", err);
+        }
+      }
     } catch (err) {
       console.error("Fetch error:", err);
       const errorMessage = err?.response?.data?.error || err?.message || "Unknown error";
-      console.error("Error details:", {
-        message: errorMessage,
-        status: err?.response?.status,
-        url: err?.config?.url,
-        backendRunning: `Check ${API_ENDPOINTS.health}`
-      });
       alert(`Failed to fetch routes: ${errorMessage}\n\nMake sure backend is running`);
     } finally {
       setLoading(false);
     }
   };
 
+  // Show login page if not authenticated
+  if (!user) {
+    return <Login onLogin={handleLogin} />;
+  }
+
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-[#f4f0ff] to-[#ffffff]">
-      <h1 className="text-3xl font-bold text-center text-purple-800 mb-6">SafeJourney</h1>
+      {/* Header with Logout */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-purple-800">🛡️ SafeJourney</h1>
+        <div className="flex items-center gap-4">
+          <span className="text-gray-700">Welcome, {user.name}!</span>
+          <button
+            onClick={handleLogout}
+            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
 
-      {/* Source and Destination Address Input - FIRST */}
+      {/* Source and Destination Input - TOP */}
       <div className="max-w-3xl mx-auto bg-white p-4 rounded-2xl shadow mb-6">
         <h2 className="text-xl font-semibold text-purple-800 mb-4">📍 Find Safe Routes</h2>
         <input
@@ -172,10 +161,56 @@ export default function Home() {
         </button>
       </div>
 
-      {/* Live Location Sharing Feature - SECOND */}
-      <div className="max-w-6xl mx-auto mb-6">
-        <LiveLocationShare userId={userId} />
-      </div>
+      {/* Route Cards - Below Input with Color Highlighting */}
+      {routes.length > 0 && (
+        <div className="max-w-6xl mx-auto mb-6">
+          <h2 className="text-2xl font-bold text-center text-purple-800 mb-4">
+            Available Routes ({routes.length})
+          </h2>
+          
+          {/* Route Selection Message */}
+          {selectedRoute && (
+            <div className={`p-4 rounded-lg border-2 mb-4 ${
+              selectedRoute.label === "Safest (Recommended)" 
+                ? "bg-green-50 border-green-300 text-green-800"
+                : selectedRoute.label === "Moderate"
+                ? "bg-yellow-50 border-yellow-300 text-yellow-800"
+                : "bg-red-50 border-red-300 text-red-800"
+            }`}>
+              <p className="font-semibold text-lg">
+                {selectedRoute.label === "Safest (Recommended)" 
+                  ? "✓ Safest route selected (Default)"
+                  : `✓ ${selectedRoute.label} route selected`}
+              </p>
+              <p className="text-sm mt-1 opacity-90">
+                {selectedRoute.label === "Safest (Recommended)" 
+                  ? "The safest route has been automatically selected for you. You can select a different route below."
+                  : "You have selected this route. Click on another route card to change selection."}
+              </p>
+            </div>
+          )}
+
+          {/* Route Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {routes.map((route, idx) => (
+              <RouteInfoCard 
+                key={idx} 
+                route={route} 
+                index={idx}
+                isSelected={selectedRoute && (
+                  selectedRoute.distance_km === route.distance_km && 
+                  selectedRoute.duration_min === route.duration_min &&
+                  selectedRoute.label === route.label
+                )}
+                onSelect={(route) => {
+                  setSelectedRoute(route);
+                  window.currentRouteUsed = route;
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Map */}
       {routes.length > 0 && coords && (
@@ -184,51 +219,10 @@ export default function Home() {
         </div>
       )}
 
-      {/* Route Selection Message */}
-      {selectedRoute && routes.length > 0 && (
-        <div className="max-w-6xl mx-auto mb-4">
-          <div className={`p-4 rounded-lg border-2 ${
-            selectedRoute.label === "Safest (Recommended)" 
-              ? "bg-green-50 border-green-300 text-green-800"
-              : selectedRoute.label === "Moderate"
-              ? "bg-yellow-50 border-yellow-300 text-yellow-800"
-              : "bg-red-50 border-red-300 text-red-800"
-          }`}>
-            <p className="font-semibold text-lg">
-              {selectedRoute.label === "Safest (Recommended)" 
-                ? "✓ Safest route selected (Default)"
-                : `✓ ${selectedRoute.label} route selected`}
-            </p>
-            <p className="text-sm mt-1 opacity-90">
-              {selectedRoute.label === "Safest (Recommended)" 
-                ? "The safest route has been automatically selected for you."
-                : "You have selected this route. Click on another route card to change selection."}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Route info cards */}
-      {routes.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-6xl mx-auto">
-          {routes.map((route, idx) => (
-            <RouteInfoCard 
-              key={idx} 
-              route={route} 
-              index={idx}
-              isSelected={selectedRoute && (
-                selectedRoute.distance_km === route.distance_km && 
-                selectedRoute.duration_min === route.duration_min &&
-                selectedRoute.label === route.label
-              )}
-              onSelect={(route) => {
-                setSelectedRoute(route);
-                window.currentRouteUsed = route;
-              }}
-            />
-          ))}
-        </div>
-      )}
+      {/* Live Location Sharing Feature - Below Map */}
+      <div className="max-w-6xl mx-auto mb-6">
+        <LiveLocationShare userId={user.id} />
+      </div>
     </div>
   );
 }

@@ -43,5 +43,33 @@
       "autoSelectSafest": true,
       "batteryMode": "medium"
     }
+  },
+  {
+    "id": 2,
+    "name": "Gunavardhan Yakkati",
+    "phone": "+919550403441",
+    "email": "yakkatik@gmail.com",
+    "password": "guna@02",
+    "emergencyContacts": [],
+    "defaultContacts": [],
+    "preferences": {
+      "autoSelectSafest": true,
+      "batteryMode": "medium"
+    },
+    "createdAt": "2025-11-15T18:19:28.934Z"
+  },
+  {
+    "id": 3,
+    "name": "Gunavardhan Yakkati",
+    "phone": "+918519932270",
+    "email": "gunavardhanyakkati@gmail.com",
+    "password": "guna@02",
+    "emergencyContacts": [],
+    "defaultContacts": [],
+    "preferences": {
+      "autoSelectSafest": true,
+      "batteryMode": "medium"
+    },
+    "createdAt": "2025-11-15T18:29:05.986Z"
   }
 ]

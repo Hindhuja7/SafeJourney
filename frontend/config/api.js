@@ -33,6 +33,7 @@ export const apiUrl = (endpoint) => {
 
 // Export commonly used endpoints
 export const API_ENDPOINTS = {
+  auth: apiUrl('api/auth'),
   health: apiUrl('api/health'),
   routes: apiUrl('api/routes'),
   liveLocation: {

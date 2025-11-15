@@ -4,7 +4,7 @@ import { API_ENDPOINTS } from "../config/api";
 
 export default function SOSAlert({ userId, isLocationSharing }) {
   const [sosActive, setSosActive] = useState(false);
-  const [checkInInterval, setCheckInInterval] = useState(2); // 2, 5, 10, or 20 minutes (2 for testing)
+  const [checkInInterval, setCheckInInterval] = useState(10); // Default: 10 minutes (2, 5, 10, or 20 minutes)
   const [timeRemaining, setTimeRemaining] = useState(null); // seconds
   const [nextCheckIn, setNextCheckIn] = useState(null);
   const [showCheckInPrompt, setShowCheckInPrompt] = useState(false);
@@ -380,6 +380,9 @@ export default function SOSAlert({ userId, isLocationSharing }) {
         </div>
         <p className="text-xs text-blue-600 mt-2">
           You'll be asked to confirm your safety every {checkInInterval} minutes
+        </p>
+        <p className="text-xs text-gray-600 mt-1 italic">
+          Default: 10 minutes (selected automatically if you don't choose)
         </p>
       </div>
 

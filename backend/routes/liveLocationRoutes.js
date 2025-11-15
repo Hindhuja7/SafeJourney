@@ -30,7 +30,15 @@ async function readJSON(filePath) {
 }
 
 async function writeJSON(filePath, data) {
-  await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
+  try {
+    // Ensure directory exists
+    const dir = path.dirname(filePath);
+    await fs.mkdir(dir, { recursive: true });
+    await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
+  } catch (err) {
+    console.error(`Error writing JSON file ${filePath}:`, err);
+    throw err;
+  }
 }
 
 // GET /api/live-location/contacts/:userId - Get user's contacts
@@ -476,11 +484,16 @@ router.post("/sos/checkin", async (req, res) => {
       return res.status(400).json({ error: "SOS alert system not active" });
     }
 
+    // Ensure checkInHistory exists and is an array
+    if (!Array.isArray(session.sosAlert.checkInHistory)) {
+      session.sosAlert.checkInHistory = [];
+    }
+
     // Record check-in
     const checkIn = {
       timestamp: new Date().toISOString(),
       isSafe: isSafe,
-      location: session.locations.length > 0 
+      location: session.locations && session.locations.length > 0 
         ? session.locations[session.locations.length - 1] 
         : null
     };
@@ -491,6 +504,10 @@ router.post("/sos/checkin", async (req, res) => {
       Date.now() + session.sosAlert.checkInIntervalMinutes * 60 * 1000
     ).toISOString();
 
+    // Initialize emergency alert results (used in response)
+    let emergencyResults = [];
+    let policeAlertResults = [];
+
     // If user is NOT safe, trigger emergency alert
     if (!isSafe) {
       session.sosAlert.emergencyTriggered = true;
@@ -500,9 +517,6 @@ router.post("/sos/checkin", async (req, res) => {
       const currentLocation = session.locations.length > 0 
         ? session.locations[session.locations.length - 1] 
         : null;
-
-      let emergencyResults = [];
-      let policeAlertResults = [];
 
       if (currentLocation && session.selectedContacts && session.selectedContacts.length > 0) {
         try {
@@ -607,7 +621,16 @@ router.post("/sos/checkin", async (req, res) => {
     });
   } catch (err) {
     console.error("Error processing SOS check-in:", err);
-    res.status(500).json({ error: "Failed to process SOS check-in" });
+    console.error("Error details:", {
+      message: err.message,
+      stack: err.stack,
+      userId: req.body?.userId,
+      isSafe: req.body?.isSafe
+    });
+    res.status(500).json({ 
+      error: "Failed to process SOS check-in",
+      details: err.message || "Unknown error occurred"
+    });
   }
 });
 

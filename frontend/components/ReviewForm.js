@@ -7,6 +7,7 @@ export default function ReviewForm({ userId, sessionData, routeUsed, sourceAddre
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [submittedReview, setSubmittedReview] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,13 +29,14 @@ export default function ReviewForm({ userId, sessionData, routeUsed, sourceAddre
       });
 
       setSuccess(true);
+      setSubmittedReview(response.data.review);
       
       // Call callback after a short delay
       setTimeout(() => {
         if (onReviewSubmitted) {
           onReviewSubmitted(response.data.review);
         }
-      }, 1500);
+      }, 3000);
     } catch (err) {
       console.error("Error submitting review:", err);
       setError(err.response?.data?.error || "Failed to submit review. Please try again.");
@@ -43,15 +45,113 @@ export default function ReviewForm({ userId, sessionData, routeUsed, sourceAddre
     }
   };
 
-  if (success) {
+  if (success && submittedReview) {
     return (
-      <div className="bg-green-50 border-2 border-green-400 rounded-2xl shadow-lg p-6 mb-6">
-        <div className="text-center">
+      <div className="bg-white border-2 border-green-400 rounded-2xl shadow-lg p-6 mb-6">
+        <div className="text-center mb-6">
           <div className="text-4xl mb-4">✅</div>
           <h2 className="text-2xl font-bold text-green-800 mb-2">Review Submitted Successfully!</h2>
-          <p className="text-green-700">
+          <p className="text-green-700 mb-4">
             Thank you for your feedback. Your safe arrival has been recorded.
           </p>
+        </div>
+
+        {/* Display Submitted Review */}
+        <div className="space-y-4">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h3 className="text-lg font-bold text-gray-800 mb-3">📝 Your Submitted Review</h3>
+            
+            {/* Review Text */}
+            {submittedReview.reviewText && (
+              <div className="mb-4 p-3 bg-white border border-gray-300 rounded-lg">
+                <p className="text-sm font-semibold text-gray-700 mb-2">Review:</p>
+                <p className="text-gray-800 whitespace-pre-wrap">{submittedReview.reviewText}</p>
+              </div>
+            )}
+
+            {/* Route Information */}
+            {submittedReview.route && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm font-semibold text-blue-800 mb-2">🗺️ Route Details:</p>
+                <div className="text-sm text-blue-700 space-y-1">
+                  {submittedReview.route.sourceAddress && submittedReview.route.destinationAddress && (
+                    <>
+                      <p><strong>From:</strong> {submittedReview.route.sourceAddress}</p>
+                      <p><strong>To:</strong> {submittedReview.route.destinationAddress}</p>
+                    </>
+                  )}
+                  {submittedReview.route.distance && (
+                    <p><strong>Distance:</strong> {submittedReview.route.distance} km</p>
+                  )}
+                  {submittedReview.route.duration && (
+                    <p><strong>Duration:</strong> {Math.round(submittedReview.route.duration)} minutes</p>
+                  )}
+                  {submittedReview.route.safetyScore !== null && submittedReview.route.safetyScore !== undefined && (
+                    <p><strong>Safety Score:</strong> {submittedReview.route.safetyScore.toFixed(1)}/5.0</p>
+                  )}
+                  {submittedReview.route.safetyReason && (
+                    <p><strong>Safety Reason:</strong> {submittedReview.route.safetyReason}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Proof of Safe Arrival */}
+            {submittedReview.proof && (
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-sm font-semibold text-green-800 mb-2">✅ Proof of Safe Arrival:</p>
+                <div className="text-sm text-green-700 space-y-1">
+                  {submittedReview.proof.finalAddress && (
+                    <p><strong>Final Location:</strong> {submittedReview.proof.finalAddress}</p>
+                  )}
+                  {submittedReview.proof.coordinates && (
+                    <p><strong>Coordinates:</strong> {submittedReview.proof.coordinates.latitude.toFixed(4)}, {submittedReview.proof.coordinates.longitude.toFixed(4)}</p>
+                  )}
+                  {submittedReview.proof.arrivedAt && (
+                    <p><strong>Arrived At:</strong> {new Date(submittedReview.proof.arrivedAt).toLocaleString()}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Journey Timeline */}
+            {submittedReview.journey && (
+              <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                <p className="text-sm font-semibold text-purple-800 mb-2">⏰ Journey Timeline:</p>
+                <div className="text-sm text-purple-700 space-y-1">
+                  {submittedReview.journey.startedAt && (
+                    <p><strong>Started:</strong> {new Date(submittedReview.journey.startedAt).toLocaleString()}</p>
+                  )}
+                  {submittedReview.journey.completedAt && (
+                    <p><strong>Completed:</strong> {new Date(submittedReview.journey.completedAt).toLocaleString()}</p>
+                  )}
+                  {submittedReview.journey.duration !== null && (
+                    <p><strong>Total Duration:</strong> {submittedReview.journey.duration} minutes</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Location History */}
+            {submittedReview.totalLocations > 0 && (
+              <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm font-semibold text-yellow-800 mb-2">📍 Location Tracking:</p>
+                <p className="text-sm text-yellow-700">
+                  <strong>Total Location Updates:</strong> {submittedReview.totalLocations}
+                </p>
+              </div>
+            )}
+
+            {/* Timestamp */}
+            <div className="mt-4 pt-4 border-t border-gray-300">
+              <p className="text-xs text-gray-500">
+                <strong>Submitted:</strong> {submittedReview.date} at {submittedReview.time}
+              </p>
+              <p className="text-xs text-gray-500">
+                <strong>Review ID:</strong> {submittedReview.id}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );

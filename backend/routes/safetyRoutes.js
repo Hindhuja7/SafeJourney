@@ -273,4 +273,37 @@ router.post("/routes", async (req, res) => {
   }
 });
 
+// POST /api/routes/store - Store route data for logged-in user
+router.post("/routes/store", async (req, res) => {
+  try {
+    const { userId, sourceAddress, destinationAddress, selectedRoute, timestamp } = req.body;
+
+    if (!userId || !sourceAddress || !destinationAddress) {
+      return res.status(400).json({ error: "userId, sourceAddress, and destinationAddress are required" });
+    }
+
+    // Store route data in user's history (you can create a routes.json file or add to users.json)
+    const routeData = {
+      userId: parseInt(userId),
+      sourceAddress,
+      destinationAddress,
+      selectedRoute: selectedRoute || null,
+      timestamp: timestamp || new Date().toISOString(),
+      date: new Date().toLocaleDateString(),
+      time: new Date().toLocaleTimeString()
+    };
+
+    // For now, just log it. You can store in a separate routes.json file if needed
+    console.log("Route data stored:", routeData);
+
+    res.json({
+      message: "Route data stored successfully",
+      routeData
+    });
+  } catch (err) {
+    console.error("Error storing route data:", err);
+    res.status(500).json({ error: "Failed to store route data" });
+  }
+});
+
 export default router;

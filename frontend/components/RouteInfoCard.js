@@ -16,36 +16,72 @@
 
 export default function RouteInfoCard({ route, index, isSelected, onSelect }) {
   const getLabelColor = () => {
-    if (route.label === "Safest (Recommended)") return "bg-green-100 text-green-800 border-green-300";
-    if (route.label === "Moderate") return "bg-yellow-100 text-yellow-800 border-yellow-300";
-    return "bg-red-100 text-red-800 border-red-300";
+    if (route.label === "Safest (Recommended)") {
+      return {
+        bg: "bg-green-50",
+        text: "text-green-800",
+        border: "border-green-400",
+        heading: "bg-green-600 text-white",
+        badge: "bg-green-100 text-green-800 border-green-300"
+      };
+    }
+    if (route.label === "Moderate") {
+      return {
+        bg: "bg-yellow-50",
+        text: "text-yellow-800",
+        border: "border-yellow-400",
+        heading: "bg-yellow-600 text-white",
+        badge: "bg-yellow-100 text-yellow-800 border-yellow-300"
+      };
+    }
+    return {
+      bg: "bg-red-50",
+      text: "text-red-800",
+      border: "border-red-400",
+      heading: "bg-red-600 text-white",
+      badge: "bg-red-100 text-red-800 border-red-300"
+    };
   };
+
+  const colors = getLabelColor();
 
   return (
     <div 
       className={`route-card p-4 border-2 rounded-lg shadow-lg cursor-pointer transition-all ${
         isSelected 
-          ? "border-purple-500 bg-purple-50 ring-2 ring-purple-300" 
-          : "border-gray-200 bg-white hover:border-purple-300 hover:shadow-xl"
+          ? `${colors.border} ${colors.bg} ring-4 ring-opacity-50 ${colors.border.replace('border-', 'ring-')}` 
+          : `${colors.border} ${colors.bg} hover:shadow-xl hover:scale-105`
       }`}
       onClick={() => onSelect && onSelect(route)}
     >
-      <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mb-2 ${getLabelColor()}`}>
+      {/* Heading with Color */}
+      <div className={`${colors.heading} px-4 py-2 rounded-t-lg -m-4 mb-3 font-bold text-center`}>
         {route.label || `Route ${index + 1}`}
       </div>
       
       {isSelected && (
-        <div className="mb-2 p-2 bg-purple-100 border border-purple-300 rounded text-sm text-purple-800 font-medium">
-          ✓ This route selected
+        <div className={`mb-3 p-2 ${colors.badge} border-2 rounded text-sm font-medium text-center`}>
+          ✓ Selected Route
         </div>
       )}
       
-      <div className="space-y-1 text-sm">
-        <p><span className="font-semibold">Distance:</span> {route.distance_km} km</p>
-        <p><span className="font-semibold">Duration:</span> {Math.round(route.duration_min)} min</p>
-        <p><span className="font-semibold">Safety Score:</span> {route.aiScore?.toFixed(1) || "N/A"}/5.0</p>
+      <div className={`space-y-2 text-sm ${colors.text}`}>
+        <div className="flex justify-between">
+          <span className="font-semibold">Distance:</span>
+          <span>{route.distance_km} km</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="font-semibold">Duration:</span>
+          <span>{Math.round(route.duration_min)} min</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="font-semibold">Safety Score:</span>
+          <span className="font-bold">{route.aiScore?.toFixed(1) || "N/A"}/5.0</span>
+        </div>
         {route.reason && (
-          <p className="text-gray-600 mt-2"><span className="font-semibold">Reason:</span> {route.reason}</p>
+          <div className="mt-3 pt-3 border-t border-opacity-30">
+            <p className="text-xs opacity-90"><span className="font-semibold">Details:</span> {route.reason}</p>
+          </div>
         )}
       </div>
     </div>
