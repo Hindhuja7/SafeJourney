@@ -12,13 +12,25 @@ const router = express.Router();
 const USERS_FILE = path.join(__dirname, "../data/users.json");
 const SESSIONS_FILE = path.join(__dirname, "../data/sessions.json");
 
+// Ensure data directory exists
+async function ensureDataDirectory() {
+  const dataDir = path.dirname(USERS_FILE);
+  try {
+    await fs.mkdir(dataDir, { recursive: true });
+  } catch (err) {
+    if (err.code !== 'EEXIST') throw err;
+  }
+}
+
 // Helper functions
 async function readJSON(filePath) {
   try {
+    await ensureDataDirectory();
     const data = await fs.readFile(filePath, "utf8");
     return JSON.parse(data);
   } catch (err) {
     if (err.code === "ENOENT") {
+      // Return empty array if file doesn't exist
       return [];
     }
     throw err;
@@ -27,8 +39,7 @@ async function readJSON(filePath) {
 
 async function writeJSON(filePath, data) {
   try {
-    const dir = path.dirname(filePath);
-    await fs.mkdir(dir, { recursive: true });
+    await ensureDataDirectory();
     await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
   } catch (err) {
     console.error(`Error writing JSON file ${filePath}:`, err);
@@ -44,17 +55,41 @@ function generateToken() {
 // POST /api/auth/register - Register new user
 router.post("/register", async (req, res) => {
   try {
+    console.log("Registration attempt:", { 
+      name: req.body.name, 
+      email: req.body.email, 
+      phone: req.body.phone 
+    });
+
     const { name, phone, email, password } = req.body;
 
+    // Validation
     if (!name || !phone || !email || !password) {
-      return res.status(400).json({ error: "Name, phone, email, and password are required" });
+      return res.status(400).json({ 
+        error: "All fields are required: name, phone, email, and password" 
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ 
+        error: "Password must be at least 6 characters long" 
+      });
     }
 
     const users = await readJSON(USERS_FILE);
+    console.log("Existing users count:", users.length);
 
     // Check if user already exists
-    if (users.find(u => u.email === email || u.phone === phone)) {
-      return res.status(400).json({ error: "User already exists with this email or phone" });
+    const existingUser = users.find(u => 
+      u.email === email.trim().toLowerCase() || 
+      u.phone === phone.trim()
+    );
+
+    if (existingUser) {
+      console.log("User already exists:", existingUser.email);
+      return res.status(400).json({ 
+        error: "User already exists with this email or phone number" 
+      });
     }
 
     // Create new user
@@ -75,6 +110,7 @@ router.post("/register", async (req, res) => {
 
     users.push(newUser);
     await writeJSON(USERS_FILE, users);
+    console.log("User registered successfully:", newUser.email);
 
     // Create session
     const sessions = await readJSON(SESSIONS_FILE);
@@ -98,9 +134,13 @@ router.post("/register", async (req, res) => {
       },
       token
     });
+
   } catch (err) {
     console.error("Error registering user:", err);
-    res.status(500).json({ error: "Failed to register user" });
+    res.status(500).json({ 
+      error: "Failed to register user",
+      details: err.message 
+    });
   }
 });
 
@@ -116,7 +156,12 @@ router.post("/login", async (req, res) => {
     const users = await readJSON(USERS_FILE);
     const user = users.find(u => u.email === email.trim().toLowerCase());
 
-    if (!user || user.password !== password) {
+    if (!user) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    // In production, use proper password hashing!
+    if (user.password !== password) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
@@ -214,4 +259,3 @@ router.get("/verify", async (req, res) => {
 });
 
 export default router;
-

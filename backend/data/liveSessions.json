@@ -3202,5 +3202,38 @@
       "emergencyTriggered": true
     },
     "stoppedAt": "2025-11-15T18:32:41.791Z"
+  },
+  {
+    "sessionId": "session_1763244275816_4",
+    "userId": 4,
+    "selectedContacts": [
+      {
+        "name": "Emergency Contact",
+        "phone": "+18312825868"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 98,
+    "isActive": true,
+    "startedAt": "2025-11-15T22:04:35.816Z",
+    "lastUpdated": "2025-11-15T22:04:50.107Z",
+    "locations": [
+      {
+        "latitude": 17.39691123437371,
+        "longitude": 78.48994783715922,
+        "timestamp": "2025-11-15T22:04:37.999Z"
+      },
+      {
+        "latitude": 17.396906426129817,
+        "longitude": 78.48991271183681,
+        "timestamp": "2025-11-15T22:04:49.122Z"
+      },
+      {
+        "latitude": 17.396906341988558,
+        "longitude": 78.48991205327239,
+        "timestamp": "2025-11-15T22:04:50.107Z"
+      }
+    ],
+    "lastSmsSent": "2025-11-15T22:04:39.170Z"
   }
 ]

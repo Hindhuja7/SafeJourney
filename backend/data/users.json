@@ -71,5 +71,19 @@
       "batteryMode": "medium"
     },
     "createdAt": "2025-11-15T18:29:05.986Z"
+  },
+  {
+    "id": 4,
+    "name": "BHAVYA",
+    "phone": "9392903079",
+    "email": "bhavya@gmail.com",
+    "password": "bhavya123$",
+    "emergencyContacts": [],
+    "defaultContacts": [],
+    "preferences": {
+      "autoSelectSafest": true,
+      "batteryMode": "medium"
+    },
+    "createdAt": "2025-11-15T20:57:48.620Z"
   }
 ]
