@@ -115,120 +115,138 @@
 import express from "express";
 import axios from "axios";
 import dotenv from "dotenv";
-import { GoogleGenAI } from "@google/genai";
 
 dotenv.config();
 const router = express.Router();
 
-// Initialize Gemini client
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
-
-// Utility: fallback labels
-function getLabel(score) {
-  if (score >= 4.5) return "Safest (Recommended)";
-  if (score >= 3) return "Normal";
-  return "Unsafe";
+// Gemini client (optional)
+let aiClient = null;
+try {
+  if (process.env.GEMINI_API_KEY) {
+    // Initialize Gemini SDK if installed
+    // aiClient = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  }
+} catch (e) {
+  console.warn("Gemini not initialized:", e.message);
 }
 
-// Fetch routes from OSRM
+// Helper: fallback scoring
+function fallbackScoreFromFeatures(route) {
+  let score = 5;
+  const reasons = [];
+
+  if (route.crime > 0) {
+    score -= route.crime * 0.5;
+    reasons.push("High crime area");
+  }
+  if (route.darkAreas > 0) {
+    score -= route.darkAreas * 0.3;
+    reasons.push("Poorly lit sections");
+  }
+  if (route.traffic > 0) {
+    score -= route.traffic * 0.2;
+    reasons.push("Heavy traffic");
+  }
+
+  score = Math.max(Math.round(score * 10) / 10, 0); // round to 0.1
+  return { score, reason: reasons.join(", ") || "No major issues", type: "Fallback" };
+}
+
+// Geocode address → [lat, lng]
+async function geocodeAddress(address) {
+  try {
+    const res = await axios.get(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`,
+      { headers: { "User-Agent": "SafeJourneyApp" } }
+    );
+    if (res.data.length > 0) {
+      return [parseFloat(res.data[0].lat), parseFloat(res.data[0].lon)];
+    }
+    return null;
+  } catch (err) {
+    console.error("Geocoding failed:", err.message);
+    return null;
+  }
+}
+
+// Fetch OSRM routes
 async function getRoutesFromOSRM(source, destination) {
-  const url = `http://router.project-osrm.org/route/v1/driving/${source[1]},${source[0]};${destination[1]},${destination[0]}?overview=full&geometries=polyline&alternatives=true`;
-
-  const res = await axios.get(url);
-  return res.data.routes.map((r, i) => ({
-    id: i + 1,
-    name: `Route ${i + 1}`,
-    distance_km: (r.distance / 1000).toFixed(2),
-    duration_min: (r.duration / 60).toFixed(2),
-    geometry: r.geometry,
-    crime: Math.floor(Math.random() * 3),
-    darkAreas: Math.floor(Math.random() * 2),
-    traffic: Math.floor(Math.random() * 3),
-  }));
-}
-
-// Call Gemini API for scoring a route
-async function getGeminiScore(route) {
   try {
-    const prompt = `
-Evaluate the safety of this route based on the following features:
-- Crime level: ${route.crime}
-- Poorly lit sections: ${route.darkAreas}
-- Traffic level: ${route.traffic}
+    const url = `http://router.project-osrm.org/route/v1/driving/${source[1]},${source[0]};${destination[1]},${destination[0]}?overview=full&geometries=polyline&alternatives=true`;
+    const res = await axios.get(url);
+    if (!res.data || !res.data.routes) return [];
 
-Return ONLY a JSON object like this:
-{
-  "score": <number between 0-5>,
-  "reason": "<short explanation>"
-}
-    `;
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-    });
-
-    // Remove Markdown code block if exists
-    let text = response.text.trim();
-    if (text.startsWith("```")) {
-      text = text.replace(/^```json\s*/, "").replace(/```$/, "");
-    }
-
-    const parsed = JSON.parse(text);
-    return {
-      score: parsed.score,
-      reason: parsed.reason,
-      scoringMethod: "Gemini",
-      label: getLabel(parsed.score),
-    };
-  } catch (err) {
-    console.error("Gemini scoring failed:", err.message);
-    // Fallback scoring
-    let fallbackScore = 10;
-    const reasons = [];
-    if (route.crime > 0) {
-      fallbackScore -= route.crime * 0.5;
-      reasons.push("High crime area");
-    }
-    if (route.darkAreas > 0) {
-      fallbackScore -= route.darkAreas * 0.3;
-      reasons.push("Poorly lit sections");
-    }
-    if (route.traffic > 0) {
-      fallbackScore -= route.traffic * 0.2;
-      reasons.push("Heavy traffic");
-    }
-    return {
-      score: Math.max(fallbackScore, 0),
-      reason: reasons.length ? reasons.join(", ") : "No major issues",
-      scoringMethod: "Fallback",
-      label: getLabel(Math.max(fallbackScore, 0)),
-    };
-  }
-}
-
-// ✅ POST /api/routes
-router.post("/routes", async (req, res) => {
-  const { source, destination } = req.body;
-
-  if (!source || !destination) {
-    return res.status(400).json({ error: "source and destination required" });
-  }
-
-  try {
-    const routes = await getRoutesFromOSRM(source, destination);
-    const scoredRoutes = await Promise.all(routes.map(getGeminiScore));
-    // Attach route info to scores
-    const finalRoutes = routes.map((route, i) => ({
-      ...route,
-      ...scoredRoutes[i],
+    return res.data.routes.map((r, i) => ({
+      id: i + 1,
+      distance_km: (r.distance / 1000).toFixed(2),
+      duration_min: (r.duration / 60).toFixed(2),
+      geometry: r.geometry,
+      crime: Math.floor(Math.random() * 3),     // mock features
+      darkAreas: Math.floor(Math.random() * 2),
+      traffic: Math.floor(Math.random() * 3),
     }));
-    res.json({ routes: finalRoutes });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch routes" });
+    console.error("OSRM fetch error:", err.message);
+    return [];
+  }
+}
+
+// Score route with Gemini or fallback
+async function scoreWithGemini(route) {
+  try {
+    if (aiClient) {
+      // Call Gemini API here if configured
+      // return { score, reason, type: "Gemini" };
+      throw new Error("Gemini API not used in this demo");
+    }
+    throw new Error("Fallback");
+  } catch {
+    return fallbackScoreFromFeatures(route);
+  }
+}
+
+// POST /api/routes
+// Accepts { sourceAddress, destinationAddress }
+router.post("/routes", async (req, res) => {
+  try {
+    let { sourceAddress, destinationAddress } = req.body;
+    if (!sourceAddress || !destinationAddress)
+      return res.status(400).json({ error: "sourceAddress and destinationAddress required" });
+
+    const source = await geocodeAddress(sourceAddress);
+    const destination = await geocodeAddress(destinationAddress);
+    if (!source || !destination)
+      return res.status(400).json({ error: "Failed to geocode addresses" });
+
+    let osrmData = await getRoutesFromOSRM(source, destination);
+    if (osrmData.length === 0) return res.status(500).json({ error: "No routes found" });
+
+    // Score each route
+    for (let r of osrmData) {
+      const scoreData = await scoreWithGemini(r);
+      r.aiScore = scoreData.score;
+      r.reason = scoreData.reason;
+      r.scoringType = scoreData.type;
+    }
+
+    // Remove duplicate OSRM routes (same distance & duration)
+    const uniqueRoutes = [];
+    for (const r of osrmData) {
+      const exists = uniqueRoutes.find(
+        u => u.distance_km === r.distance_km && u.duration_min === r.duration_min && u.aiScore === r.aiScore
+      );
+      if (!exists) uniqueRoutes.push(r);
+    }
+
+    // Sort descending by AI score (safest first)
+    uniqueRoutes.sort((a, b) => b.aiScore - a.aiScore);
+
+    const safestRoute = uniqueRoutes.length > 0 ? uniqueRoutes[0] : null;
+
+    res.json({ safestRoute, routes: uniqueRoutes });
+  } catch (err) {
+    console.error("Server error:", err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 

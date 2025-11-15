@@ -82,58 +82,87 @@
 
 
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import dynamic from "next/dynamic";
 import RouteInfoCard from "../components/RouteInfoCard";
 
-// Dynamically import MapView for SSR
+// Dynamic wrapper for client-only Leaflet component
 const MapView = dynamic(() => import("../components/MapView"), { ssr: false });
 
 export default function Home() {
+  const [srcAddr, setSrcAddr] = useState("");
+  const [dstAddr, setDstAddr] = useState("");
   const [routes, setRoutes] = useState([]);
+  const [coords, setCoords] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const fetchRoutes = async () => {
+    if (!srcAddr.trim() || !dstAddr.trim()) {
+      alert("Please enter both source and destination addresses.");
+      return;
+    }
+    setLoading(true);
+    setRoutes([]);
+    setCoords(null);
+
     try {
-      setLoading(true);
-      const res = await axios.post("http://localhost:5000/api/routes",{
-  "source": [40.7580, -73.9855],      // Times Square
-  "destination": [40.7308, -73.9973]  // Washington Square Park
-}
+      const res = await axios.post("http://localhost:5000/api/routes", {
+        sourceAddress: srcAddr.trim(),
+        destinationAddress: dstAddr.trim()
+      });
 
-
-);
-
-      // Sort routes by score descending
-      const sorted = res.data.routes.sort((a, b) => b.score - a.score);
-      setRoutes(sorted);
+      setCoords(res.data.coords || null);
+      setRoutes(res.data.routes || []);
     } catch (err) {
-      console.error("Error fetching routes:", err.message);
+      console.error("Fetch error:", err?.response?.data || err.message);
+      alert("Failed to fetch routes. Check backend logs.");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchRoutes();
-  }, []);
-
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <h1 className="text-3xl font-bold mb-6">SafeJourney Routes</h1>
+    <div className="min-h-screen p-6 bg-gradient-to-br from-[#f4f0ff] to-[#ffffff]">
+      <h1 className="text-3xl font-bold text-center text-purple-800 mb-6">SafeJourney</h1>
 
-      {loading && <p>Loading routes...</p>}
+      <div className="max-w-3xl mx-auto bg-white p-4 rounded-2xl shadow mb-6">
+        <input
+          value={srcAddr}
+          onChange={(e) => setSrcAddr(e.target.value)}
+          placeholder="Source address (e.g., Miyapur, Hyderabad)"
+          className="w-full p-3 mb-3 border rounded"
+        />
+        <input
+          value={dstAddr}
+          onChange={(e) => setDstAddr(e.target.value)}
+          placeholder="Destination address (e.g., LB Nagar, Hyderabad)"
+          className="w-full p-3 mb-3 border rounded"
+        />
+        <button
+          onClick={fetchRoutes}
+          className="w-full bg-purple-600 text-white p-3 rounded-lg"
+          disabled={loading}
+        >
+          {loading ? "Finding routes..." : "Find Routes"}
+        </button>
+      </div>
 
-      {!loading && routes.length > 0 && (
-        <>
-          <MapView routes={routes} />
-          <div className="mt-6">
-            {routes.map((route, idx) => (
-              <RouteInfoCard key={route.id} route={route} index={idx} />
-            ))}
-          </div>
-        </>
+      {/* Map */}
+      {routes.length > 0 && coords && (
+        <div className="max-w-6xl mx-auto rounded-3xl overflow-hidden shadow mb-6">
+          <MapView routes={routes} coords={coords} />
+        </div>
+      )}
+
+      {/* Route cards (shows distance/duration/score/reason/method) */}
+      {routes.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-6xl mx-auto">
+  {routes.map((route, idx) => (
+    <RouteInfoCard key={idx} route={route} index={idx} />
+  ))}
+</div>
+
       )}
     </div>
   );

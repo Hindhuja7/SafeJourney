@@ -82,70 +82,69 @@
 
 
 
-import { MapContainer, TileLayer, Polyline } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+import { MapContainer, TileLayer, Polyline, Marker, Popup } from "react-leaflet";
+import polyline from "@mapbox/polyline";
+import L from "leaflet";
+import { useEffect, useRef } from "react";
+import "leaflet/dist/leaflet.css";
 
-export default function MapViewClient({ routes }) {
-  // Map label to color
-  const labelColors = {
-    "Safest (Recommended)": "#4ade80", // Green
-    Normal: "#facc15",                 // Yellow
-    Unsafe: "#f87171",                 // Red
+// Fix default icon paths (CDN)
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png"
+});
+
+export default function MapViewClient({ routes, coords }) {
+  const mapRef = useRef();
+
+  const decode = (geom) => {
+    try {
+      return polyline.decode(geom).map(([lat, lng]) => [lat, lng]);
+    } catch (e) {
+      return [];
+    }
   };
 
+  useEffect(() => {
+    if (!mapRef.current || !routes || routes.length === 0) return;
+    // collect all points to fit bounds
+    const all = [];
+    routes.forEach((r) => {
+      const pts = decode(r.geometry);
+      pts.forEach((p) => all.push(p));
+    });
+    if (all.length) {
+      const bounds = L.latLngBounds(all);
+      mapRef.current.fitBounds(bounds, { padding: [40, 40] });
+    }
+  }, [routes]);
+
+  const center = coords && coords.source ? coords.source : [17.385, 78.4867];
+  const colors = ["#2563EB", "#16A34A", "#EF4444"];
+
   return (
-    <MapContainer
-      center={[17.4239, 78.4865]}
-      zoom={13}
-      scrollWheelZoom={true}
-      className="w-full h-full rounded-3xl shadow-xl"
-    >
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution="&copy; OpenStreetMap contributors"
-      />
-      {routes.map((route) => (
-        <Polyline
-          key={route.id}
-          positions={decodePolyline(route.geometry)}
-          pathOptions={{
-            color: labelColors[route.label] || '#3b82f6',
-            weight: 5,
-          }}
-        />
-      ))}
+    <MapContainer whenCreated={(m) => (mapRef.current = m)} center={center} zoom={13} style={{ height: "520px", width: "100%" }}>
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+      {/* markers */}
+      {coords?.source && (
+        <Marker position={coords.source}>
+          <Popup>Source</Popup>
+        </Marker>
+      )}
+      {coords?.destination && (
+        <Marker position={coords.destination}>
+          <Popup>Destination</Popup>
+        </Marker>
+      )}
+
+      {routes.map((r, i) => {
+        const pts = decode(r.geometry);
+        const color = colors[i % colors.length];
+        return <Polyline key={i} positions={pts} pathOptions={{ color, weight: 6, opacity: 0.9 }} />;
+      })}
     </MapContainer>
   );
-}
-
-// Decode polyline to [lat,lng]
-function decodePolyline(str) {
-  const points = [];
-  let index = 0,
-    lat = 0,
-    lng = 0;
-
-  while (index < str.length) {
-    let b, shift = 0, result = 0;
-    do {
-      b = str.charCodeAt(index++) - 63;
-      result |= (b & 0x1f) << shift;
-      shift += 5;
-    } while (b >= 0x20);
-    const dlat = (result & 1 ? ~(result >> 1) : result >> 1);
-    lat += dlat;
-
-    shift = 0;
-    result = 0;
-    do {
-      b = str.charCodeAt(index++) - 63;
-      result |= (b & 0x1f) << shift;
-      shift += 5;
-    } while (b >= 0x20);
-    const dlng = (result & 1 ? ~(result >> 1) : result >> 1);
-    lng += dlng;
-
-    points.push([lat / 1e5, lng / 1e5]);
-  }
-  return points;
 }

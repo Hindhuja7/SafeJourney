@@ -14,18 +14,14 @@
 
 
 
-export default function RouteInfoCard({ route, index }) {
+export default function RouteInfoCard({ route, index }) { // receive index here
   return (
-    <div className="bg-white rounded-xl shadow p-4 mb-4">
-      <h2 className="text-lg font-bold">
-        {route.label} Route #{index + 1}
-      </h2>
+    <div className="route-card p-4 border rounded-lg shadow">
+      <h2 className="font-bold">Route {index + 1}</h2>
       <p>Distance: {route.distance_km} km</p>
       <p>Duration: {route.duration_min} min</p>
-      <p>
-        Score: {route.score} / 5 ({route.label})
-      </p>
-      <p>{route.reason}</p>
+      <p>AI Score: {route.aiScore.toFixed(1)}</p>
+      <p>Reason: {route.reason}</p>
     </div>
   );
 }
