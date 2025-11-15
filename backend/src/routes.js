@@ -539,7 +539,7 @@ router.get('/safe-routes', async (req, res) => {
     // Step 6: Sort routes by risk (ascending - lowest risk = safest)
     enrichedRoutes.sort((a, b) => a.riskScore - b.riskScore);
     
-    // Step 7: Find safest route index
+    // Step 7: Find safest route index (after sorting, first route is safest)
     const safestRouteIndex = enrichedRoutes.length > 0 ? 0 : -1;
     
     console.log(`Returning ${enrichedRoutes.length} routes. Safest route index: ${safestRouteIndex}`);

@@ -1,6 +1,7 @@
 /**
- * TomTom API integration module
- * Handles all TomTom API calls: routes, incidents, traffic flow, and POIs
+ * Hybrid API integration module
+ * Uses free APIs (OSRM, Nominatim, Overpass) for routing, geocoding, and POIs
+ * Uses TomTom API only for real-time traffic data (incidents, traffic flow)
  */
 
 import fetch from 'node-fetch';
@@ -19,133 +20,89 @@ if (!TOMTOM_API_KEY || TOMTOM_API_KEY === 'YOUR_KEY') {
 }
 
 /**
- * Fetch multiple route alternatives from TomTom Routing API
+ * Fetch multiple route alternatives from OSRM (Open Source Routing Machine) - FREE
+ * Hybrid approach: Use free OSRM for routing, TomTom only for traffic data
  * @param {number} originLat - Origin latitude
  * @param {number} originLon - Origin longitude
  * @param {number} destLat - Destination latitude
  * @param {number} destLon - Destination longitude
- * @returns {Promise<Array>} Array of route objects
+ * @returns {Promise<Array>} Array of route objects in TomTom-compatible format
  */
 export async function fetchRoutes(originLat, originLon, destLat, destLon) {
-  if (!TOMTOM_API_KEY || TOMTOM_API_KEY === 'YOUR_KEY') {
-    throw new Error('TomTom API key is not set. Please set TOMTOM_API_KEY in your .env file.');
-  }
-
-  // Try TomTom Routing API with different endpoint format
-  // Some versions use waypoints as query parameter instead of path
-  const waypoints = `${originLat},${originLon}:${destLat},${destLon}`;
-
-  // Try format: calculateRoute/json?waypoints={waypoints}&key={key}
-  const url = `https://api.tomtom.com/routing/1/calculateRoute/${waypoints}/json?key=${TOMTOM_API_KEY}&traffic=true&routeType=fastest&travelMode=car`;
+  // Use OSRM (Open Source Routing Machine) - FREE, no API key needed
+  // OSRM format: lon,lat (note: longitude first!)
+  // Note: TomTom API key is no longer required for routing (hybrid approach)
+  const osrmUrl = `http://router.project-osrm.org/route/v1/driving/${originLon},${originLat};${destLon},${destLat}?overview=full&geometries=geojson&alternatives=true`;
 
   try {
-    console.log('Fetching routes from TomTom API...');
-    console.log('URL:', url.replace(TOMTOM_API_KEY, '***'));
+    console.log('Fetching routes from OSRM (free, hybrid approach)...');
+    console.log('URL:', osrmUrl);
 
-    const response = await fetch(url, {
+    const response = await fetch(osrmUrl, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'User-Agent': 'SafeJourneyApp/1.0'
       }
     });
 
+    if (!response.ok) {
+      throw new Error(`OSRM API error (${response.status}): ${response.statusText}`);
+    }
+
     const data = await response.json();
 
-    if (!response.ok) {
-      console.error('TomTom API Error Response:', JSON.stringify(data, null, 2));
-      console.error('Response Status:', response.status, response.statusText);
-      const errorMsg = data.detailedError?.message || data.error?.message || data.errorText || data.message || JSON.stringify(data);
-      throw new Error(`TomTom Routing API error (${response.status}): ${errorMsg}`);
-    }
-
-    // TomTom returns a single route object, not an array
-    // To get alternatives, we'll make multiple calls with different route types
-    let routes = [];
-
-    // The response contains a single route
-    if (data.routes && Array.isArray(data.routes)) {
-      routes = data.routes;
-    } else if (data.routes) {
-      routes = [data.routes];
-    } else if (data.route) {
-      routes = [data.route];
-    } else {
-      // Try to get the route from the response directly
-      routes = [data];
-    }
-
-    // If we got a route, try to get alternatives by calling with different route types
-    if (routes.length > 0) {
-      const routeTypes = ['fastest', 'shortest', 'eco'];
-      const alternativePromises = routeTypes.slice(1).map(async (routeType) => {
-        try {
-          const altUrl = `https://api.tomtom.com/routing/1/calculateRoute/${waypoints}/json?key=${TOMTOM_API_KEY}&traffic=true&routeType=${routeType}&travelMode=car`;
-
-          const altResponse = await fetch(altUrl, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json'
-            }
-          });
-          if (altResponse.ok) {
-            const altData = await altResponse.json();
-            // altData is the route object itself, not wrapped
-            if (altData && (altData.legs || altData.sections || altData.summary)) {
-              return altData;
-            }
-            // Fallback to nested structure
-            return altData.routes || altData.route || altData;
-          }
-        } catch (e) {
-          console.warn(`Failed to fetch ${routeType} route:`, e.message);
-        }
-        return null;
-      });
-
-      const alternatives = await Promise.all(alternativePromises);
-
-      // Helper function to check if routes are similar (same distance/time)
-      const routesAreSimilar = (r1, r2) => {
-        const s1 = r1.summary || {};
-        const s2 = r2.summary || {};
-        const dist1 = s1.lengthInMeters || 0;
-        const dist2 = s2.lengthInMeters || 0;
-        const time1 = s1.travelTimeInSeconds || 0;
-        const time2 = s2.travelTimeInSeconds || 0;
-
-        // Consider routes similar if distance and time are within 5% of each other
-        const distDiff = Math.abs(dist1 - dist2) / Math.max(dist1, dist2, 1);
-        const timeDiff = Math.abs(time1 - time2) / Math.max(time1, time2, 1);
-
-        return distDiff < 0.05 && timeDiff < 0.05;
-      };
-
-      alternatives.forEach(alt => {
-        if (alt) {
-          // Check if this route is already in the list (by comparing summaries)
-          const isDuplicate = routes.some(r => routesAreSimilar(r, alt));
-          if (!isDuplicate) {
-            routes.push(alt);
-            console.log(`Added alternative route: ${alt.summary?.routeType || 'unknown'}`);
-          } else {
-            console.log(`Skipped duplicate route: ${alt.summary?.routeType || 'unknown'}`);
-          }
-        }
-      });
-    }
-
-    if (routes.length === 0) {
-      console.warn('TomTom API returned no routes');
+    if (!data.routes || data.routes.length === 0) {
+      console.warn('OSRM returned no routes');
       return [];
     }
 
-    console.log(`Successfully fetched ${routes.length} routes from TomTom`);
+    // Convert OSRM format to TomTom-compatible format
+    const routes = data.routes.map((osrmRoute, index) => {
+      // Extract coordinates from GeoJSON geometry
+      const coordinates = osrmRoute.geometry.coordinates || []; // [lon, lat] pairs
+
+      // Convert to TomTom format: {latitude, longitude} points
+      const points = coordinates.map(coord => ({
+        latitude: coord[1], // lat is second in GeoJSON
+        longitude: coord[0] // lon is first in GeoJSON
+      }));
+
+      // Create legs structure (TomTom format)
+      const legs = [{
+        summary: {
+          lengthInMeters: Math.round(osrmRoute.distance),
+          travelTimeInSeconds: Math.round(osrmRoute.duration),
+          trafficDelayInSeconds: 0,
+          trafficLengthInMeters: 0
+        },
+        points: points
+      }];
+
+      // Create route in TomTom-compatible format
+      return {
+        summary: {
+          lengthInMeters: Math.round(osrmRoute.distance),
+          travelTimeInSeconds: Math.round(osrmRoute.duration),
+          trafficDelayInSeconds: 0,
+          trafficLengthInMeters: 0,
+          routeType: index === 0 ? 'fastest' : 'alternative',
+          departureTime: new Date().toISOString(),
+          arrivalTime: new Date(Date.now() + osrmRoute.duration * 1000).toISOString()
+        },
+        legs: legs,
+        sections: legs, // Some code checks sections too
+        points: points, // Direct points array
+        geometry: {
+          points: points // For compatibility
+        }
+      };
+    });
+
+    console.log(`Successfully fetched ${routes.length} routes from OSRM`);
     return routes;
   } catch (error) {
-    console.error('Error fetching routes:', error.message);
-    if (error.message.includes('API key')) {
-      throw error;
-    }
+    console.error('Error fetching routes from OSRM:', error.message);
     throw new Error(`Failed to fetch routes: ${error.message}`);
   }
 }
@@ -209,33 +166,74 @@ export async function fetchTrafficFlow(lat, lon) {
 
 /**
  * Fetch POIs (police, hospitals, gas stations) near a point
+ * Hybrid approach: Use Overpass API (OpenStreetMap) - FREE
  * @param {number} lat - Latitude
  * @param {number} lon - Longitude
  * @param {number} radius - Search radius in meters (default: 500)
  * @returns {Promise<Array>} Array of POI objects
  */
 export async function fetchPOIs(lat, lon, radius = 500) {
-  // Category sets: police=7366, hospitals=7322, fuel=7311
-  const categorySet = '7366,7322,7311';
-  const url = `https://api.tomtom.com/search/2/poiSearch/.json?key=${TOMTOM_API_KEY}&lat=${lat}&lon=${lon}&radius=${radius}&categorySet=${categorySet}`;
-
+  // Use Overpass API (OpenStreetMap) - FREE, no API key needed
   try {
-    const response = await fetch(url);
-    const data = await response.json();
+    // Overpass API query for police, hospitals, and gas stations
+    const overpassQuery = `
+      [out:json][timeout:10];
+      (
+        node["amenity"="police"](around:${radius},${lat},${lon});
+        node["amenity"="hospital"](around:${radius},${lat},${lon});
+        node["amenity"="fuel"](around:${radius},${lat},${lon});
+        way["amenity"="police"](around:${radius},${lat},${lon});
+        way["amenity"="hospital"](around:${radius},${lat},${lon});
+        way["amenity"="fuel"](around:${radius},${lat},${lon});
+      );
+      out center;
+    `;
+
+    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
+
+    const response = await fetch(url, {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'SafeJourneyApp/1.0'
+      }
+    });
 
     if (!response.ok) {
-      throw new Error(`TomTom POI API error: ${data.error?.message || 'Unknown error'}`);
+      console.warn('Overpass API error, returning empty POI list');
+      return [];
     }
 
-    return data.results || [];
+    const data = await response.json();
+
+    // Convert Overpass format to TomTom-compatible format
+    const pois = (data.elements || []).map(element => {
+      const position = element.center || { lat: element.lat, lon: element.lon };
+      const tags = element.tags || {};
+
+      return {
+        position: {
+          lat: position.lat,
+          lon: position.lon
+        },
+        poi: {
+          name: tags.name || tags['name:en'] || 'Unknown',
+          category: tags.amenity || 'unknown'
+        },
+        type: 'POI'
+      };
+    });
+
+    console.log(`Found ${pois.length} POIs from Overpass API (free)`);
+    return pois;
   } catch (error) {
-    console.error('Error fetching POIs:', error);
+    console.warn('Error fetching POIs from Overpass API:', error.message);
     return []; // Return empty array on error
   }
 }
 
 /**
  * Search for location autocomplete suggestions
+ * Hybrid approach: Use Nominatim (OpenStreetMap) - FREE
  * @param {string} query - Partial address or location name
  * @param {number} limit - Maximum number of results (default: 5)
  * @returns {Promise<Array>} Array of suggestion objects with address, lat, lon
@@ -246,30 +244,44 @@ export async function searchAutocomplete(query, limit = 5) {
   }
 
   const encodedQuery = encodeURIComponent(query);
-  // Use TomTom Search API with typeahead for autocomplete
-  const url = `https://api.tomtom.com/search/2/search/${encodedQuery}.json?key=${TOMTOM_API_KEY}&limit=${limit}&typeahead=true`;
+
+  // Use Nominatim (OpenStreetMap) - FREE, no API key needed
+  // Documentation: https://nominatim.org/release-docs/develop/api/Search/
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodedQuery}&format=json&limit=${limit}&addressdetails=1&extratags=1`;
 
   try {
     const response = await fetch(url, {
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'User-Agent': 'SafeJourneyApp/1.0' // Required by Nominatim
       }
     });
-    const data = await response.json();
 
     if (!response.ok) {
-      console.warn(`Autocomplete error (${response.status}): ${data.detailedError?.message || data.error?.message || 'Unknown error'}`);
+      console.warn(`Autocomplete error (${response.status}): ${response.statusText}`);
       return [];
     }
 
-    if (data.results && data.results.length > 0) {
-      return data.results.map(result => ({
-        address: result.address?.freeformAddress || result.poi?.name || query,
-        lat: result.position.lat,
-        lon: result.position.lon,
-        type: result.type || 'address',
-        poiName: result.poi?.name
-      }));
+    const data = await response.json();
+
+    if (Array.isArray(data) && data.length > 0) {
+      return data.map(result => {
+        // Format address from Nominatim response
+        const address = result.display_name ||
+          [result.address?.road,
+          result.address?.city || result.address?.town || result.address?.village,
+          result.address?.state,
+          result.address?.country].filter(Boolean).join(', ') ||
+          query;
+
+        return {
+          address: address,
+          lat: parseFloat(result.lat),
+          lon: parseFloat(result.lon),
+          type: result.type || result.class || 'address',
+          poiName: result.name || result.address?.name || null
+        };
+      });
     }
 
     return [];
