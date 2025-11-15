@@ -14,7 +14,7 @@ import polyline from 'polyline';
 export function splitRouteIntoSegments(routeData) {
   try {
     let coordinates;
-    
+
     // Handle both array of points and encoded polyline string
     if (Array.isArray(routeData)) {
       coordinates = routeData;
@@ -36,39 +36,39 @@ export function splitRouteIntoSegments(routeData) {
     } else {
       return [];
     }
-    
+
     if (!coordinates || coordinates.length < 2) {
       return [];
     }
-    
+
     const segments = [];
     let currentSegment = {
       start: { lat: coordinates[0][0], lon: coordinates[0][1] },
       points: [[coordinates[0][0], coordinates[0][1]]]
     };
-    
+
     let segmentLength = 0;
     const targetSegmentLength = 50; // 50 meters
-    
+
     for (let i = 1; i < coordinates.length; i++) {
       const prevPoint = coordinates[i - 1];
       const currentPoint = coordinates[i];
-      
+
       // Calculate distance between consecutive points
       const distance = getDistance(
         { latitude: prevPoint[0], longitude: prevPoint[1] },
         { latitude: currentPoint[0], longitude: currentPoint[1] }
       );
-      
+
       segmentLength += distance;
       currentSegment.points.push([currentPoint[0], currentPoint[1]]);
-      
+
       // If segment length exceeds target, finalize segment
       if (segmentLength >= targetSegmentLength || i === coordinates.length - 1) {
         currentSegment.end = { lat: currentPoint[0], lon: currentPoint[1] };
         currentSegment.length = segmentLength;
         segments.push(currentSegment);
-        
+
         // Start new segment
         currentSegment = {
           start: { lat: currentPoint[0], lon: currentPoint[1] },
@@ -78,7 +78,7 @@ export function splitRouteIntoSegments(routeData) {
         segmentLength = 0;
       }
     }
-    
+
     return segments;
   } catch (error) {
     console.error('Error splitting route into segments:', error);
@@ -96,18 +96,27 @@ export function calculateIncidentScore(segment, incidents) {
   if (!incidents || incidents.length === 0) {
     return 0;
   }
-  
+
   let totalSeverity = 0;
   let count = 0;
-  
+
   // Check if any incident is near this segment
   for (const incident of incidents) {
     if (!incident.geometry || !incident.geometry.coordinates) continue;
-    
+
     const incidentCoords = incident.geometry.coordinates;
-    const incidentLat = Array.isArray(incidentCoords[0]) ? incidentCoords[1] : incidentCoords[1];
-    const incidentLon = Array.isArray(incidentCoords[0]) ? incidentCoords[0] : incidentCoords[0];
-    
+    // GeoJSON format: [longitude, latitude] or nested [[longitude, latitude]]
+    let incidentLat, incidentLon;
+    if (Array.isArray(incidentCoords[0])) {
+      // Nested structure: [[lon, lat]] or [[lon, lat], ...]
+      incidentLon = incidentCoords[0][0];
+      incidentLat = incidentCoords[0][1];
+    } else {
+      // Flat structure: [lon, lat]
+      incidentLon = incidentCoords[0];
+      incidentLat = incidentCoords[1];
+    }
+
     // Check if incident is within 100m of segment
     const distToStart = getDistance(
       { latitude: segment.start.lat, longitude: segment.start.lon },
@@ -117,7 +126,7 @@ export function calculateIncidentScore(segment, incidents) {
       { latitude: segment.end.lat, longitude: segment.end.lon },
       { latitude: incidentLat, longitude: incidentLon }
     );
-    
+
     if (distToStart < 100 || distToEnd < 100) {
       // Severity: 1=low, 2=medium, 3=high, 4=critical
       const severity = incident.severity || 1;
@@ -125,7 +134,7 @@ export function calculateIncidentScore(segment, incidents) {
       count++;
     }
   }
-  
+
   // Normalize: max severity per incident is 4, normalize to 0-1
   // More incidents and higher severity = higher score
   const maxPossibleScore = count * 4;
@@ -143,18 +152,18 @@ export function calculatePOISafetyScore(segment, pois) {
   if (!pois || pois.length === 0) {
     return 0;
   }
-  
+
   let nearbyPOIs = 0;
   const searchRadius = 200; // 200 meters
-  
+
   for (const poi of pois) {
     if (!poi.position) continue;
-    
+
     const poiLat = poi.position.lat || poi.position.latitude;
     const poiLon = poi.position.lon || poi.position.longitude;
-    
+
     if (poiLat === undefined || poiLon === undefined) continue;
-    
+
     const distToStart = getDistance(
       { latitude: segment.start.lat, longitude: segment.start.lon },
       { latitude: poiLat, longitude: poiLon }
@@ -163,12 +172,12 @@ export function calculatePOISafetyScore(segment, pois) {
       { latitude: segment.end.lat, longitude: segment.end.lon },
       { latitude: poiLat, longitude: poiLon }
     );
-    
+
     if (distToStart < searchRadius || distToEnd < searchRadius) {
       nearbyPOIs++;
     }
   }
-  
+
   // Normalize: assume max 10 POIs nearby is very safe (score = 1)
   return Math.min(nearbyPOIs / 10, 1);
 }
@@ -184,10 +193,10 @@ export function calculateTrafficFlowScore(segment, flowData) {
   if (!flowData || !flowData.currentSpeed) {
     return 0.5; // Default medium risk if no data
   }
-  
+
   const currentSpeed = flowData.currentSpeed;
   const freeFlowSpeed = flowData.freeFlowSpeed || 60; // Default 60 km/h
-  
+
   // Lower speed relative to free flow = higher risk
   // Normalize: if speed is 0, score = 1 (highest risk), if speed = freeFlow, score = 0
   const speedRatio = Math.max(0, 1 - (currentSpeed / freeFlowSpeed));
@@ -251,16 +260,16 @@ export function calculateSegmentRisk(segment, incidents, pois, flowData) {
   const trafficFlowScore = calculateTrafficFlowScore(segment, flowData);
   const isolationScore = calculateIsolationScore(segment, pois);
   const timeOfDayScore = calculateTimeOfDayScore();
-  
+
   // Calculate risk using weighted formula
-  const segmentRisk = 
+  const segmentRisk =
     0.25 * (1 - lightingScore) +
     0.25 * incidentScore +
     0.20 * (1 - poiSafetyScore) +
     0.15 * trafficFlowScore +
     0.10 * isolationScore +
     0.05 * timeOfDayScore;
-  
+
   // Ensure score is between 0 and 1
   return Math.max(0, Math.min(1, segmentRisk));
 }
@@ -274,22 +283,22 @@ export function calculateRouteRisk(segments) {
   if (!segments || segments.length === 0) {
     return 1; // High risk if no segments
   }
-  
+
   let totalWeightedRisk = 0;
   let totalLength = 0;
-  
+
   for (const segment of segments) {
     const risk = segment.riskScore || 0;
     const length = segment.length || 0;
-    
+
     totalWeightedRisk += risk * length;
     totalLength += length;
   }
-  
+
   if (totalLength === 0) {
     return 1;
   }
-  
+
   return totalWeightedRisk / totalLength;
 }
 
