@@ -48,6 +48,11 @@ export const API_ENDPOINTS = {
       status: (userId) => apiUrl(`api/live-location/sos/status/${userId}`),
     },
   },
+  reviews: {
+    submit: apiUrl('api/reviews/submit'),
+    getUserReviews: (userId) => apiUrl(`api/reviews/${userId}`),
+    getSessionReview: (sessionId) => apiUrl(`api/reviews/session/${sessionId}`),
+  },
 };
 
 export default API_BASE_URL;

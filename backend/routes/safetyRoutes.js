@@ -242,15 +242,28 @@ router.post("/routes", async (req, res) => {
       }
     }
 
-    // Sort safest → dangerous
+    // Sort safest → dangerous (descending order)
     uniqueRoutes.sort((a, b) => b.aiScore - a.aiScore);
 
-    const safestRoute = uniqueRoutes[0] || null;
+    // Label routes: Safest (Recommended), Moderate, Unsafe
+    const labeledRoutes = uniqueRoutes.map((route, index) => {
+      let label = "";
+      if (index === 0) {
+        label = "Safest (Recommended)";
+      } else if (index === 1) {
+        label = "Moderate";
+      } else {
+        label = "Unsafe";
+      }
+      return { ...route, label };
+    });
+
+    const safestRoute = labeledRoutes[0] || null;
 
     // IMPORTANT FIX: RETURN coords for frontend map
     res.json({
       coords: { source, destination },
-      routes: uniqueRoutes,
+      routes: labeledRoutes,
       safestRoute,
     });
 

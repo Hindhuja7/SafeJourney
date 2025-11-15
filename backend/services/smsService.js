@@ -474,26 +474,28 @@ export async function sendEmergencyAlert(contacts, location, userName = "User", 
   
   // Build emergency message
   let message = `🚨 EMERGENCY SOS ALERT 🚨\n\n`;
-  message += `${userName} is NOT SAFE and needs immediate help!\n\n`;
+  message += `${userName} is NOT SAFE and needs immediate help!\n`;
+  message += `User did not respond to safety check-in.\n\n`;
   message += `📍 Current Location:\n${address || `${latitude}, ${longitude}`}\n`;
   message += `🗺️ View on map: ${mapsLink}\n\n`;
   message += `⏰ Time: ${new Date().toLocaleString()}\n\n`;
   
   // Add police station info if available
   if (policeStations.length > 0) {
-    message += `🚔 Nearest Police Stations:\n`;
+    message += `🚔 Nearest Police Stations (Please contact them):\n`;
     policeStations.slice(0, 2).forEach((station, idx) => {
       message += `${idx + 1}. ${station.name} (${station.distance} km away)\n`;
       message += `   📍 ${station.address}\n`;
       message += `   🗺️ https://www.google.com/maps?q=${station.latitude},${station.longitude}\n\n`;
     });
+    message += `⚠️ Please contact the nearest police station immediately!\n\n`;
   }
   
   message += `📞 Emergency Numbers:\n`;
   message += `Police: 100\n`;
   message += `Women Helpline: 1091\n`;
   message += `Child Helpline: 1098\n\n`;
-  message += `⚠️ Please take immediate action!`;
+  message += `⚠️ Please take immediate action! Contact police if needed!`;
 
   // Send to all contacts
   const results = await Promise.allSettled(

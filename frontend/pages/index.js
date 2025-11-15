@@ -95,6 +95,7 @@ export default function Home() {
   const [routes, setRoutes] = useState([]);
   const [coords, setCoords] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [selectedRoute, setSelectedRoute] = useState(null);
   const [userId] = useState(1); // In a real app, this would come from auth context
 
   const fetchRoutes = async () => {
@@ -113,7 +114,21 @@ export default function Home() {
       });
 
       setCoords(res.data.coords || null);
-      setRoutes(res.data.routes || []);
+      const fetchedRoutes = res.data.routes || [];
+      setRoutes(fetchedRoutes);
+      
+      // Default to safest route (first one after sorting)
+      if (fetchedRoutes.length > 0) {
+        const safestRoute = fetchedRoutes[0];
+        setSelectedRoute(safestRoute);
+        // Store route and address info globally for review form
+        window.currentRouteUsed = safestRoute;
+      } else {
+        setSelectedRoute(null);
+      }
+      
+      window.currentSourceAddress = srcAddr.trim();
+      window.currentDestinationAddress = dstAddr.trim();
     } catch (err) {
       console.error("Fetch error:", err);
       const errorMessage = err?.response?.data?.error || err?.message || "Unknown error";
@@ -169,11 +184,48 @@ export default function Home() {
         </div>
       )}
 
+      {/* Route Selection Message */}
+      {selectedRoute && routes.length > 0 && (
+        <div className="max-w-6xl mx-auto mb-4">
+          <div className={`p-4 rounded-lg border-2 ${
+            selectedRoute.label === "Safest (Recommended)" 
+              ? "bg-green-50 border-green-300 text-green-800"
+              : selectedRoute.label === "Moderate"
+              ? "bg-yellow-50 border-yellow-300 text-yellow-800"
+              : "bg-red-50 border-red-300 text-red-800"
+          }`}>
+            <p className="font-semibold text-lg">
+              {selectedRoute.label === "Safest (Recommended)" 
+                ? "✓ Safest route selected (Default)"
+                : `✓ ${selectedRoute.label} route selected`}
+            </p>
+            <p className="text-sm mt-1 opacity-90">
+              {selectedRoute.label === "Safest (Recommended)" 
+                ? "The safest route has been automatically selected for you."
+                : "You have selected this route. Click on another route card to change selection."}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Route info cards */}
       {routes.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-6xl mx-auto">
           {routes.map((route, idx) => (
-            <RouteInfoCard key={idx} route={route} index={idx} />
+            <RouteInfoCard 
+              key={idx} 
+              route={route} 
+              index={idx}
+              isSelected={selectedRoute && (
+                selectedRoute.distance_km === route.distance_km && 
+                selectedRoute.duration_min === route.duration_min &&
+                selectedRoute.label === route.label
+              )}
+              onSelect={(route) => {
+                setSelectedRoute(route);
+                window.currentRouteUsed = route;
+              }}
+            />
           ))}
         </div>
       )}

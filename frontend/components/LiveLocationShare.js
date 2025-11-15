@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
 import SOSAlert from "./SOSAlert";
+import ReviewForm from "./ReviewForm";
 
 export default function LiveLocationShare({ userId = 1 }) {
   const [isSharing, setIsSharing] = useState(false);
@@ -16,6 +17,8 @@ export default function LiveLocationShare({ userId = 1 }) {
   const [currentAddress, setCurrentAddress] = useState(null);
   const [error, setError] = useState("");
   const [loadingContacts, setLoadingContacts] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [sessionDataForReview, setSessionDataForReview] = useState(null);
 
   const locationIntervalRef = useRef(null);
   const watchIdRef = useRef(null);
@@ -279,7 +282,7 @@ export default function LiveLocationShare({ userId = 1 }) {
   const handleStartSharing = async () => {
     setError("");
 
-    // Use selected contacts if available, otherwise use default contacts
+    // Use selected contacts if available, otherwise backend will use default (including TWILIO_PHONE_NUMBER)
     let contactsToUse = [];
     
     if (selectedContacts.length >= 1) {
@@ -289,14 +292,11 @@ export default function LiveLocationShare({ userId = 1 }) {
       // No contacts selected, use default contacts automatically
       contactsToUse = defaultContacts.slice(0, 1);
     } else {
-      setError("Please select at least 1 contact or ensure default contacts are configured");
-      return;
+      // No contacts selected - backend will use TWILIO_PHONE_NUMBER as default
+      contactsToUse = []; // Empty array - backend will handle default
     }
 
-    if (contactsToUse.length < 1) {
-      setError("At least 1 contact is required. Please select a contact or configure default contacts.");
-      return;
-    }
+    // Allow empty array - backend will use TWILIO_PHONE_NUMBER as default
 
     try {
       const res = await axios.post(API_ENDPOINTS.liveLocation.start, {
@@ -325,7 +325,7 @@ export default function LiveLocationShare({ userId = 1 }) {
 
   const handleStopSharing = async () => {
     try {
-      await axios.post(API_ENDPOINTS.liveLocation.stop, { userId });
+      const response = await axios.post(API_ENDPOINTS.liveLocation.stop, { userId });
       
       // Clear intervals
       if (locationIntervalRef.current) {
@@ -337,12 +337,29 @@ export default function LiveLocationShare({ userId = 1 }) {
         watchIdRef.current = null;
       }
 
+      // Store session data for review
+      if (response.data?.sessionData) {
+        setSessionDataForReview(response.data.sessionData);
+        setShowReviewForm(true);
+      }
+
       setIsSharing(false);
       setSessionStatus(null);
       setCurrentLocation(null);
     } catch (err) {
       setError(err.response?.data?.error || "Failed to stop live location sharing");
     }
+  };
+
+  const handleReviewSubmitted = (review) => {
+    setShowReviewForm(false);
+    setSessionDataForReview(null);
+    // Optionally show a success message or redirect
+  };
+
+  const handleReviewCancel = () => {
+    setShowReviewForm(false);
+    setSessionDataForReview(null);
   };
 
   const getRecommendedInterval = () => {
@@ -352,6 +369,23 @@ export default function LiveLocationShare({ userId = 1 }) {
     if (batteryPercent > 20) return 10; // Low battery - less frequent
     return 15; // Very low battery - minimal updates
   };
+
+  // Show review form if location sharing was just stopped
+  if (showReviewForm && sessionDataForReview) {
+    return (
+      <div>
+        <ReviewForm
+          userId={userId}
+          sessionData={sessionDataForReview}
+          routeUsed={window.currentRouteUsed || null}
+          sourceAddress={window.currentSourceAddress || null}
+          destinationAddress={window.currentDestinationAddress || null}
+          onReviewSubmitted={handleReviewSubmitted}
+          onCancel={handleReviewCancel}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
@@ -512,6 +546,14 @@ export default function LiveLocationShare({ userId = 1 }) {
                     </div>
                   )}
 
+                  {selectedContacts.length === 0 && defaultContacts.length === 0 && (
+                    <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                      <p className="text-sm text-yellow-800">
+                        ℹ️ No contact selected. <strong>System default contact (Twilio number) will be used automatically.</strong>
+                      </p>
+                    </div>
+                  )}
+
                   {selectedContacts.length >= 1 && (
                     <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded">
                       <p className="text-sm text-green-800 font-medium">
@@ -558,14 +600,13 @@ export default function LiveLocationShare({ userId = 1 }) {
           {/* Start Button */}
           <button
             onClick={handleStartSharing}
-            disabled={selectedContacts.length < 1 && defaultContacts.length < 1}
             className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             {selectedContacts.length >= 1 
               ? `Start Sharing with ${selectedContacts.length} Selected Contact(s)` 
               : defaultContacts.length >= 1
               ? `Start Sharing (Using Default Contact)`
-              : "Add at least 1 contact to start"}
+              : "Start Sharing (Using System Default Contact)"}
           </button>
         </>
       )}

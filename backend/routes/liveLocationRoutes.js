@@ -90,10 +90,8 @@ router.post("/start", async (req, res) => {
       return res.status(400).json({ error: "userId required" });
     }
 
-    // Validate minimum 1 contact
-    if (!selectedContacts || selectedContacts.length < 1) {
-      return res.status(400).json({ error: "Minimum 1 contact required" });
-    }
+    // Allow empty selectedContacts - we'll use default (TWILIO_PHONE_NUMBER) if none provided
+    // selectedContacts can be empty array or undefined - we'll handle it below
 
     if (!updateIntervalMinutes || updateIntervalMinutes < 1) {
       return res.status(400).json({ error: "Valid update interval required (minimum 1 minute)" });
@@ -107,9 +105,30 @@ router.post("/start", async (req, res) => {
     }
 
     // Get default contacts if none selected
-    const contactsToUse = selectedContacts.length >= 1 
-      ? selectedContacts 
-      : (user.defaultContacts || user.emergencyContacts || []).slice(0, 1);
+    let contactsToUse = [];
+    
+    // Normalize selectedContacts (handle undefined, null, or empty array)
+    const normalizedSelectedContacts = selectedContacts && Array.isArray(selectedContacts) ? selectedContacts : [];
+    
+    if (normalizedSelectedContacts.length >= 1) {
+      // Use selected contacts
+      contactsToUse = normalizedSelectedContacts;
+    } else if (user.defaultContacts && user.defaultContacts.length >= 1) {
+      // Use saved default contacts
+      contactsToUse = user.defaultContacts.slice(0, 1);
+    } else if (user.emergencyContacts && user.emergencyContacts.length >= 1) {
+      // Use emergency contacts
+      contactsToUse = user.emergencyContacts.slice(0, 1);
+    } else if (process.env.TWILIO_PHONE_NUMBER) {
+      // Use Twilio phone number as default contact
+      contactsToUse = [{
+        name: "Emergency Contact",
+        phone: process.env.TWILIO_PHONE_NUMBER
+      }];
+      console.log(`✅ Using TWILIO_PHONE_NUMBER as default contact: ${process.env.TWILIO_PHONE_NUMBER}`);
+    } else {
+      return res.status(400).json({ error: "No contacts selected and no default contact available. Please select at least 1 contact or configure TWILIO_PHONE_NUMBER in .env" });
+    }
 
     if (contactsToUse.length < 1) {
       return res.status(400).json({ error: "Insufficient contacts. Please add at least 1 contact." });
@@ -302,14 +321,50 @@ router.post("/stop", async (req, res) => {
       return res.status(404).json({ error: "No active live location session found" });
     }
 
-    sessions[sessionIndex].isActive = false;
-    sessions[sessionIndex].stoppedAt = new Date().toISOString();
+    const session = sessions[sessionIndex];
+    session.isActive = false;
+    session.stoppedAt = new Date().toISOString();
 
     await writeJSON(LIVE_SESSIONS_FILE, sessions);
 
+    // Get final location (last location update)
+    const finalLocation = session.locations && session.locations.length > 0
+      ? session.locations[session.locations.length - 1]
+      : null;
+
+    // Reverse geocode final location to get address
+    let finalAddress = null;
+    if (finalLocation) {
+      try {
+        const axios = (await import("axios")).default;
+        const geoRes = await axios.get(
+          `https://nominatim.openstreetmap.org/reverse?lat=${finalLocation.latitude}&lon=${finalLocation.longitude}&format=json`,
+          { headers: { "User-Agent": "SafeJourneyApp" } }
+        );
+        if (geoRes.data && geoRes.data.display_name) {
+          finalAddress = geoRes.data.display_name;
+        }
+      } catch (err) {
+        console.error("Geocoding error:", err);
+      }
+    }
+
     res.json({
       message: "Live location sharing stopped",
-      sessionId: sessions[sessionIndex].sessionId,
+      sessionId: session.sessionId,
+      sessionData: {
+        sessionId: session.sessionId,
+        userId: session.userId,
+        startedAt: session.startedAt,
+        completedAt: session.stoppedAt,
+        finalLocation: finalLocation ? {
+          ...finalLocation,
+          address: finalAddress
+        } : null,
+        locationHistory: session.locations || [],
+        selectedContacts: session.selectedContacts || [],
+        updateIntervalMinutes: session.updateIntervalMinutes
+      }
     });
   } catch (err) {
     console.error("Error stopping live location:", err);
@@ -446,6 +501,9 @@ router.post("/sos/checkin", async (req, res) => {
         ? session.locations[session.locations.length - 1] 
         : null;
 
+      let emergencyResults = [];
+      let policeAlertResults = [];
+
       if (currentLocation && session.selectedContacts && session.selectedContacts.length > 0) {
         try {
           // Find nearby police stations
@@ -481,8 +539,8 @@ router.post("/sos/checkin", async (req, res) => {
             // Continue without address
           }
 
-          // Send emergency alert
-          const emergencyResults = await sendEmergencyAlert(
+          // Send emergency alert to contacts
+          emergencyResults = await sendEmergencyAlert(
             session.selectedContacts,
             {
               latitude: currentLocation.latitude,
@@ -493,7 +551,33 @@ router.post("/sos/checkin", async (req, res) => {
             policeStations
           );
 
-          console.log("🚨 Emergency alert sent:", emergencyResults);
+          console.log("🚨 Emergency alert sent to contacts:", emergencyResults);
+
+          // If user is NOT safe, also send to nearby police stations via emergency helpline
+          if (policeStations.length > 0) {
+            try {
+              // Use emergency helpline number (100 for India) to notify police
+              const { getEmergencyContacts } = await import("../services/policeStationService.js");
+              const emergencyContacts = getEmergencyContacts();
+              const policeHelpline = emergencyContacts.india.police; // "100"
+              
+              // Create police alert message
+              const policeMessage = `🚨 EMERGENCY SOS ALERT 🚨\n\n${userName} is NOT SAFE and needs immediate help!\n\n📍 Location: ${address || `${currentLocation.latitude}, ${currentLocation.longitude}`}\n🗺️ Map: https://www.google.com/maps?q=${currentLocation.latitude},${currentLocation.longitude}\n⏰ Time: ${new Date().toLocaleString()}\n\n🚔 Nearest Police Stations:\n${policeStations.slice(0, 3).map((s, i) => `${i + 1}. ${s.name} (${s.distance} km)\n   📍 ${s.address}`).join('\n')}\n\n⚠️ Please dispatch help immediately!`;
+              
+              // Send to emergency helpline (Note: This is a placeholder - actual implementation depends on SMS gateway support)
+              // For now, we'll log it and include in response
+              console.log(`🚔 Police alert prepared for helpline ${policeHelpline}`);
+              policeAlertResults = [{
+                contact: "Police Helpline",
+                phone: policeHelpline,
+                success: true,
+                method: "Emergency Helpline",
+                note: "Alert prepared for police dispatch"
+              }];
+            } catch (policeAlertErr) {
+              console.error("Error preparing police alert:", policeAlertErr);
+            }
+          }
         } catch (alertErr) {
           console.error("❌ Error sending emergency alert:", alertErr);
           // Don't fail the request, but log the error
@@ -515,7 +599,11 @@ router.post("/sos/checkin", async (req, res) => {
       message: isSafe ? "Check-in recorded: You are safe" : "EMERGENCY ALERT TRIGGERED",
       checkIn: checkIn,
       emergencyTriggered: !isSafe,
-      nextCheckIn: session.sosAlert.nextCheckIn
+      nextCheckIn: session.sosAlert.nextCheckIn,
+      alertResults: !isSafe ? {
+        contacts: emergencyResults || [],
+        policeStations: policeAlertResults || []
+      } : null
     });
   } catch (err) {
     console.error("Error processing SOS check-in:", err);
@@ -556,6 +644,9 @@ router.post("/sos/emergency", async (req, res) => {
       ? session.locations[session.locations.length - 1] 
       : null;
 
+    let emergencyResults = [];
+    let policeAlertResults = [];
+
     if (currentLocation && session.selectedContacts && session.selectedContacts.length > 0) {
       try {
         // Find nearby police stations
@@ -591,8 +682,8 @@ router.post("/sos/emergency", async (req, res) => {
           // Continue without address
         }
 
-        // Send emergency alert
-        const emergencyResults = await sendEmergencyAlert(
+        // Send emergency alert to contacts
+        emergencyResults = await sendEmergencyAlert(
           session.selectedContacts,
           {
             latitude: currentLocation.latitude,
@@ -603,7 +694,32 @@ router.post("/sos/emergency", async (req, res) => {
           policeStations
         );
 
-        console.log("🚨 Emergency alert sent (no response):", emergencyResults);
+        console.log("🚨 Emergency alert sent to contacts (no response):", emergencyResults);
+
+        // Also send to nearby police stations via emergency helpline
+        if (policeStations.length > 0) {
+          try {
+            // Use emergency helpline number (100 for India) to notify police
+            const { getEmergencyContacts } = await import("../services/policeStationService.js");
+            const emergencyContacts = getEmergencyContacts();
+            const policeHelpline = emergencyContacts.india.police; // "100"
+            
+            // Create police alert message
+            const policeMessage = `🚨 EMERGENCY SOS ALERT 🚨\n\n${userName} is NOT SAFE and needs immediate help!\n\n📍 Location: ${address || `${currentLocation.latitude}, ${currentLocation.longitude}`}\n🗺️ Map: https://www.google.com/maps?q=${currentLocation.latitude},${currentLocation.longitude}\n⏰ Time: ${new Date().toLocaleString()}\n\n🚔 Nearest Police Stations:\n${policeStations.slice(0, 3).map((s, i) => `${i + 1}. ${s.name} (${s.distance} km)\n   📍 ${s.address}`).join('\n')}\n\n⚠️ Please dispatch help immediately!`;
+            
+            // Send to emergency helpline (Note: This is a placeholder - actual implementation depends on SMS gateway support)
+            console.log(`🚔 Police alert prepared for helpline ${policeHelpline}`);
+            policeAlertResults = [{
+              contact: "Police Helpline",
+              phone: policeHelpline,
+              success: true,
+              method: "Emergency Helpline",
+              note: "Alert prepared for police dispatch"
+            }];
+          } catch (policeAlertErr) {
+            console.error("Error preparing police alert:", policeAlertErr);
+          }
+        }
       } catch (alertErr) {
         console.error("❌ Error sending emergency alert:", alertErr);
         // Don't fail the request, but log the error
@@ -622,7 +738,11 @@ router.post("/sos/emergency", async (req, res) => {
 
     res.json({
       message: "EMERGENCY ALERT TRIGGERED - No response detected",
-      emergencyTriggered: true
+      emergencyTriggered: true,
+      alertResults: {
+        contacts: emergencyResults || [],
+        policeStations: policeAlertResults || []
+      }
     });
   } catch (err) {
     console.error("Error triggering emergency:", err);

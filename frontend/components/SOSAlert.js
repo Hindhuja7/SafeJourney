@@ -4,13 +4,15 @@ import { API_ENDPOINTS } from "../config/api";
 
 export default function SOSAlert({ userId, isLocationSharing }) {
   const [sosActive, setSosActive] = useState(false);
-  const [checkInInterval, setCheckInInterval] = useState(10); // 5, 10, or 20 minutes
+  const [checkInInterval, setCheckInInterval] = useState(2); // 2, 5, 10, or 20 minutes (2 for testing)
   const [timeRemaining, setTimeRemaining] = useState(null); // seconds
   const [nextCheckIn, setNextCheckIn] = useState(null);
   const [showCheckInPrompt, setShowCheckInPrompt] = useState(false);
   const [emergencyTriggered, setEmergencyTriggered] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [noResponseCountdown, setNoResponseCountdown] = useState(null); // seconds remaining before auto-emergency
+  const [alertResults, setAlertResults] = useState(null); // Store alert results with phone numbers
 
   const countdownIntervalRef = useRef(null);
   const checkInTimeoutRef = useRef(null);
@@ -25,7 +27,14 @@ export default function SOSAlert({ userId, isLocationSharing }) {
         clearInterval(countdownIntervalRef.current);
       }
       if (checkInTimeoutRef.current) {
-        clearTimeout(checkInTimeoutRef.current);
+        if (typeof checkInTimeoutRef.current === 'object' && checkInTimeoutRef.current.timeout) {
+          clearTimeout(checkInTimeoutRef.current.timeout);
+          if (checkInTimeoutRef.current.interval) {
+            clearInterval(checkInTimeoutRef.current.interval);
+          }
+        } else {
+          clearTimeout(checkInTimeoutRef.current);
+        }
       }
     };
   }, [userId, isLocationSharing]);
@@ -34,18 +43,22 @@ export default function SOSAlert({ userId, isLocationSharing }) {
   const checkSOSStatus = async () => {
     try {
       const res = await axios.get(API_ENDPOINTS.liveLocation.sos.status(userId));
-      if (res.data.isActive) {
+      if (res.data && res.data.isActive) {
         setSosActive(true);
         setCheckInInterval(res.data.checkInIntervalMinutes);
-        setNextCheckIn(new Date(res.data.nextCheckIn));
-        startCountdown(new Date(res.data.nextCheckIn));
+        if (res.data.nextCheckIn) {
+          const nextCheckInTime = new Date(res.data.nextCheckIn);
+          setNextCheckIn(nextCheckInTime);
+          startCountdown(nextCheckInTime);
+        }
       }
-      if (res.data.emergencyTriggered) {
+      if (res.data && res.data.emergencyTriggered) {
         setEmergencyTriggered(true);
         setSosActive(false);
       }
     } catch (err) {
       console.error("Error checking SOS status:", err);
+      // Don't set error state - SOS might not be started yet
     }
   };
 
@@ -65,10 +78,32 @@ export default function SOSAlert({ userId, isLocationSharing }) {
         setShowCheckInPrompt(true);
         clearInterval(countdownIntervalRef.current);
         
-        // Auto-trigger emergency after 30 seconds if no response
-        checkInTimeoutRef.current = setTimeout(() => {
-          triggerEmergencyNoResponse();
-        }, 30000); // 30 seconds grace period
+        // Start countdown for auto-emergency (3 minutes = 180 seconds)
+        const autoEmergencyDelay = 3 * 60 * 1000; // 3 minutes
+        setNoResponseCountdown(180); // 3 minutes in seconds
+        
+        // Start countdown display
+        let remainingSeconds = 180;
+        const noResponseCountdownInterval = setInterval(() => {
+          remainingSeconds--;
+          setNoResponseCountdown(remainingSeconds);
+          
+          if (remainingSeconds <= 0) {
+            clearInterval(noResponseCountdownInterval);
+            setNoResponseCountdown(null);
+            triggerEmergencyNoResponse();
+          }
+        }, 1000);
+        
+        // Store interval reference to clear it if user responds
+        checkInTimeoutRef.current = {
+          timeout: setTimeout(() => {
+            clearInterval(noResponseCountdownInterval);
+            setNoResponseCountdown(null);
+            triggerEmergencyNoResponse();
+          }, autoEmergencyDelay),
+          interval: noResponseCountdownInterval
+        };
       }
     };
 
@@ -91,9 +126,16 @@ export default function SOSAlert({ userId, isLocationSharing }) {
       const nextCheckInTime = new Date(res.data.nextCheckIn);
       setNextCheckIn(nextCheckInTime);
       startCountdown(nextCheckInTime);
+      setError(""); // Clear any previous errors
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to start SOS alert system");
+      const errorMsg = err.response?.data?.error || "Failed to start SOS alert system";
+      setError(errorMsg);
       console.error("Error starting SOS:", err);
+      
+      // Show helpful error message
+      if (errorMsg.includes("No active live location session")) {
+        setError("⚠️ Please start location sharing first, then start SOS Alert System");
+      }
     } finally {
       setLoading(false);
     }
@@ -104,10 +146,16 @@ export default function SOSAlert({ userId, isLocationSharing }) {
     setLoading(true);
     setError("");
 
-    // Clear timeout if user responds
+    // Clear timeout and countdown if user responds
     if (checkInTimeoutRef.current) {
-      clearTimeout(checkInTimeoutRef.current);
+      if (typeof checkInTimeoutRef.current === 'object' && checkInTimeoutRef.current.timeout) {
+        clearTimeout(checkInTimeoutRef.current.timeout);
+        clearInterval(checkInTimeoutRef.current.interval);
+      } else {
+        clearTimeout(checkInTimeoutRef.current);
+      }
     }
+    setNoResponseCountdown(null); // Clear countdown display
 
     try {
       const res = await axios.post(API_ENDPOINTS.liveLocation.sos.checkin, {
@@ -119,6 +167,10 @@ export default function SOSAlert({ userId, isLocationSharing }) {
         setEmergencyTriggered(true);
         setSosActive(false);
         setShowCheckInPrompt(false);
+        // Store alert results to show which numbers received alerts
+        if (res.data.alertResults) {
+          setAlertResults(res.data.alertResults);
+        }
         if (countdownIntervalRef.current) {
           clearInterval(countdownIntervalRef.current);
         }
@@ -140,12 +192,17 @@ export default function SOSAlert({ userId, isLocationSharing }) {
   // Trigger emergency if no response
   const triggerEmergencyNoResponse = async () => {
     try {
-      await axios.post(API_ENDPOINTS.liveLocation.sos.emergency, {
+      setNoResponseCountdown(null); // Clear countdown
+      const res = await axios.post(API_ENDPOINTS.liveLocation.sos.emergency, {
         userId
       });
       setEmergencyTriggered(true);
       setSosActive(false);
       setShowCheckInPrompt(false);
+      // Store alert results to show which numbers received alerts
+      if (res.data.alertResults) {
+        setAlertResults(res.data.alertResults);
+      }
     } catch (err) {
       console.error("Error triggering emergency:", err);
       setError("Failed to trigger emergency alert");
@@ -169,9 +226,47 @@ export default function SOSAlert({ userId, isLocationSharing }) {
         <div className="text-center">
           <div className="text-4xl mb-4">🚨</div>
           <h2 className="text-2xl font-bold mb-2">EMERGENCY ALERT SENT</h2>
-          <p className="text-lg">
+          <p className="text-lg mb-4">
             Your emergency contacts have been notified with your location and nearby police stations.
           </p>
+
+          {/* Show which phone numbers received alerts */}
+          {alertResults && (
+            <div className="mt-4 p-4 bg-red-700 rounded-lg text-left">
+              <h3 className="font-semibold mb-3 text-lg">📱 Alert Sent To:</h3>
+              
+              {/* Contact alerts */}
+              {alertResults.contacts && alertResults.contacts.length > 0 && (
+                <div className="mb-3">
+                  <p className="font-semibold mb-2">Emergency Contacts:</p>
+                  <ul className="list-disc list-inside space-y-1 text-sm">
+                    {alertResults.contacts.map((result, idx) => (
+                      <li key={idx} className={result.success ? "text-green-200" : "text-yellow-200"}>
+                        {result.success ? "✅" : "⚠️"} {result.contact || "Contact"} - {result.phone}
+                        {result.error && <span className="text-xs block ml-4">Error: {result.error}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Police station alerts */}
+              {alertResults.policeStations && alertResults.policeStations.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-red-500">
+                  <p className="font-semibold mb-2">🚔 Police Stations:</p>
+                  <ul className="list-disc list-inside space-y-1 text-sm">
+                    {alertResults.policeStations.map((result, idx) => (
+                      <li key={idx} className="text-green-200">
+                        ✅ {result.contact} - {result.phone}
+                        {result.note && <span className="text-xs block ml-4">{result.note}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
           <p className="text-sm mt-4 opacity-90">
             Help is on the way. Stay safe!
           </p>
@@ -189,6 +284,20 @@ export default function SOSAlert({ userId, isLocationSharing }) {
           <p className="text-lg mb-6">
             Are you safe? Please confirm your safety status.
           </p>
+          
+          {noResponseCountdown !== null && noResponseCountdown > 0 && (
+            <div className="mb-6 p-4 bg-red-600 rounded-lg">
+              <p className="text-sm font-semibold mb-2">
+                ⚠️ Emergency alert will be sent in:
+              </p>
+              <p className="text-3xl font-bold mb-2">
+                {formatTime(noResponseCountdown)}
+              </p>
+              <p className="text-xs opacity-90">
+                If you don't respond, emergency alert will be sent to your contacts and nearby police stations
+              </p>
+            </div>
+          )}
           
           <div className="flex gap-4 justify-center">
             <button
@@ -212,7 +321,7 @@ export default function SOSAlert({ userId, isLocationSharing }) {
           )}
           
           <p className="text-sm mt-4 opacity-90">
-            If you don't respond, an emergency alert will be sent automatically.
+            If you don't respond within 3 minutes, an emergency alert will be sent automatically to your contacts and nearby police stations.
           </p>
         </div>
       </div>
@@ -252,8 +361,8 @@ export default function SOSAlert({ userId, isLocationSharing }) {
         <label className="block font-semibold text-blue-800 mb-2">
           Check-In Interval
         </label>
-        <div className="grid grid-cols-3 gap-2">
-          {[5, 10, 20].map((minutes) => (
+        <div className="grid grid-cols-4 gap-2">
+          {[2, 5, 10, 20].map((minutes) => (
             <button
               key={minutes}
               type="button"
