@@ -1,6 +1,6 @@
 /**
  * Main App component for SafeJourney
- * Provides UI for origin/destination input and displays routes
+ * Modern UI with dark/light mode and enhanced interactions
  */
 
 import { useState, useEffect, useRef } from 'react';
@@ -30,6 +30,9 @@ function App() {
   const [showOriginSuggestions, setShowOriginSuggestions] = useState(false);
   const [showDestSuggestions, setShowDestSuggestions] = useState(false);
   const [gettingCurrentLocation, setGettingCurrentLocation] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const [hoveredRouteIndex, setHoveredRouteIndex] = useState(-1);
+  
   const originInputRef = useRef(null);
   const destInputRef = useRef(null);
   const originTimeoutRef = useRef(null);
@@ -37,6 +40,19 @@ function App() {
 
   const origin = originLat && originLon ? [parseFloat(originLon), parseFloat(originLat)] : null;
   const destination = destLat && destLon ? [parseFloat(destLon), parseFloat(destLat)] : null;
+
+  // Toggle dark mode
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+    document.documentElement.setAttribute('data-theme', !darkMode ? 'dark' : 'light');
+  };
+
+  // Initialize theme
+  useEffect(() => {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setDarkMode(prefersDark);
+    document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+  }, []);
 
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -53,11 +69,9 @@ function App() {
           const lat = position.coords.latitude;
           const lon = position.coords.longitude;
 
-          // Set coordinates
           setOriginLat(lat.toString());
           setOriginLon(lon.toString());
 
-          // Reverse geocode to get address name
           const result = await reverseGeocode(lat, lon);
           if (result && result.address) {
             setOriginName(result.address);
@@ -130,7 +144,6 @@ function App() {
   };
 
   const handleFindRoutes = async () => {
-    // Validate inputs
     if (!originLat || !originLon || !destLat || !destLon) {
       setError('Please enter both origin and destination locations');
       return;
@@ -152,38 +165,28 @@ function App() {
     setSelectedRouteIndex(-1);
 
     try {
-      console.log('Fetching routes...');
-      const data = await fetchSafeRoutes(originLatNum, originLonNum, destLatNum, destLonNum);
-      console.log('Received routes data:', {
-        routeCount: data.routes?.length || 0,
-        safestIndex: data.safestRouteIndex
+      console.log('Fetching routes from API...', {
+        origin: { lat: originLatNum, lon: originLonNum },
+        destination: { lat: destLatNum, lon: destLonNum }
       });
 
+      const data = await fetchSafeRoutes(originLatNum, originLonNum, destLatNum, destLonNum);
+      console.log('Received routes data:', data);
+
       if (!data || !data.routes || data.routes.length === 0) {
-        setError('No routes found');
+        setError('No routes found between these locations');
         return;
       }
 
       setRoutes(data.routes);
       const safestIdx = data.safestRouteIndex || 0;
       setSafestRouteIndex(safestIdx);
-      setSelectedRouteIndex(safestIdx); // Select safest route by default
-      console.log('Routes set successfully');
-
-      // Debug: Log first route structure
-      if (data.routes && data.routes.length > 0) {
-        const firstRoute = data.routes[0];
-        console.log('First route structure:', {
-          hasSegments: !!firstRoute.segments,
-          segmentCount: firstRoute.segments?.length || 0,
-          firstSegment: firstRoute.segments?.[0],
-          hasGeometry: !!firstRoute.geometry,
-          geometryPoints: firstRoute.geometry?.points?.length || 0
-        });
-      }
+      setSelectedRouteIndex(safestIdx);
+      
+      console.log(`Successfully loaded ${data.routes.length} routes`);
     } catch (err) {
       console.error('Error fetching routes:', err);
-      setError(err.response?.data?.error || err.message || 'Failed to fetch routes');
+      setError(err.response?.data?.error || err.message || 'Failed to fetch routes. Please check your internet connection.');
     } finally {
       setLoading(false);
     }
@@ -201,15 +204,12 @@ function App() {
       return;
     }
 
-    // Request location permission before starting navigation
     if (navigator.geolocation) {
-      // Start navigation immediately - no delay
       console.log('Starting navigation immediately...');
       setNavigationRoute(route);
       setIsNavigating(true);
-      setError(null); // Clear any previous errors
+      setError(null);
 
-      // Request location permission in background (for GPS tracking)
       navigator.geolocation.getCurrentPosition(
         (position) => {
           console.log('Location permission granted for GPS tracking');
@@ -224,7 +224,6 @@ function App() {
         }
       );
     } else {
-      // Start navigation even if geolocation is not supported
       console.log('Starting navigation (geolocation not supported, GPS tracking disabled)');
       setNavigationRoute(route);
       setIsNavigating(true);
@@ -239,7 +238,6 @@ function App() {
 
   const handleReroute = (newRoute) => {
     setNavigationRoute(newRoute);
-    // Update the routes list with the new route
     if (routes && routes.length > 0) {
       const updatedRoutes = [...routes];
       updatedRoutes[selectedRouteIndex] = newRoute;
@@ -249,7 +247,6 @@ function App() {
 
   const handleMapClick = async (coords, type) => {
     try {
-      // Reverse geocode to get address name
       const result = await reverseGeocode(coords.lat, coords.lon);
 
       if (type === 'origin') {
@@ -267,7 +264,6 @@ function App() {
       }
     } catch (error) {
       console.error('Error reverse geocoding map click:', error);
-      // Still set coordinates even if reverse geocoding fails
       if (type === 'origin') {
         setOriginLat(coords.lat.toString());
         setOriginLon(coords.lon.toString());
@@ -285,12 +281,10 @@ function App() {
     setOriginName(value);
     setShowOriginSuggestions(true);
 
-    // Clear previous timeout
     if (originTimeoutRef.current) {
       clearTimeout(originTimeoutRef.current);
     }
 
-    // Debounce autocomplete search
     if (value.trim().length >= 2) {
       originTimeoutRef.current = setTimeout(async () => {
         try {
@@ -300,7 +294,7 @@ function App() {
           console.error('Error fetching origin suggestions:', error);
           setOriginSuggestions([]);
         }
-      }, 300); // 300ms delay
+      }, 300);
     } else {
       setOriginSuggestions([]);
     }
@@ -311,12 +305,10 @@ function App() {
     setDestName(value);
     setShowDestSuggestions(true);
 
-    // Clear previous timeout
     if (destTimeoutRef.current) {
       clearTimeout(destTimeoutRef.current);
     }
 
-    // Debounce autocomplete search
     if (value.trim().length >= 2) {
       destTimeoutRef.current = setTimeout(async () => {
         try {
@@ -326,7 +318,7 @@ function App() {
           console.error('Error fetching destination suggestions:', error);
           setDestSuggestions([]);
         }
-      }, 300); // 300ms delay
+      }, 300);
     } else {
       setDestSuggestions([]);
     }
@@ -383,42 +375,40 @@ function App() {
   }
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100vh',
-      fontFamily: 'Arial, sans-serif'
-    }}>
+    <div className={`app-container ${darkMode ? 'dark' : 'light'}`}>
       {/* Header */}
-      <header style={{
-        backgroundColor: '#1a1a1a',
-        color: 'white',
-        padding: '20px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-      }}>
-        <h1 style={{ margin: 0, fontSize: '24px' }}>SafeJourney - Safety-Aware Routing</h1>
+      <header className="app-header">
+        <div className="header-content">
+          <div className="logo-section">
+            <div className="logo-icon">🛡️</div>
+            <div>
+              <h1>SafeJourney</h1>
+              <span className="tagline">Safety-Aware Routing</span>
+            </div>
+          </div>
+          <div className="header-controls">
+            <button 
+              className="theme-toggle"
+              onClick={toggleDarkMode}
+              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {darkMode ? '☀️' : '🌙'}
+            </button>
+          </div>
+        </div>
       </header>
 
       {/* Input Section */}
-      <div style={{
-        padding: '20px',
-        backgroundColor: '#f5f5f5',
-        borderBottom: '1px solid #ddd'
-      }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '20px',
-          maxWidth: '1200px',
-          margin: '0 auto'
-        }}>
+      <div className="input-section">
+        <div className="input-grid">
           {/* Origin */}
-          <div ref={originInputRef} style={{ position: 'relative' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '14px' }}>
+          <div ref={originInputRef} className="input-group">
+            <label className="input-label">
+              <span className="label-icon">📍</span>
               Origin Location
             </label>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <div style={{ flex: 1, position: 'relative' }}>
+            <div className="input-row">
+              <div className="input-wrapper">
                 <input
                   type="text"
                   value={originName}
@@ -426,48 +416,21 @@ function App() {
                   onFocus={() => originName.length >= 2 && setShowOriginSuggestions(true)}
                   onKeyPress={(e) => e.key === 'Enter' && handleGeocodeOrigin()}
                   placeholder="e.g., Hyderabad, Telangana"
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    fontSize: '14px',
-                    boxSizing: 'border-box'
-                  }}
+                  className="location-input"
                 />
                 {showOriginSuggestions && originSuggestions.length > 0 && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: 0,
-                    right: 0,
-                    backgroundColor: 'white',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                    zIndex: 1000,
-                    maxHeight: '200px',
-                    overflowY: 'auto',
-                    marginTop: '2px'
-                  }}>
+                  <div className="suggestions-dropdown">
                     {originSuggestions.map((suggestion, index) => (
                       <div
                         key={index}
                         onClick={() => handleOriginSuggestionSelect(suggestion)}
-                        style={{
-                          padding: '10px',
-                          cursor: 'pointer',
-                          borderBottom: index < originSuggestions.length - 1 ? '1px solid #eee' : 'none',
-                          hover: { backgroundColor: '#f0f0f0' }
-                        }}
-                        onMouseEnter={(e) => e.target.style.backgroundColor = '#f0f0f0'}
-                        onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                        className="suggestion-item"
                       >
-                        <div style={{ fontWeight: 'bold', fontSize: '13px' }}>
+                        <div className="suggestion-primary">
                           {suggestion.poiName || suggestion.address}
                         </div>
                         {suggestion.poiName && (
-                          <div style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>
+                          <div className="suggestion-secondary">
                             {suggestion.address}
                           </div>
                         )}
@@ -479,48 +442,32 @@ function App() {
               <button
                 onClick={handleGeocodeOrigin}
                 disabled={geocodingOrigin}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: geocodingOrigin ? '#ccc' : '#28a745',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: geocodingOrigin ? 'not-allowed' : 'pointer',
-                  fontSize: '14px'
-                }}
+                className="btn btn-primary"
               >
-                {geocodingOrigin ? '...' : 'Search'}
+                {geocodingOrigin ? <div className="spinner"></div> : 'Search'}
               </button>
               <button
                 onClick={handleUseCurrentLocation}
                 disabled={gettingCurrentLocation}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: gettingCurrentLocation ? '#ccc' : '#007bff',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: gettingCurrentLocation ? 'not-allowed' : 'pointer',
-                  fontSize: '14px',
-                  whiteSpace: 'nowrap'
-                }}
+                className="btn btn-secondary"
                 title="Use your current GPS location as origin"
               >
-                {gettingCurrentLocation ? '...' : '📍 Current Location'}
+                {gettingCurrentLocation ? <div className="spinner"></div> : '📍 Current'}
               </button>
             </div>
-            <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>
+            <div className="input-hint">
               Or click on map to select | Lat: {originLat || 'N/A'}, Lon: {originLon || 'N/A'}
             </div>
           </div>
 
           {/* Destination */}
-          <div ref={destInputRef} style={{ position: 'relative' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '14px' }}>
+          <div ref={destInputRef} className="input-group">
+            <label className="input-label">
+              <span className="label-icon">🎯</span>
               Destination Location
             </label>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <div style={{ flex: 1, position: 'relative' }}>
+            <div className="input-row">
+              <div className="input-wrapper">
                 <input
                   type="text"
                   value={destName}
@@ -528,47 +475,21 @@ function App() {
                   onFocus={() => destName.length >= 2 && setShowDestSuggestions(true)}
                   onKeyPress={(e) => e.key === 'Enter' && handleGeocodeDest()}
                   placeholder="e.g., Narayanaguda, Hyderabad"
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    fontSize: '14px',
-                    boxSizing: 'border-box'
-                  }}
+                  className="location-input"
                 />
                 {showDestSuggestions && destSuggestions.length > 0 && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: 0,
-                    right: 0,
-                    backgroundColor: 'white',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                    zIndex: 1000,
-                    maxHeight: '200px',
-                    overflowY: 'auto',
-                    marginTop: '2px'
-                  }}>
+                  <div className="suggestions-dropdown">
                     {destSuggestions.map((suggestion, index) => (
                       <div
                         key={index}
                         onClick={() => handleDestSuggestionSelect(suggestion)}
-                        style={{
-                          padding: '10px',
-                          cursor: 'pointer',
-                          borderBottom: index < destSuggestions.length - 1 ? '1px solid #eee' : 'none'
-                        }}
-                        onMouseEnter={(e) => e.target.style.backgroundColor = '#f0f0f0'}
-                        onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                        className="suggestion-item"
                       >
-                        <div style={{ fontWeight: 'bold', fontSize: '13px' }}>
+                        <div className="suggestion-primary">
                           {suggestion.poiName || suggestion.address}
                         </div>
                         {suggestion.poiName && (
-                          <div style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>
+                          <div className="suggestion-secondary">
                             {suggestion.address}
                           </div>
                         )}
@@ -580,61 +501,47 @@ function App() {
               <button
                 onClick={handleGeocodeDest}
                 disabled={geocodingDest}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: geocodingDest ? '#ccc' : '#28a745',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: geocodingDest ? 'not-allowed' : 'pointer',
-                  fontSize: '14px'
-                }}
+                className="btn btn-primary"
               >
-                {geocodingDest ? '...' : 'Search'}
+                {geocodingDest ? <div className="spinner"></div> : 'Search'}
               </button>
             </div>
-            <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>
+            <div className="input-hint">
               Or click on map to select | Lat: {destLat || 'N/A'}, Lon: {destLon || 'N/A'}
             </div>
           </div>
         </div>
-        <div style={{ marginTop: '15px', textAlign: 'center' }}>
+        <div className="action-section">
           <button
             onClick={handleFindRoutes}
-            disabled={loading}
-            style={{
-              padding: '12px 30px',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              backgroundColor: loading ? '#ccc' : '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-            }}
+            disabled={loading || !originLat || !destLat}
+            className="btn btn-action"
           >
-            {loading ? 'Finding Routes...' : 'Find Safe Routes'}
+            {loading ? (
+              <>
+                <div className="spinner"></div>
+                Finding Safe Routes...
+              </>
+            ) : (
+              <>
+                <span className="btn-icon">🛡️</span>
+                Find Safe Routes
+              </>
+            )}
           </button>
         </div>
         {error && (
-          <div style={{
-            marginTop: '15px',
-            padding: '10px',
-            backgroundColor: '#fee',
-            color: '#c33',
-            borderRadius: '4px',
-            textAlign: 'center'
-          }}>
+          <div className="error-message">
+            <span className="error-icon">⚠️</span>
             {error}
           </div>
         )}
       </div>
 
       {/* Main Content */}
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+      <div className="main-content">
         {/* Map */}
-        <div style={{ flex: 1, position: 'relative' }}>
+        <div className="map-container">
           <Map
             origin={origin}
             destination={destination}
@@ -647,108 +554,118 @@ function App() {
 
         {/* Routes List */}
         {routes && routes.length > 0 && (
-          <div style={{
-            width: '350px',
-            backgroundColor: 'white',
-            borderLeft: '1px solid #ddd',
-            overflowY: 'auto',
-            padding: '20px'
-          }}>
-            <h2 style={{ marginTop: 0, fontSize: '20px', marginBottom: '15px' }}>
-              Routes (Sorted by Safety)
-            </h2>
-            {routes.map((route, index) => {
-              const isSafest = index === safestRouteIndex;
-              const isSelected = index === selectedRouteIndex;
-              const riskPercent = (route.riskScore * 100).toFixed(1);
+          <div className="routes-sidebar">
+            <div className="sidebar-header">
+              <h2>Available Routes</h2>
+              <span className="subtitle">Sorted by Safety Score</span>
+            </div>
+            <div className="routes-list">
+              {routes.map((route, index) => {
+                const isSafest = index === safestRouteIndex;
+                const isSelected = index === selectedRouteIndex;
+                const isHovered = index === hoveredRouteIndex;
+                const riskPercent = (route.riskScore * 100).toFixed(1);
+                const distanceKm = route.summary?.lengthInMeters ? (route.summary.lengthInMeters / 1000).toFixed(2) : 'N/A';
+                const timeMin = route.summary?.travelTimeInSeconds ? Math.round(route.summary.travelTimeInSeconds / 60) : 'N/A';
 
-              return (
-                <div
-                  key={route.id}
-                  onClick={() => handleRouteSelect(index)}
-                  style={{
-                    padding: '15px',
-                    marginBottom: '15px',
-                    border: isSelected ? '3px solid #007bff' : (isSafest ? '2px solid #28a745' : '1px solid #ddd'),
-                    borderRadius: '6px',
-                    backgroundColor: isSelected ? '#e7f3ff' : (isSafest ? '#f0fff4' : 'white'),
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                    <h3 style={{ margin: 0, fontSize: '16px' }}>
-                      Route {route.id + 1}
-                      {isSafest && (
-                        <span style={{
-                          marginLeft: '8px',
-                          padding: '2px 8px',
-                          backgroundColor: '#28a745',
-                          color: 'white',
-                          borderRadius: '4px',
-                          fontSize: '12px',
-                          fontWeight: 'normal'
-                        }}>
-                          SAFEST
-                        </span>
-                      )}
-                      {isSelected && (
-                        <span style={{
-                          marginLeft: '8px',
-                          padding: '2px 8px',
-                          backgroundColor: '#007bff',
-                          color: 'white',
-                          borderRadius: '4px',
-                          fontSize: '12px',
-                          fontWeight: 'normal'
-                        }}>
-                          SELECTED
-                        </span>
-                      )}
-                    </h3>
-                  </div>
-                  <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
-                    Risk Score: <strong>{riskPercent}%</strong>
-                  </div>
-                  {route.summary && (
-                    <div style={{ fontSize: '12px', color: '#888' }}>
-                      {route.summary.lengthInMeters && (
-                        <div>Distance: {(route.summary.lengthInMeters / 1000).toFixed(2)} km</div>
-                      )}
-                      {route.summary.travelTimeInSeconds && (
-                        <div>Time: {Math.round(route.summary.travelTimeInSeconds / 60)} min</div>
-                      )}
-                    </div>
-                  )}
-                  <div style={{ fontSize: '12px', color: '#888', marginTop: '8px' }}>
-                    Segments: {route.segments?.length || 0}
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleStartNavigation(route);
-                    }}
-                    style={{
-                      width: '100%',
-                      marginTop: '12px',
-                      padding: '10px',
-                      backgroundColor: '#007bff',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      fontWeight: 'bold',
-                      transition: 'background-color 0.2s'
-                    }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = '#0056b3'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = '#007bff'}
+                return (
+                  <div
+                    key={route.id || index}
+                    onClick={() => handleRouteSelect(index)}
+                    onMouseEnter={() => setHoveredRouteIndex(index)}
+                    onMouseLeave={() => setHoveredRouteIndex(-1)}
+                    className={`route-card ${isSelected ? 'selected' : ''} ${isSafest ? 'safest' : ''} ${isHovered ? 'hovered' : ''}`}
                   >
-                    🧭 Start Navigation
-                  </button>
-                </div>
-              );
-            })}
+                    <div className="route-header">
+                      <div className="route-title">
+                        <h3>Route {index + 1}</h3>
+                        <div className="route-badges">
+                          {isSafest && (
+                            <span className="badge badge-safest">
+                              🛡️ SAFEST
+                            </span>
+                          )}
+                          {isSelected && (
+                            <span className="badge badge-selected">
+                              ✅ SELECTED
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="risk-indicator">
+                        <div className="risk-value">{riskPercent}%</div>
+                        <div className="risk-label">Risk Score</div>
+                      </div>
+                    </div>
+                    
+                    <div className="route-stats">
+                      <div className="stat">
+                        <span className="stat-icon">📏</span>
+                        <span className="stat-value">{distanceKm} km</span>
+                      </div>
+                      <div className="stat">
+                        <span className="stat-icon">⏱️</span>
+                        <span className="stat-value">{timeMin} min</span>
+                      </div>
+                      <div className="stat">
+                        <span className="stat-icon">🛣️</span>
+                        <span className="stat-value">{route.segments?.length || 0} segments</span>
+                      </div>
+                    </div>
+
+                    {/* Hover Card for Detailed Info */}
+                    {isHovered && (
+                      <div className="route-hover-card">
+                        <div className="hover-card-content">
+                          <h4>Route {index + 1} Details</h4>
+                          <div className="detail-grid">
+                            <div className="detail-item">
+                              <span className="detail-label">Total Distance:</span>
+                              <span className="detail-value">{distanceKm} km</span>
+                            </div>
+                            <div className="detail-item">
+                              <span className="detail-label">Estimated Time:</span>
+                              <span className="detail-value">{timeMin} minutes</span>
+                            </div>
+                            <div className="detail-item">
+                              <span className="detail-label">Safety Score:</span>
+                              <span className="detail-value">{riskPercent}% risk</span>
+                            </div>
+                            <div className="detail-item">
+                              <span className="detail-label">Route Segments:</span>
+                              <span className="detail-value">{route.segments?.length || 0}</span>
+                            </div>
+                          </div>
+                          <div className="safety-meter">
+                            <div className="safety-labels">
+                              <span>Low Risk</span>
+                              <span>High Risk</span>
+                            </div>
+                            <div className="meter-bar">
+                              <div 
+                                className="meter-fill"
+                                style={{ width: `${riskPercent}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStartNavigation(route);
+                      }}
+                      className="btn btn-navigation"
+                    >
+                      <span className="btn-icon">🧭</span>
+                      Start Navigation
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
