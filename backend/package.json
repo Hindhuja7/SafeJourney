@@ -1,39 +1,40 @@
 {
-    "name": "safejourney-backend",
-    "version": "1.0.0",
-    "type": "module",
-    "main": "index.js",
-    "dependencies": {
-        "@capacitor/android": "^7.4.4",
-        "@capacitor/app": "^7.1.0",
-        "@capacitor/cli": "^7.4.4",
-        "@capacitor/core": "^7.4.4",
-        "@capacitor/geolocation": "^7.1.5",
-        "@capacitor/ios": "^7.4.4",
-        "@capacitor/status-bar": "^7.0.3",
-        "@google/genai": "^1.29.1",
-        "@google/generative-ai": "^0.24.1",
-        "@mapbox/polyline": "^1.2.1",
-        "axios": "^1.13.2",
-        "cors": "^2.8.5",
-        "csvtojson": "^2.0.14",
-        "dotenv": "^17.2.3",
-        "express": "^4.21.2",
-        "leaflet": "^1.9.4",
-        "node-fetch": "^3.3.2",
-        "polyline": "^0.2.0",
-        "react-leaflet": "^5.0.0",
-        "twilio": "^5.10.5"
-    },
-    "devDependencies": {
-        "nodemon": "^3.1.10"
-    },
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "node index.js"
-    },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "description": ""
+  "name": "safejourney-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "dependencies": {
+    "@capacitor/android": "^7.4.4",
+    "@capacitor/app": "^7.1.0",
+    "@capacitor/cli": "^7.4.4",
+    "@capacitor/core": "^7.4.4",
+    "@capacitor/geolocation": "^7.1.5",
+    "@capacitor/ios": "^7.4.4",
+    "@capacitor/status-bar": "^7.0.3",
+    "@google/genai": "^1.29.1",
+    "@google/generative-ai": "^0.24.1",
+    "@mapbox/polyline": "^1.2.1",
+    "axios": "^1.13.2",
+    "cors": "^2.8.5",
+    "csvtojson": "^2.0.14",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "geolib": "^3.3.4",
+    "leaflet": "^1.9.4",
+    "node-fetch": "^3.3.2",
+    "polyline": "^0.2.0",
+    "react-leaflet": "^5.0.0",
+    "twilio": "^5.10.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }

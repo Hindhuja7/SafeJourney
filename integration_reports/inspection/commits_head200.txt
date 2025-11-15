@@ -1,0 +1,14 @@
+﻿*   24f0b70 (refs/stash) WIP on tomtom: 45d8352 used osrm for multiple routes
+|\  
+| * 95a22d7 index on tomtom: 45d8352 used osrm for multiple routes
+|/  
+* 45d8352 (tag: backup/tomtom-before-integration-20251116013405, tag: backup/tomtom-before-integration-20251116-010917, origin/tomtom, tomtom) used osrm for multiple routes
+* c3a9c94 Complete SafeJourney implementation with TomTom Maps API, navigation system, and safety-aware routing
+| * c433250 (HEAD -> integration/tomtom-main, tag: backup/main-before-integration-20251116013353, tag: backup/main-before-integration-20251116-010850, origin/main, origin/HEAD, main) added alert and sos
+| * 85cecc3 Update project with new changes
+| * ba3103e Update project with new changes
+| * 55ed232 Update project with new changes
+|/  
+* 97fd15a Update project with new changes
+* 1faa8b1 Update project with new changes
+* 6c28ec4 Initial clean commit without node_modules
