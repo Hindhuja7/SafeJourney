@@ -3001,9 +3001,9 @@
     ],
     "updateIntervalMinutes": 2,
     "batteryPercent": 60,
-    "isActive": true,
+    "isActive": false,
     "startedAt": "2025-11-15T18:20:18.578Z",
-    "lastUpdated": "2025-11-15T18:32:35.917Z",
+    "lastUpdated": "2025-11-15T21:08:02.029Z",
     "locations": [
       {
         "latitude": 17.4587904,
@@ -3114,6 +3114,31 @@
         "latitude": 17.3967298,
         "longitude": 78.4898561,
         "timestamp": "2025-11-15T18:32:35.917Z"
+      },
+      {
+        "latitude": 17.4587904,
+        "longitude": 78.39744,
+        "timestamp": "2025-11-15T21:07:01.032Z"
+      },
+      {
+        "latitude": 17.4587904,
+        "longitude": 78.39744,
+        "timestamp": "2025-11-15T21:07:48.879Z"
+      },
+      {
+        "latitude": 17.4587904,
+        "longitude": 78.39744,
+        "timestamp": "2025-11-15T21:07:52.509Z"
+      },
+      {
+        "latitude": 17.4587904,
+        "longitude": 78.39744,
+        "timestamp": "2025-11-15T21:07:57.987Z"
+      },
+      {
+        "latitude": 17.4587904,
+        "longitude": 78.39744,
+        "timestamp": "2025-11-15T21:08:02.029Z"
       }
     ],
     "sosAlert": {
@@ -3134,7 +3159,8 @@
       ],
       "emergencyTriggered": true
     },
-    "lastSmsSent": "2025-11-15T18:32:38.665Z"
+    "lastSmsSent": "2025-11-15T21:07:05.671Z",
+    "stoppedAt": "2025-11-15T21:08:15.296Z"
   },
   {
     "sessionId": "session_1763231405207_3",
@@ -3202,5 +3228,77 @@
       "emergencyTriggered": true
     },
     "stoppedAt": "2025-11-15T18:32:41.791Z"
+  },
+  {
+    "sessionId": "session_1763238753587_3",
+    "userId": 3,
+    "selectedContacts": [
+      {
+        "name": "guna",
+        "phone": "+17792497968"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T20:32:33.587Z",
+    "lastUpdated": "2025-11-15T20:35:14.409Z",
+    "locations": [
+      {
+        "latitude": 17.4587904,
+        "longitude": 78.39744,
+        "timestamp": "2025-11-15T20:32:37.725Z"
+      },
+      {
+        "latitude": 17.4587904,
+        "longitude": 78.39744,
+        "timestamp": "2025-11-15T20:32:38.766Z"
+      },
+      {
+        "latitude": 17.4587904,
+        "longitude": 78.39744,
+        "timestamp": "2025-11-15T20:32:48.415Z"
+      },
+      {
+        "latitude": 17.4587904,
+        "longitude": 78.39744,
+        "timestamp": "2025-11-15T20:32:50.423Z"
+      },
+      {
+        "latitude": 17.4587904,
+        "longitude": 78.39744,
+        "timestamp": "2025-11-15T20:35:02.377Z"
+      },
+      {
+        "latitude": 17.4587904,
+        "longitude": 78.39744,
+        "timestamp": "2025-11-15T20:35:04.382Z"
+      },
+      {
+        "latitude": 17.4587904,
+        "longitude": 78.39744,
+        "timestamp": "2025-11-15T20:35:14.409Z"
+      }
+    ],
+    "lastSmsSent": "2025-11-15T20:32:41.350Z",
+    "sosAlert": {
+      "isActive": false,
+      "checkInIntervalMinutes": 2,
+      "nextCheckIn": "2025-11-15T20:36:53.368Z",
+      "lastCheckIn": "2025-11-15T20:34:53.368Z",
+      "checkInHistory": [
+        {
+          "timestamp": "2025-11-15T20:34:53.368Z",
+          "isSafe": false,
+          "location": {
+            "latitude": 17.4587904,
+            "longitude": 78.39744,
+            "timestamp": "2025-11-15T20:32:50.423Z"
+          }
+        }
+      ],
+      "emergencyTriggered": true
+    },
+    "stoppedAt": "2025-11-15T20:35:15.090Z"
   }
 ]

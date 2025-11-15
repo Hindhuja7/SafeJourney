@@ -115,6 +115,12 @@
 import express from "express";
 import axios from "axios";
 import dotenv from "dotenv";
+import { fetchRoutes, fetchIncidents, fetchTrafficFlow, fetchPOIs, calculateBoundingBox } from "../src/tomtom.js";
+import {
+  splitRouteIntoSegments,
+  calculateSegmentRisk,
+  calculateRouteRisk
+} from "../src/scoring.js";
 
 dotenv.config();
 const router = express.Router();
@@ -169,7 +175,43 @@ async function geocodeAddress(address) {
   }
 }
 
-// Fetch OSRM routes
+// Fetch routes using TomTom integration (uses OSRM internally but returns TomTom format)
+async function getRoutesFromTomTom(source, destination) {
+  try {
+    const [sourceLat, sourceLon] = source;
+    const [destLat, destLon] = destination;
+    
+    const tomtomRoutes = await fetchRoutes(sourceLat, sourceLon, destLat, destLon);
+    
+    // Convert TomTom format to our expected format
+    return tomtomRoutes.map((route, i) => {
+      // Extract geometry as polyline string
+      let geometry = '';
+      if (route.geometry && route.geometry.points) {
+        // Convert points to polyline format (we'll use OSRM polyline for now)
+        const points = route.geometry.points.map(p => [p.latitude, p.longitude]);
+        // For now, we'll fetch from OSRM to get polyline
+      }
+      
+      // Also fetch from OSRM to get polyline geometry
+      const osrmUrl = `http://router.project-osrm.org/route/v1/driving/${sourceLon},${sourceLat};${destLon},${destLat}?overview=full&geometries=polyline&alternatives=true`;
+      
+      return {
+        id: i + 1,
+        distance_km: ((route.summary?.lengthInMeters || 0) / 1000).toFixed(2),
+        duration_min: ((route.summary?.travelTimeInSeconds || 0) / 60).toFixed(2),
+        geometry: null, // Will be set from OSRM
+        tomtomRoute: route, // Store full TomTom route for scoring
+        points: route.geometry?.points || route.points || []
+      };
+    });
+  } catch (err) {
+    console.error("TomTom route fetch error:", err.message);
+    return [];
+  }
+}
+
+// Fetch OSRM routes for polyline geometry
 async function getRoutesFromOSRM(source, destination) {
   try {
     const url = `http://router.project-osrm.org/route/v1/driving/${source[1]},${source[0]};${destination[1]},${destination[0]}?overview=full&geometries=polyline&alternatives=true`;
@@ -182,9 +224,6 @@ async function getRoutesFromOSRM(source, destination) {
       distance_km: (r.distance / 1000).toFixed(2),
       duration_min: (r.duration / 60).toFixed(2),
       geometry: r.geometry,
-      crime: Math.floor(Math.random() * 3),
-      darkAreas: Math.floor(Math.random() * 2),
-      traffic: Math.floor(Math.random() * 3),
     }));
   } catch (err) {
     console.error("OSRM fetch error:", err.message);
@@ -192,15 +231,88 @@ async function getRoutesFromOSRM(source, destination) {
   }
 }
 
-// Gemini or fallback scoring
-async function scoreWithGemini(route) {
+// Calculate safety score using TomTom-based comprehensive scoring
+async function calculateTomTomSafetyScore(route, incidents, pois, flowDataCache) {
   try {
-    if (aiClient) {
-      throw new Error("Gemini not enabled in this demo");
+    if (!route.points || route.points.length === 0) {
+      console.warn("Route has no points, using fallback scoring");
+      return fallbackScoreFromFeatures({ crime: 0, darkAreas: 0, traffic: 0 });
     }
-    throw new Error("Use fallback");
-  } catch {
-    return fallbackScoreFromFeatures(route);
+
+    // Convert route points to array format for segment splitting
+    const routePoints = route.points.map(p => {
+      const lat = p.latitude || p.lat;
+      const lon = p.longitude || p.lon;
+      return [lat, lon];
+    });
+
+    // Split route into segments
+    const segments = splitRouteIntoSegments(routePoints);
+    
+    if (segments.length === 0) {
+      console.warn("Route has no segments, using fallback scoring");
+      return fallbackScoreFromFeatures({ crime: 0, darkAreas: 0, traffic: 0 });
+    }
+
+    // Process segments and calculate risk scores
+    const enrichedSegments = [];
+    
+    for (const segment of segments) {
+      // Get traffic flow for segment midpoint (use cached data)
+      const midLat = (segment.start.lat + segment.end.lat) / 2;
+      const midLon = (segment.start.lon + segment.end.lon) / 2;
+      
+      // Round to 2 decimal places for caching
+      const cacheKey = `${Math.round(midLat * 100) / 100},${Math.round(midLon * 100) / 100}`;
+      let flowData = flowDataCache.get(cacheKey);
+      
+      if (!flowData) {
+        try {
+          flowData = await fetchTrafficFlow(midLat, midLon);
+          flowDataCache.set(cacheKey, flowData);
+        } catch (e) {
+          flowData = null;
+        }
+      }
+
+      // Calculate segment risk
+      const riskScore = calculateSegmentRisk(segment, incidents, pois, flowData);
+      
+      enrichedSegments.push({
+        ...segment,
+        riskScore: riskScore || 0.5
+      });
+    }
+
+    // Calculate route risk (length-weighted average)
+    const routeRiskScore = calculateRouteRisk(enrichedSegments);
+    
+    // Convert risk score (0-1, lower is safer) to safety score (0-5, higher is safer)
+    // riskScore 0.0 = safest = safety score 5.0
+    // riskScore 1.0 = most dangerous = safety score 0.0
+    const safetyScore = (1 - routeRiskScore) * 5;
+    
+    // Generate reason based on risk factors
+    const reasons = [];
+    if (routeRiskScore > 0.6) {
+      reasons.push("High crime area");
+    }
+    if (routeRiskScore > 0.5) {
+      reasons.push("Poorly lit sections");
+    }
+    if (routeRiskScore > 0.4) {
+      reasons.push("Heavy traffic");
+    }
+    
+    return {
+      score: Math.max(0, Math.min(5, Math.round(safetyScore * 10) / 10)),
+      reason: reasons.join(", ") || "No major issues",
+      type: "TomTom Comprehensive",
+      riskScore: routeRiskScore
+    };
+  } catch (error) {
+    console.error("Error calculating TomTom safety score:", error);
+    return fallbackScoreFromFeatures({ crime: 0, darkAreas: 0, traffic: 0 });
   }
 }
 
@@ -218,23 +330,70 @@ router.post("/routes", async (req, res) => {
     if (!source || !destination)
       return res.status(400).json({ error: "Failed to geocode addresses" });
 
-    let rawRoutes = await getRoutesFromOSRM(source, destination);
-    if (rawRoutes.length === 0)
+    // Fetch routes from both TomTom (for scoring) and OSRM (for geometry)
+    const [tomtomRoutes, osrmRoutes] = await Promise.all([
+      getRoutesFromTomTom(source, destination),
+      getRoutesFromOSRM(source, destination)
+    ]);
+
+    if (osrmRoutes.length === 0)
       return res.status(500).json({ error: "No routes found" });
 
-    // Score each route
-    for (let r of rawRoutes) {
-      const scoreData = await scoreWithGemini(r);
+    // Merge OSRM geometry with TomTom routes
+    const mergedRoutes = tomtomRoutes.map((tomtomRoute, i) => {
+      const osrmRoute = osrmRoutes[i] || osrmRoutes[0];
+      return {
+        ...tomtomRoute,
+        geometry: osrmRoute.geometry,
+        distance_km: osrmRoute.distance_km || tomtomRoute.distance_km,
+        duration_min: osrmRoute.duration_min || tomtomRoute.duration_min
+      };
+    });
+
+    // Calculate bounding box for incidents and POIs
+    const allCoordinates = [];
+    mergedRoutes.forEach(route => {
+      if (route.points && route.points.length > 0) {
+        route.points.forEach(p => {
+          const lat = p.latitude || p.lat;
+          const lon = p.longitude || p.lon;
+          if (lat && lon) allCoordinates.push([lon, lat]);
+        });
+      }
+    });
+    
+    if (allCoordinates.length === 0) {
+      // Fallback: use source and destination
+      allCoordinates.push([source[1], source[0]], [destination[1], destination[0]]);
+    }
+
+    const bbox = calculateBoundingBox(allCoordinates);
+    
+    // Fetch incidents and POIs
+    const [incidents, pois] = await Promise.all([
+      fetchIncidents(bbox.minLon, bbox.minLat, bbox.maxLon, bbox.maxLat),
+      fetchPOIs((bbox.minLat + bbox.maxLat) / 2, (bbox.minLon + bbox.maxLon) / 2, 5000)
+    ]);
+
+    console.log(`Found ${incidents.length} incidents and ${pois.length} POIs`);
+
+    // Create flow data cache
+    const flowDataCache = new Map();
+
+    // Score each route using TomTom comprehensive scoring
+    for (let r of mergedRoutes) {
+      const scoreData = await calculateTomTomSafetyScore(r, incidents, pois, flowDataCache);
       r.aiScore = scoreData.score;
       r.reason = scoreData.reason;
       r.scoringType = scoreData.type;
+      r.riskScore = scoreData.riskScore;
     }
 
-    // Remove duplicate OSRM routes → only unique distance+duration+geometry
+    // Remove duplicate routes
     const uniqueRoutes = [];
     const seen = new Set();
 
-    for (const r of rawRoutes) {
+    for (const r of mergedRoutes) {
       const key = `${r.distance_km}-${r.duration_min}-${r.geometry}`;
       if (!seen.has(key)) {
         seen.add(key);
@@ -242,7 +401,7 @@ router.post("/routes", async (req, res) => {
       }
     }
 
-    // Sort safest → dangerous (descending order)
+    // Sort safest → dangerous (descending order by aiScore)
     uniqueRoutes.sort((a, b) => b.aiScore - a.aiScore);
 
     // Label routes: Safest (Recommended), Moderate, Unsafe
@@ -269,7 +428,7 @@ router.post("/routes", async (req, res) => {
 
   } catch (err) {
     console.error("Server error:", err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Server error", message: err.message });
   }
 });
 

@@ -4,6 +4,7 @@ import RouteInfoCard from "../components/RouteInfoCard";
 import MapView from "../components/MapView";
 import LiveLocationShare from "../components/LiveLocationShare";
 import Login from "../components/Login";
+import NavigationView from "../components/NavigationView";
 import { API_ENDPOINTS } from "../config/api";
 
 export default function Home() {
@@ -15,6 +16,7 @@ export default function Home() {
   const [coords, setCoords] = useState(null);
   const [loading, setLoading] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState(null);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   // Check if user is logged in on mount
   useEffect(() => {
@@ -122,105 +124,323 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-[#f4f0ff] to-[#ffffff]">
-      {/* Header with Logout */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-purple-800">🛡️ SafeJourney</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-gray-700">Welcome, {user.name}!</span>
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100vh',
+      fontFamily: 'Arial, sans-serif',
+      backgroundColor: '#ffffff'
+    }}>
+      {/* Header with Logout - Preserved from main branch */}
+      <header style={{
+        backgroundColor: '#1a1a1a',
+        color: 'white',
+        padding: '20px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <h1 style={{ margin: 0, fontSize: '24px' }}>🛡️ SafeJourney</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span style={{ fontSize: '14px' }}>Welcome, {user.name}!</span>
           <button
             onClick={handleLogout}
-            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#dc3545',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = '#c82333'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = '#dc3545'}
           >
             Logout
           </button>
         </div>
-      </div>
+      </header>
 
-      {/* Source and Destination Input - TOP */}
-      <div className="max-w-3xl mx-auto bg-white p-4 rounded-2xl shadow mb-6">
-        <h2 className="text-xl font-semibold text-purple-800 mb-4">📍 Find Safe Routes</h2>
-        <input
-          value={srcAddr}
-          onChange={(e) => setSrcAddr(e.target.value)}
-          placeholder="Source address (e.g., Miyapur, Hyderabad)"
-          className="w-full p-3 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-        />
-        <input
-          value={dstAddr}
-          onChange={(e) => setDstAddr(e.target.value)}
-          placeholder="Destination address (e.g., LB Nagar, Hyderabad)"
-          className="w-full p-3 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-        />
-        <button
-          onClick={fetchRoutes}
-          className="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-          disabled={loading}
-        >
-          {loading ? "Finding routes..." : "Find Routes"}
-        </button>
-      </div>
-
-      {/* Route Cards - Below Input with Color Highlighting */}
-      {routes.length > 0 && (
-        <div className="max-w-6xl mx-auto mb-6">
-          <h2 className="text-2xl font-bold text-center text-purple-800 mb-4">
-            Available Routes ({routes.length})
-          </h2>
-          
-          {/* Route Selection Message */}
-          {selectedRoute && (
-            <div className={`p-4 rounded-lg border-2 mb-4 ${
-              selectedRoute.label === "Safest (Recommended)" 
-                ? "bg-green-50 border-green-300 text-green-800"
-                : selectedRoute.label === "Moderate"
-                ? "bg-yellow-50 border-yellow-300 text-yellow-800"
-                : "bg-red-50 border-red-300 text-red-800"
-            }`}>
-              <p className="font-semibold text-lg">
-                {selectedRoute.label === "Safest (Recommended)" 
-                  ? "✓ Safest route selected (Default)"
-                  : `✓ ${selectedRoute.label} route selected`}
-              </p>
-              <p className="text-sm mt-1 opacity-90">
-                {selectedRoute.label === "Safest (Recommended)" 
-                  ? "The safest route has been automatically selected for you. You can select a different route below."
-                  : "You have selected this route. Click on another route card to change selection."}
-              </p>
+      {/* Source and Destination Input - Matching tomtom branch UI */}
+      <div style={{
+        padding: '20px',
+        backgroundColor: '#f5f5f5',
+        borderBottom: '1px solid #ddd',
+        marginBottom: '20px'
+      }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '20px',
+          maxWidth: '1200px',
+          margin: '0 auto'
+        }}>
+          {/* Origin */}
+          <div style={{ position: 'relative' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '14px' }}>
+              Origin Location
+            </label>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input
+                type="text"
+                value={srcAddr}
+                onChange={(e) => setSrcAddr(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && fetchRoutes()}
+                placeholder="e.g., Hyderabad, Telangana"
+                style={{
+                  flex: 1,
+                  padding: '8px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  boxSizing: 'border-box'
+                }}
+              />
+              <button
+                onClick={fetchRoutes}
+                disabled={loading || !srcAddr.trim() || !dstAddr.trim()}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: (loading || !srcAddr.trim() || !dstAddr.trim()) ? '#ccc' : '#28a745',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: (loading || !srcAddr.trim() || !dstAddr.trim()) ? 'not-allowed' : 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                {loading ? '...' : 'Search'}
+              </button>
             </div>
-          )}
+          </div>
 
-          {/* Route Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {routes.map((route, idx) => (
-              <RouteInfoCard 
-                key={idx} 
-                route={route} 
-                index={idx}
-                isSelected={selectedRoute && (
+          {/* Destination */}
+          <div style={{ position: 'relative' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '14px' }}>
+              Destination Location
+            </label>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input
+                type="text"
+                value={dstAddr}
+                onChange={(e) => setDstAddr(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && fetchRoutes()}
+                placeholder="e.g., Narayanaguda, Hyderabad"
+                style={{
+                  flex: 1,
+                  padding: '8px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  boxSizing: 'border-box'
+                }}
+              />
+              <button
+                onClick={fetchRoutes}
+                disabled={loading || !srcAddr.trim() || !dstAddr.trim()}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: (loading || !srcAddr.trim() || !dstAddr.trim()) ? '#ccc' : '#28a745',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: (loading || !srcAddr.trim() || !dstAddr.trim()) ? 'not-allowed' : 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                {loading ? '...' : 'Search'}
+              </button>
+            </div>
+          </div>
+        </div>
+        <div style={{ marginTop: '15px', textAlign: 'center' }}>
+          <button
+            onClick={fetchRoutes}
+            disabled={loading || !srcAddr.trim() || !dstAddr.trim()}
+            style={{
+              padding: '12px 30px',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              backgroundColor: (loading || !srcAddr.trim() || !dstAddr.trim()) ? '#ccc' : '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: (loading || !srcAddr.trim() || !dstAddr.trim()) ? 'not-allowed' : 'pointer',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+            }}
+          >
+            {loading ? 'Finding Routes...' : 'Find Safe Routes'}
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content Area with Map and Routes Sidebar - Matching tomtom branch layout */}
+      {routes.length > 0 && (
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden', height: 'calc(100vh - 300px)', minHeight: '600px', marginBottom: '20px' }}>
+          {/* Map Section */}
+          <div style={{ flex: 1, position: 'relative', height: '100%' }}>
+            <div style={{ width: '100%', height: '100%' }}>
+              <MapView 
+                routes={routes} 
+                coords={coords}
+                selectedRouteIndex={routes.findIndex(r => 
+                  selectedRoute && 
+                  r.distance_km === selectedRoute.distance_km && 
+                  r.duration_min === selectedRoute.duration_min &&
+                  r.label === selectedRoute.label
+                )}
+                onRouteSelect={(index) => {
+                  if (routes[index]) {
+                    setSelectedRoute(routes[index]);
+                    window.currentRouteUsed = routes[index];
+                  }
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Routes Sidebar - Matching tomtom branch UI exactly */}
+          {routes && routes.length > 0 && (
+            <div style={{
+              width: '350px',
+              backgroundColor: 'white',
+              borderLeft: '1px solid #ddd',
+              overflowY: 'auto',
+              padding: '20px'
+            }}>
+              <h2 style={{ marginTop: 0, fontSize: '20px', marginBottom: '15px' }}>
+                Routes (Sorted by Safety)
+              </h2>
+              {routes.map((route, index) => {
+                const isSafest = index === 0; // First route is safest after sorting
+                const isSelected = selectedRoute && (
                   selectedRoute.distance_km === route.distance_km && 
                   selectedRoute.duration_min === route.duration_min &&
                   selectedRoute.label === route.label
-                )}
-                onSelect={(route) => {
-                  setSelectedRoute(route);
-                  window.currentRouteUsed = route;
-                }}
-              />
-            ))}
-          </div>
+                );
+                const riskPercent = route.riskScore !== undefined 
+                  ? (route.riskScore * 100).toFixed(1) 
+                  : route.aiScore !== undefined 
+                    ? ((5 - route.aiScore) / 5 * 100).toFixed(1) 
+                    : 'N/A';
+
+                return (
+                  <div
+                    key={route.id || index}
+                    onClick={() => {
+                      setSelectedRoute(route);
+                      window.currentRouteUsed = route;
+                    }}
+                    style={{
+                      padding: '15px',
+                      marginBottom: '15px',
+                      border: isSelected ? '3px solid #007bff' : (isSafest ? '2px solid #28a745' : '1px solid #ddd'),
+                      borderRadius: '6px',
+                      backgroundColor: isSelected ? '#e7f3ff' : (isSafest ? '#f0fff4' : 'white'),
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                      <h3 style={{ margin: 0, fontSize: '16px' }}>
+                        Route {index + 1}
+                        {isSafest && (
+                          <span style={{
+                            marginLeft: '8px',
+                            padding: '2px 8px',
+                            backgroundColor: '#28a745',
+                            color: 'white',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            fontWeight: 'normal'
+                          }}>
+                            SAFEST
+                          </span>
+                        )}
+                        {isSelected && (
+                          <span style={{
+                            marginLeft: '8px',
+                            padding: '2px 8px',
+                            backgroundColor: '#007bff',
+                            color: 'white',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            fontWeight: 'normal'
+                          }}>
+                            SELECTED
+                          </span>
+                        )}
+                      </h3>
+                    </div>
+                    <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
+                      Risk Score: <strong>{riskPercent}%</strong>
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#888' }}>
+                      <div>Distance: {route.distance_km} km</div>
+                      <div>Time: {Math.round(parseFloat(route.duration_min))} min</div>
+                    </div>
+                    {route.segments && (
+                      <div style={{ fontSize: '12px', color: '#888', marginTop: '8px' }}>
+                        Segments: {route.segments.length || 0}
+                      </div>
+                    )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedRoute(route);
+                        window.currentRouteUsed = route;
+                        setIsNavigating(true);
+                      }}
+                      style={{
+                        width: '100%',
+                        marginTop: '12px',
+                        padding: '10px',
+                        backgroundColor: '#007bff',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        transition: 'background-color 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = '#0056b3'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = '#007bff'}
+                    >
+                      🧭 Start Navigation
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
-      {/* Map */}
-      {routes.length > 0 && coords && (
-        <div className="max-w-6xl mx-auto rounded-3xl overflow-hidden shadow mb-6" style={{ height: "520px", width: "100%" }}>
-          <MapView routes={routes} coords={coords} />
-        </div>
+      {/* Navigation View - Full Screen Overlay */}
+      {isNavigating && selectedRoute && coords && (
+        <NavigationView
+          route={selectedRoute}
+          origin={coords.source ? [coords.source.lon, coords.source.lat] : null}
+          destination={coords.destination ? [coords.destination.lon, coords.destination.lat] : null}
+          onExit={() => setIsNavigating(false)}
+          onReroute={(newRoute) => {
+            setSelectedRoute(newRoute);
+            window.currentRouteUsed = newRoute;
+          }}
+        />
       )}
 
-      {/* Live Location Sharing Feature - Below Map */}
-      <div className="max-w-6xl mx-auto mb-6">
+
+      {/* Live Location Sharing Feature - Below Map (Preserved from main branch - functionality unchanged) */}
+      <div style={{ 
+        maxWidth: '1200px', 
+        margin: '0 auto', 
+        padding: '20px',
+        marginBottom: '20px'
+      }}>
         <LiveLocationShare userId={user.id} />
       </div>
     </div>

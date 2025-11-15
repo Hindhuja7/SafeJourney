@@ -301,4 +301,3 @@ export function calculateRouteRisk(segments) {
 
   return totalWeightedRisk / totalLength;
 }
-

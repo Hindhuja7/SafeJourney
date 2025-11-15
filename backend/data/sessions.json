@@ -4,5 +4,11 @@
     "userId": 3,
     "createdAt": "2025-11-15T18:29:06.135Z",
     "expiresAt": "2025-11-22T20:26:32.035Z"
+  },
+  {
+    "token": "f54c404b987331452cad89d0cef7b1ab8e31af31030fdc82bcfae284f5714c3b",
+    "userId": 2,
+    "createdAt": "2025-11-15T22:07:35.199Z",
+    "expiresAt": "2025-11-22T22:07:35.200Z"
   }
 ]

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import Head from "next/head";
+import Script from "next/script";
 import "../styles/globals.css";
 import "leaflet/dist/leaflet.css";
 
@@ -22,7 +23,17 @@ export default function MyApp({ Component, pageProps }) {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        {/* TomTom Maps SDK */}
+        <link rel='stylesheet' type='text/css' href='https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.25.0/maps/maps.css'/>
       </Head>
+      {/* Load TomTom Maps SDK */}
+      <Script
+        src='https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.25.0/maps/maps-web.min.js'
+        strategy="beforeInteractive"
+        onLoad={() => {
+          console.log('TomTom Maps SDK loaded');
+        }}
+      />
       <Component {...pageProps} />
     </>
   );

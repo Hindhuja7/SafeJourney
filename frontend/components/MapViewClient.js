@@ -99,12 +99,26 @@ L.Icon.Default.mergeOptions({
 export default function MapViewClient({ routes, coords }) {
   const mapRef = useRef();
 
+  // Debug logging
+  useEffect(() => {
+    console.log("MapViewClient - Routes:", routes?.length, "Coords:", coords);
+    if (routes && routes.length > 0) {
+      console.log("First route:", routes[0]);
+      console.log("First route geometry:", routes[0]?.geometry);
+    }
+  }, [routes, coords]);
+
   const decode = (geom) => {
-    if (!geom) return [];
+    if (!geom) {
+      console.warn("MapViewClient: No geometry provided");
+      return [];
+    }
     try {
-      return polyline.decode(geom).map(([lat, lng]) => [lat, lng]);
+      const decoded = polyline.decode(geom);
+      console.log(`MapViewClient: Decoded ${decoded.length} points from polyline`);
+      return decoded.map(([lat, lng]) => [lat, lng]);
     } catch (e) {
-      console.error("Polyline decode error:", e);
+      console.error("Polyline decode error:", e, "Geometry:", geom?.substring(0, 50));
       return [];
     }
   };

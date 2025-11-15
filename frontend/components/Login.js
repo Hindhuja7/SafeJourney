@@ -41,7 +41,20 @@ export default function Login({ onLogin }) {
         onLogin(res.data.user, res.data.token);
       }
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to authenticate");
+      console.error("Authentication error:", err);
+      
+      // More detailed error handling
+      if (err.response) {
+        // Backend responded with error
+        const errorMsg = err.response.data?.error || err.response.statusText || "Authentication failed";
+        setError(errorMsg);
+      } else if (err.request) {
+        // Request was made but no response received
+        setError("Cannot connect to server. Please make sure the backend is running on http://localhost:5000");
+      } else {
+        // Something else happened
+        setError(err.message || "Failed to authenticate. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
