@@ -84,11 +84,10 @@
 
 import { useState } from "react";
 import axios from "axios";
-import dynamic from "next/dynamic";
 import RouteInfoCard from "../components/RouteInfoCard";
-
-// Dynamic wrapper for client-only Leaflet component
-const MapView = dynamic(() => import("../components/MapView"), { ssr: false });
+import MapView from "../components/MapView";
+import LiveLocationShare from "../components/LiveLocationShare";
+import { API_ENDPOINTS } from "../config/api";
 
 export default function Home() {
   const [srcAddr, setSrcAddr] = useState("");
@@ -96,6 +95,7 @@ export default function Home() {
   const [routes, setRoutes] = useState([]);
   const [coords, setCoords] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [userId] = useState(1); // In a real app, this would come from auth context
 
   const fetchRoutes = async () => {
     if (!srcAddr.trim() || !dstAddr.trim()) {
@@ -107,7 +107,7 @@ export default function Home() {
     setCoords(null);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/routes", {
+      const res = await axios.post(API_ENDPOINTS.routes, {
         sourceAddress: srcAddr.trim(),
         destinationAddress: dstAddr.trim()
       });
@@ -115,8 +115,15 @@ export default function Home() {
       setCoords(res.data.coords || null);
       setRoutes(res.data.routes || []);
     } catch (err) {
-      console.error("Fetch error:", err?.response?.data || err.message);
-      alert("Failed to fetch routes. Check backend logs.");
+      console.error("Fetch error:", err);
+      const errorMessage = err?.response?.data?.error || err?.message || "Unknown error";
+      console.error("Error details:", {
+        message: errorMessage,
+        status: err?.response?.status,
+        url: err?.config?.url,
+        backendRunning: `Check ${API_ENDPOINTS.health}`
+      });
+      alert(`Failed to fetch routes: ${errorMessage}\n\nMake sure backend is running`);
     } finally {
       setLoading(false);
     }
@@ -126,43 +133,49 @@ export default function Home() {
     <div className="min-h-screen p-6 bg-gradient-to-br from-[#f4f0ff] to-[#ffffff]">
       <h1 className="text-3xl font-bold text-center text-purple-800 mb-6">SafeJourney</h1>
 
+      {/* Source and Destination Address Input - FIRST */}
       <div className="max-w-3xl mx-auto bg-white p-4 rounded-2xl shadow mb-6">
+        <h2 className="text-xl font-semibold text-purple-800 mb-4">📍 Find Safe Routes</h2>
         <input
           value={srcAddr}
           onChange={(e) => setSrcAddr(e.target.value)}
           placeholder="Source address (e.g., Miyapur, Hyderabad)"
-          className="w-full p-3 mb-3 border rounded"
+          className="w-full p-3 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
         <input
           value={dstAddr}
           onChange={(e) => setDstAddr(e.target.value)}
           placeholder="Destination address (e.g., LB Nagar, Hyderabad)"
-          className="w-full p-3 mb-3 border rounded"
+          className="w-full p-3 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
         <button
           onClick={fetchRoutes}
-          className="w-full bg-purple-600 text-white p-3 rounded-lg"
+          className="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
           disabled={loading}
         >
           {loading ? "Finding routes..." : "Find Routes"}
         </button>
       </div>
 
+      {/* Live Location Sharing Feature - SECOND */}
+      <div className="max-w-6xl mx-auto mb-6">
+        <LiveLocationShare userId={userId} />
+      </div>
+
       {/* Map */}
       {routes.length > 0 && coords && (
-        <div className="max-w-6xl mx-auto rounded-3xl overflow-hidden shadow mb-6">
+        <div className="max-w-6xl mx-auto rounded-3xl overflow-hidden shadow mb-6" style={{ height: "520px", width: "100%" }}>
           <MapView routes={routes} coords={coords} />
         </div>
       )}
 
-      {/* Route cards (shows distance/duration/score/reason/method) */}
+      {/* Route info cards */}
       {routes.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-6xl mx-auto">
-  {routes.map((route, idx) => (
-    <RouteInfoCard key={idx} route={route} index={idx} />
-  ))}
-</div>
-
+          {routes.map((route, idx) => (
+            <RouteInfoCard key={idx} route={route} index={idx} />
+          ))}
+        </div>
       )}
     </div>
   );

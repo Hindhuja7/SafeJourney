@@ -1,0 +1,37 @@
+{
+  "appId": "com.safejourney.app",
+  "appName": "SafeJourney",
+  "webDir": ".next",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "https",
+    "hostname": "safejourney.app",
+    "cleartext": true
+  },
+  "plugins": {
+    "Geolocation": {
+      "presentationStyle": "fullscreen"
+    },
+    "App": {
+      "launchUrl": "safejourney://app"
+    },
+    "StatusBar": {
+      "style": "dark",
+      "backgroundColor": "#7c3aed"
+    }
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true,
+    "minVersion": 22,
+    "targetVersion": 33
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "scrollEnabled": true,
+    "minVersion": "13.0"
+  }
+}
+

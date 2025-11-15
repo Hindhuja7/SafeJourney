@@ -1,0 +1,40 @@
+{
+  "name": "SafeJourney - Route Safety & Live Location",
+  "short_name": "SafeJourney",
+  "description": "Find safe routes and share live location with trusted contacts",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f0ff",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["navigation", "safety", "travel"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Find Routes",
+      "short_name": "Routes",
+      "description": "Find safe routes between locations",
+      "url": "/",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "permissions": [
+    "geolocation",
+    "notifications"
+  ]
+}
+

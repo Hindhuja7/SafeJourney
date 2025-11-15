@@ -100,51 +100,86 @@ export default function MapViewClient({ routes, coords }) {
   const mapRef = useRef();
 
   const decode = (geom) => {
+    if (!geom) return [];
     try {
       return polyline.decode(geom).map(([lat, lng]) => [lat, lng]);
     } catch (e) {
+      console.error("Polyline decode error:", e);
       return [];
     }
   };
 
+  // Fit map to all route points
   useEffect(() => {
     if (!mapRef.current || !routes || routes.length === 0) return;
-    // collect all points to fit bounds
-    const all = [];
+
+    const allPoints = [];
     routes.forEach((r) => {
-      const pts = decode(r.geometry);
-      pts.forEach((p) => all.push(p));
+      if (r.geometry) {
+        const pts = decode(r.geometry);
+        pts.forEach((p) => allPoints.push(p));
+      }
     });
-    if (all.length) {
-      const bounds = L.latLngBounds(all);
+
+    // Add source and destination to bounds
+    if (coords?.source) allPoints.push(coords.source);
+    if (coords?.destination) allPoints.push(coords.destination);
+
+    if (allPoints.length > 0) {
+      const bounds = L.latLngBounds(allPoints);
       mapRef.current.fitBounds(bounds, { padding: [40, 40] });
     }
-  }, [routes]);
+  }, [routes, coords]);
 
-  const center = coords && coords.source ? coords.source : [17.385, 78.4867];
-  const colors = ["#2563EB", "#16A34A", "#EF4444"];
+  if (!coords || !routes || routes.length === 0) {
+    return <div className="w-full h-full flex items-center justify-center">Loading map...</div>;
+  }
+
+  const center = coords?.source || [17.385, 78.4867]; // default Hyderabad
 
   return (
-    <MapContainer whenCreated={(m) => (mapRef.current = m)} center={center} zoom={13} style={{ height: "520px", width: "100%" }}>
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+    <MapContainer
+      whenCreated={(m) => (mapRef.current = m)}
+      center={center}
+      zoom={13}
+      style={{ height: "100%", width: "100%" }}
+      className="z-0"
+    >
+      <TileLayer 
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" 
+      />
 
-      {/* markers */}
+      {/* Source Marker */}
       {coords?.source && (
         <Marker position={coords.source}>
           <Popup>Source</Popup>
         </Marker>
       )}
+
+      {/* Destination Marker */}
       {coords?.destination && (
         <Marker position={coords.destination}>
           <Popup>Destination</Popup>
         </Marker>
       )}
 
+      {/* Draw all route polylines */}
       {routes.map((r, i) => {
+        if (!r.geometry) return null;
         const pts = decode(r.geometry);
-        const color = colors[i % colors.length];
-        return <Polyline key={i} positions={pts} pathOptions={{ color, weight: 6, opacity: 0.9 }} />;
+        if (pts.length === 0) return null;
+        const isSafest = i === 0; // first route is safest after sorting
+        const color = isSafest ? "#2563EB" : i === 1 ? "#16A34A" : "#EF4444";
+        return (
+          <Polyline 
+            key={r.id || i} 
+            positions={pts} 
+            pathOptions={{ color, weight: 6, opacity: 0.9 }} 
+          />
+        );
       })}
+
     </MapContainer>
   );
 }

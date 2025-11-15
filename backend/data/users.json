@@ -8,6 +8,11 @@
       { "name": "Rohit", "phone": "+91XXXXXXX2" },
       { "name": "Sravya", "phone": "+91XXXXXXX3" }
     ],
+    "defaultContacts": [
+      { "name": "Devika", "phone": "+91XXXXXXX1" },
+      { "name": "Rohit", "phone": "+91XXXXXXX2" },
+      { "name": "Sravya", "phone": "+91XXXXXXX3" }
+    ],
     "preferences": {
       "autoSelectSafest": true,
       "batteryMode": "medium"

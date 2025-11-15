@@ -123,14 +123,13 @@ const router = express.Router();
 let aiClient = null;
 try {
   if (process.env.GEMINI_API_KEY) {
-    // Initialize Gemini SDK if installed
     // aiClient = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   }
 } catch (e) {
   console.warn("Gemini not initialized:", e.message);
 }
 
-// Helper: fallback scoring
+// Fallback scoring
 function fallbackScoreFromFeatures(route) {
   let score = 5;
   const reasons = [];
@@ -148,7 +147,7 @@ function fallbackScoreFromFeatures(route) {
     reasons.push("Heavy traffic");
   }
 
-  score = Math.max(Math.round(score * 10) / 10, 0); // round to 0.1
+  score = Math.max(Math.round(score * 10) / 10, 0);
   return { score, reason: reasons.join(", ") || "No major issues", type: "Fallback" };
 }
 
@@ -159,6 +158,7 @@ async function geocodeAddress(address) {
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`,
       { headers: { "User-Agent": "SafeJourneyApp" } }
     );
+
     if (res.data.length > 0) {
       return [parseFloat(res.data[0].lat), parseFloat(res.data[0].lon)];
     }
@@ -174,6 +174,7 @@ async function getRoutesFromOSRM(source, destination) {
   try {
     const url = `http://router.project-osrm.org/route/v1/driving/${source[1]},${source[0]};${destination[1]},${destination[0]}?overview=full&geometries=polyline&alternatives=true`;
     const res = await axios.get(url);
+
     if (!res.data || !res.data.routes) return [];
 
     return res.data.routes.map((r, i) => ({
@@ -181,7 +182,7 @@ async function getRoutesFromOSRM(source, destination) {
       distance_km: (r.distance / 1000).toFixed(2),
       duration_min: (r.duration / 60).toFixed(2),
       geometry: r.geometry,
-      crime: Math.floor(Math.random() * 3),     // mock features
+      crime: Math.floor(Math.random() * 3),
       darkAreas: Math.floor(Math.random() * 2),
       traffic: Math.floor(Math.random() * 3),
     }));
@@ -191,59 +192,68 @@ async function getRoutesFromOSRM(source, destination) {
   }
 }
 
-// Score route with Gemini or fallback
+// Gemini or fallback scoring
 async function scoreWithGemini(route) {
   try {
     if (aiClient) {
-      // Call Gemini API here if configured
-      // return { score, reason, type: "Gemini" };
-      throw new Error("Gemini API not used in this demo");
+      throw new Error("Gemini not enabled in this demo");
     }
-    throw new Error("Fallback");
+    throw new Error("Use fallback");
   } catch {
     return fallbackScoreFromFeatures(route);
   }
 }
 
 // POST /api/routes
-// Accepts { sourceAddress, destinationAddress }
 router.post("/routes", async (req, res) => {
   try {
     let { sourceAddress, destinationAddress } = req.body;
+
     if (!sourceAddress || !destinationAddress)
       return res.status(400).json({ error: "sourceAddress and destinationAddress required" });
 
     const source = await geocodeAddress(sourceAddress);
     const destination = await geocodeAddress(destinationAddress);
+
     if (!source || !destination)
       return res.status(400).json({ error: "Failed to geocode addresses" });
 
-    let osrmData = await getRoutesFromOSRM(source, destination);
-    if (osrmData.length === 0) return res.status(500).json({ error: "No routes found" });
+    let rawRoutes = await getRoutesFromOSRM(source, destination);
+    if (rawRoutes.length === 0)
+      return res.status(500).json({ error: "No routes found" });
 
     // Score each route
-    for (let r of osrmData) {
+    for (let r of rawRoutes) {
       const scoreData = await scoreWithGemini(r);
       r.aiScore = scoreData.score;
       r.reason = scoreData.reason;
       r.scoringType = scoreData.type;
     }
 
-    // Remove duplicate OSRM routes (same distance & duration)
+    // Remove duplicate OSRM routes → only unique distance+duration+geometry
     const uniqueRoutes = [];
-    for (const r of osrmData) {
-      const exists = uniqueRoutes.find(
-        u => u.distance_km === r.distance_km && u.duration_min === r.duration_min && u.aiScore === r.aiScore
-      );
-      if (!exists) uniqueRoutes.push(r);
+    const seen = new Set();
+
+    for (const r of rawRoutes) {
+      const key = `${r.distance_km}-${r.duration_min}-${r.geometry}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueRoutes.push(r);
+      }
     }
 
-    // Sort descending by AI score (safest first)
+    // Sort safest → dangerous
     uniqueRoutes.sort((a, b) => b.aiScore - a.aiScore);
 
-    const safestRoute = uniqueRoutes.length > 0 ? uniqueRoutes[0] : null;
+    const safestRoute = uniqueRoutes[0] || null;
 
-    res.json({ safestRoute, routes: uniqueRoutes });
+    // IMPORTANT FIX: RETURN coords for frontend map
+    res.json({
+      coords: { source, destination },
+      routes: uniqueRoutes,
+      safestRoute,
+    });
+
   } catch (err) {
     console.error("Server error:", err);
     res.status(500).json({ error: "Server error" });

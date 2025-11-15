@@ -1,0 +1,2537 @@
+[
+  {
+    "sessionId": "session_1763193445604_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T07:57:25.604Z",
+    "lastUpdated": "2025-11-15T07:57:32.852Z",
+    "locations": [
+      {
+        "latitude": 17.396899,
+        "longitude": 78.490451,
+        "timestamp": "2025-11-15T07:57:32.852Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T07:57:38.979Z"
+  },
+  {
+    "sessionId": "session_1763198124509_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T09:15:24.509Z",
+    "lastUpdated": "2025-11-15T09:16:16.227Z",
+    "locations": [
+      {
+        "latitude": 17.3971,
+        "longitude": 78.48999,
+        "timestamp": "2025-11-15T09:15:31.698Z"
+      },
+      {
+        "latitude": 17.3971,
+        "longitude": 78.48999,
+        "timestamp": "2025-11-15T09:15:49.894Z"
+      },
+      {
+        "latitude": 17.397154,
+        "longitude": 78.49001299999999,
+        "timestamp": "2025-11-15T09:16:16.227Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T09:17:28.592Z"
+  },
+  {
+    "sessionId": "session_1763198332598_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      }
+    ],
+    "updateIntervalMinutes": 30,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T09:18:52.598Z",
+    "lastUpdated": "2025-11-15T09:18:52.598Z",
+    "locations": [],
+    "stoppedAt": "2025-11-15T09:19:02.105Z"
+  },
+  {
+    "sessionId": "session_1763198344913_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      }
+    ],
+    "updateIntervalMinutes": 30,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T09:19:04.913Z",
+    "lastUpdated": "2025-11-15T09:19:04.913Z",
+    "locations": [],
+    "stoppedAt": "2025-11-15T09:19:07.190Z"
+  },
+  {
+    "sessionId": "session_1763198371600_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      }
+    ],
+    "updateIntervalMinutes": 30,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T09:19:31.600Z",
+    "lastUpdated": "2025-11-15T09:19:31.600Z",
+    "locations": [],
+    "stoppedAt": "2025-11-15T09:19:36.535Z"
+  },
+  {
+    "sessionId": "session_1763198379152_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T09:19:39.152Z",
+    "lastUpdated": "2025-11-15T09:20:49.079Z",
+    "locations": [
+      {
+        "latitude": 17.397154,
+        "longitude": 78.49001299999999,
+        "timestamp": "2025-11-15T09:20:47.148Z"
+      },
+      {
+        "latitude": 17.397154,
+        "longitude": 78.49001299999999,
+        "timestamp": "2025-11-15T09:20:48.161Z"
+      },
+      {
+        "latitude": 17.397154,
+        "longitude": 78.49001299999999,
+        "timestamp": "2025-11-15T09:20:49.079Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T09:22:06.065Z"
+  },
+  {
+    "sessionId": "session_1763198790588_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T09:26:30.588Z",
+    "lastUpdated": "2025-11-15T09:26:30.588Z",
+    "locations": [],
+    "stoppedAt": "2025-11-15T09:26:42.797Z"
+  },
+  {
+    "sessionId": "session_1763198860382_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      },
+      {
+        "name": "bhavya",
+        "phone": "9392903079"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T09:27:40.382Z",
+    "lastUpdated": "2025-11-15T09:30:13.382Z",
+    "locations": [
+      {
+        "latitude": 17.396942,
+        "longitude": 78.49045,
+        "timestamp": "2025-11-15T09:29:56.892Z"
+      },
+      {
+        "latitude": 17.396942,
+        "longitude": 78.49045,
+        "timestamp": "2025-11-15T09:30:00.659Z"
+      },
+      {
+        "latitude": 17.397154,
+        "longitude": 78.49001299999999,
+        "timestamp": "2025-11-15T09:30:12.394Z"
+      },
+      {
+        "latitude": 17.397154,
+        "longitude": 78.49001299999999,
+        "timestamp": "2025-11-15T09:30:13.382Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T09:30:14.095Z"
+  },
+  {
+    "sessionId": "session_1763199053571_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      },
+      {
+        "name": "bhavya",
+        "phone": "9392903079"
+      },
+      {
+        "name": "bhavya",
+        "phone": "93929 03079"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T09:30:53.571Z",
+    "lastUpdated": "2025-11-15T09:30:53.571Z",
+    "locations": [],
+    "stoppedAt": "2025-11-15T09:31:45.880Z"
+  },
+  {
+    "sessionId": "session_1763199114432_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      },
+      {
+        "name": "bhavya",
+        "phone": "9392903079"
+      },
+      {
+        "name": "bhavya",
+        "phone": "93929 03079"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T09:31:54.432Z",
+    "lastUpdated": "2025-11-15T09:49:08.382Z",
+    "locations": [
+      {
+        "latitude": 17.397797,
+        "longitude": 78.490811,
+        "timestamp": "2025-11-15T09:37:01.196Z"
+      },
+      {
+        "latitude": 17.397797,
+        "longitude": 78.490811,
+        "timestamp": "2025-11-15T09:37:02.223Z"
+      },
+      {
+        "latitude": 17.397797,
+        "longitude": 78.490811,
+        "timestamp": "2025-11-15T09:37:03.255Z"
+      },
+      {
+        "latitude": 17.397154,
+        "longitude": 78.49001299999999,
+        "timestamp": "2025-11-15T09:37:13.373Z"
+      },
+      {
+        "latitude": 17.397154,
+        "longitude": 78.49001299999999,
+        "timestamp": "2025-11-15T09:37:14.391Z"
+      },
+      {
+        "latitude": 17.397154,
+        "longitude": 78.49001299999999,
+        "timestamp": "2025-11-15T09:49:07.642Z"
+      },
+      {
+        "latitude": 17.397154,
+        "longitude": 78.49001299999999,
+        "timestamp": "2025-11-15T09:49:08.382Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T09:49:26.292Z"
+  },
+  {
+    "sessionId": "session_1763200217742_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      },
+      {
+        "name": "bhavya",
+        "phone": "9392903079"
+      },
+      {
+        "name": "bhavya",
+        "phone": "93929 03079"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T09:50:17.742Z",
+    "lastUpdated": "2025-11-15T09:50:17.742Z",
+    "locations": [],
+    "stoppedAt": "2025-11-15T09:51:27.945Z"
+  },
+  {
+    "sessionId": "session_1763200298990_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      },
+      {
+        "name": "bhavya",
+        "phone": "9392903079"
+      },
+      {
+        "name": "bhavya",
+        "phone": "93929 03079"
+      }
+    ],
+    "updateIntervalMinutes": 2,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T09:51:38.990Z",
+    "lastUpdated": "2025-11-15T09:51:38.990Z",
+    "locations": [],
+    "stoppedAt": "2025-11-15T09:52:14.983Z"
+  },
+  {
+    "sessionId": "session_1763200389715_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T09:53:09.715Z",
+    "lastUpdated": "2025-11-15T09:53:14.158Z",
+    "locations": [
+      {
+        "latitude": 17.397154,
+        "longitude": 78.49001299999999,
+        "timestamp": "2025-11-15T09:53:14.158Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T09:53:20.119Z"
+  },
+  {
+    "sessionId": "session_1763200619359_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "bhavya",
+        "phone": "93929 03079"
+      },
+      {
+        "name": "hindhuja",
+        "phone": "9381503017"
+      },
+      {
+        "name": "guna",
+        "phone": "94927 13451"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T09:56:59.359Z",
+    "lastUpdated": "2025-11-15T10:00:47.539Z",
+    "locations": [
+      {
+        "latitude": 17.396971,
+        "longitude": 78.48999,
+        "timestamp": "2025-11-15T09:57:04.270Z"
+      },
+      {
+        "latitude": 17.397154,
+        "longitude": 78.49001299999999,
+        "timestamp": "2025-11-15T09:57:15.304Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:00:46.509Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:00:47.539Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T10:00:57.987Z"
+  },
+  {
+    "sessionId": "session_1763200892477_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "bhavya",
+        "phone": "93929 03079"
+      },
+      {
+        "name": "hindhuja",
+        "phone": "9381503017"
+      },
+      {
+        "name": "guna",
+        "phone": "94927 13451"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T10:01:32.477Z",
+    "lastUpdated": "2025-11-15T10:13:59.733Z",
+    "locations": [
+      {
+        "latitude": 17.3746,
+        "longitude": 78.5582,
+        "timestamp": "2025-11-15T10:06:37.399Z"
+      },
+      {
+        "latitude": 17.3746,
+        "longitude": 78.5582,
+        "timestamp": "2025-11-15T10:06:38.386Z"
+      },
+      {
+        "latitude": 17.3746,
+        "longitude": 78.5582,
+        "timestamp": "2025-11-15T10:06:40.481Z"
+      },
+      {
+        "latitude": 17.397154,
+        "longitude": 78.49001299999999,
+        "timestamp": "2025-11-15T10:06:44.411Z"
+      },
+      {
+        "latitude": 17.397154,
+        "longitude": 78.49001299999999,
+        "timestamp": "2025-11-15T10:06:47.468Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:07:07.111Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:07:07.876Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:11:36.276Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:11:37.301Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:11:38.396Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T10:12:03.300Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T10:12:04.236Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T10:13:58.666Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T10:13:59.733Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T10:14:09.185Z"
+  },
+  {
+    "sessionId": "session_1763201693075_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "bhavya",
+        "phone": "93929 03079"
+      },
+      {
+        "name": "hindhuja",
+        "phone": "9381503017"
+      },
+      {
+        "name": "guna",
+        "phone": "94927 13451"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T10:14:53.075Z",
+    "lastUpdated": "2025-11-15T10:18:03.047Z",
+    "locations": [
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:17:12.244Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:17:13.260Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:18:03.047Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T10:18:04.536Z"
+  },
+  {
+    "sessionId": "session_1763201910513_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "bhavya",
+        "phone": "93929 03079"
+      },
+      {
+        "name": "hindhuja",
+        "phone": "9381503017"
+      },
+      {
+        "name": "guna",
+        "phone": "94927 13451"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T10:18:30.513Z",
+    "lastUpdated": "2025-11-15T10:21:39.450Z",
+    "locations": [
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T10:18:40.109Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T10:18:40.874Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T10:19:20.554Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T10:19:21.531Z"
+      },
+      {
+        "latitude": 17.397829,
+        "longitude": 78.49086,
+        "timestamp": "2025-11-15T10:21:38.705Z"
+      },
+      {
+        "latitude": 17.397829,
+        "longitude": 78.49086,
+        "timestamp": "2025-11-15T10:21:39.450Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T10:21:49.226Z"
+  },
+  {
+    "sessionId": "session_1763202138368_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T10:22:18.368Z",
+    "lastUpdated": "2025-11-15T10:42:32.750Z",
+    "locations": [
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:22:21.622Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:24:39.248Z"
+      },
+      {
+        "latitude": 17.3746,
+        "longitude": 78.5582,
+        "timestamp": "2025-11-15T10:27:23.498Z"
+      },
+      {
+        "latitude": 17.3746,
+        "longitude": 78.5582,
+        "timestamp": "2025-11-15T10:27:24.348Z"
+      },
+      {
+        "latitude": 17.397154,
+        "longitude": 78.49001299999999,
+        "timestamp": "2025-11-15T10:27:28.485Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:27:39.268Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T10:33:03.225Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T10:33:04.177Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:35:06.542Z"
+      },
+      {
+        "latitude": 17.396952,
+        "longitude": 78.489899,
+        "timestamp": "2025-11-15T10:37:25.410Z"
+      },
+      {
+        "latitude": 17.396952,
+        "longitude": 78.489899,
+        "timestamp": "2025-11-15T10:37:26.366Z"
+      },
+      {
+        "latitude": 17.39705,
+        "longitude": 78.490565,
+        "timestamp": "2025-11-15T10:42:20.795Z"
+      },
+      {
+        "latitude": 17.39705,
+        "longitude": 78.490565,
+        "timestamp": "2025-11-15T10:42:32.750Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T10:42:33.399Z"
+  },
+  {
+    "sessionId": "session_1763203393791_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T10:43:13.791Z",
+    "lastUpdated": "2025-11-15T11:03:54.158Z",
+    "locations": [
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:48:22.716Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:48:23.662Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:48:26.683Z"
+      },
+      {
+        "latitude": 17.397829,
+        "longitude": 78.49086,
+        "timestamp": "2025-11-15T10:53:19.167Z"
+      },
+      {
+        "latitude": 17.397829,
+        "longitude": 78.49086,
+        "timestamp": "2025-11-15T10:53:20.280Z"
+      },
+      {
+        "latitude": 17.397829,
+        "longitude": 78.49086,
+        "timestamp": "2025-11-15T10:53:22.231Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:53:32.922Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:53:33.934Z"
+      },
+      {
+        "latitude": 17.397309406347365,
+        "longitude": 78.49013443927554,
+        "timestamp": "2025-11-15T10:54:51.796Z"
+      },
+      {
+        "latitude": 17.397309406347365,
+        "longitude": 78.49013443927554,
+        "timestamp": "2025-11-15T10:54:52.476Z"
+      },
+      {
+        "latitude": 17.397305588688017,
+        "longitude": 78.49012344575434,
+        "timestamp": "2025-11-15T10:56:24.669Z"
+      },
+      {
+        "latitude": 17.397305588688017,
+        "longitude": 78.49012344575434,
+        "timestamp": "2025-11-15T10:56:25.703Z"
+      },
+      {
+        "latitude": 17.39733548779103,
+        "longitude": 78.49021243214084,
+        "timestamp": "2025-11-15T10:56:51.649Z"
+      },
+      {
+        "latitude": 17.39733548779103,
+        "longitude": 78.49021243214084,
+        "timestamp": "2025-11-15T10:56:52.760Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:58:25.446Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:58:26.268Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T10:58:27.260Z"
+      },
+      {
+        "latitude": 17.397285178294574,
+        "longitude": 78.49018415460812,
+        "timestamp": "2025-11-15T11:02:10.070Z"
+      },
+      {
+        "latitude": 17.397285178294574,
+        "longitude": 78.49018415460812,
+        "timestamp": "2025-11-15T11:02:11.061Z"
+      },
+      {
+        "latitude": 17.39729029537105,
+        "longitude": 78.49015959110947,
+        "timestamp": "2025-11-15T11:03:00.818Z"
+      },
+      {
+        "latitude": 17.39729029537105,
+        "longitude": 78.49015959110947,
+        "timestamp": "2025-11-15T11:03:02.101Z"
+      },
+      {
+        "latitude": 17.39729029537105,
+        "longitude": 78.49015959110947,
+        "timestamp": "2025-11-15T11:03:54.158Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T11:03:58.972Z"
+  },
+  {
+    "sessionId": "session_1763204704726_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      },
+      {
+        "name": "hindhuja",
+        "phone": "9381503017"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T11:05:04.726Z",
+    "lastUpdated": "2025-11-15T11:05:58.501Z",
+    "locations": [
+      {
+        "latitude": 17.39733548779103,
+        "longitude": 78.49021243214084,
+        "timestamp": "2025-11-15T11:05:11.153Z"
+      },
+      {
+        "latitude": 17.39733548779103,
+        "longitude": 78.49021243214084,
+        "timestamp": "2025-11-15T11:05:12.135Z"
+      },
+      {
+        "latitude": 17.39733548779103,
+        "longitude": 78.49021243214084,
+        "timestamp": "2025-11-15T11:05:58.501Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T11:06:09.898Z"
+  },
+  {
+    "sessionId": "session_1763204799695_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      },
+      {
+        "name": "hindhuja",
+        "phone": "9381503017"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T11:06:39.695Z",
+    "lastUpdated": "2025-11-15T11:16:06.575Z",
+    "locations": [
+      {
+        "latitude": 17.3746,
+        "longitude": 78.5582,
+        "timestamp": "2025-11-15T11:11:50.564Z"
+      },
+      {
+        "latitude": 17.3746,
+        "longitude": 78.5582,
+        "timestamp": "2025-11-15T11:11:51.553Z"
+      },
+      {
+        "latitude": 17.3746,
+        "longitude": 78.5582,
+        "timestamp": "2025-11-15T11:11:54.491Z"
+      },
+      {
+        "latitude": 17.397154,
+        "longitude": 78.49001299999999,
+        "timestamp": "2025-11-15T11:11:55.591Z"
+      },
+      {
+        "latitude": 17.397154,
+        "longitude": 78.49001299999999,
+        "timestamp": "2025-11-15T11:11:58.619Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T11:12:07.907Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T11:12:08.941Z"
+      },
+      {
+        "latitude": 17.3973450278251,
+        "longitude": 78.49020629926179,
+        "timestamp": "2025-11-15T11:12:46.255Z"
+      },
+      {
+        "latitude": 17.3973450278251,
+        "longitude": 78.49020629926179,
+        "timestamp": "2025-11-15T11:12:47.277Z"
+      },
+      {
+        "latitude": 17.397319849143916,
+        "longitude": 78.4901649666821,
+        "timestamp": "2025-11-15T11:13:37.438Z"
+      },
+      {
+        "latitude": 17.397319849143916,
+        "longitude": 78.4901649666821,
+        "timestamp": "2025-11-15T11:13:38.400Z"
+      },
+      {
+        "latitude": 17.397306351697633,
+        "longitude": 78.49012065150544,
+        "timestamp": "2025-11-15T11:14:05.109Z"
+      },
+      {
+        "latitude": 17.397306351697633,
+        "longitude": 78.49012065150544,
+        "timestamp": "2025-11-15T11:14:06.076Z"
+      },
+      {
+        "latitude": 17.39730434606907,
+        "longitude": 78.49013588317415,
+        "timestamp": "2025-11-15T11:14:54.268Z"
+      },
+      {
+        "latitude": 17.39730434606907,
+        "longitude": 78.49013588317415,
+        "timestamp": "2025-11-15T11:14:55.249Z"
+      },
+      {
+        "latitude": 17.39730434606907,
+        "longitude": 78.49013588317415,
+        "timestamp": "2025-11-15T11:16:06.575Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T11:16:06.855Z"
+  },
+  {
+    "sessionId": "session_1763205411406_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      },
+      {
+        "name": "hindhuja",
+        "phone": "9381503017"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T11:16:51.406Z",
+    "lastUpdated": "2025-11-15T11:21:10.510Z",
+    "locations": [
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T11:21:09.772Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T11:21:10.510Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T11:21:22.136Z"
+  },
+  {
+    "sessionId": "session_1763205701319_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      },
+      {
+        "name": "hindhuja",
+        "phone": "9381503017"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T11:21:41.319Z",
+    "lastUpdated": "2025-11-15T11:27:50.101Z",
+    "locations": [
+      {
+        "latitude": 17.397829,
+        "longitude": 78.49086,
+        "timestamp": "2025-11-15T11:22:49.468Z"
+      },
+      {
+        "latitude": 17.397829,
+        "longitude": 78.49086,
+        "timestamp": "2025-11-15T11:22:50.533Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T11:26:50.771Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T11:26:51.797Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T11:26:53.828Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T11:27:50.101Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T11:27:57.697Z"
+  },
+  {
+    "sessionId": "session_1763206097721_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      },
+      {
+        "name": "hindhuja",
+        "phone": "9381503017"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T11:28:17.721Z",
+    "lastUpdated": "2025-11-15T11:29:36.478Z",
+    "locations": [
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T11:29:35.464Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T11:29:36.478Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T11:29:45.497Z"
+  },
+  {
+    "sessionId": "session_1763206201674_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      },
+      {
+        "name": "hindhuja",
+        "phone": "9381503017"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T11:30:01.674Z",
+    "lastUpdated": "2025-11-15T11:30:37.181Z",
+    "locations": [
+      {
+        "latitude": 17.3973450278251,
+        "longitude": 78.49020629926179,
+        "timestamp": "2025-11-15T11:30:01.920Z"
+      },
+      {
+        "latitude": 17.3973450278251,
+        "longitude": 78.49020629926179,
+        "timestamp": "2025-11-15T11:30:37.181Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T11:30:51.095Z"
+  },
+  {
+    "sessionId": "session_1763206272577_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      },
+      {
+        "name": "hindhuja",
+        "phone": "9381503017"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T11:31:12.577Z",
+    "lastUpdated": "2025-11-15T12:46:20.576Z",
+    "locations": [
+      {
+        "latitude": 17.396974,
+        "longitude": 78.490593,
+        "timestamp": "2025-11-15T12:06:48.428Z"
+      },
+      {
+        "latitude": 17.396974,
+        "longitude": 78.490593,
+        "timestamp": "2025-11-15T12:06:49.341Z"
+      },
+      {
+        "latitude": 17.396974,
+        "longitude": 78.490593,
+        "timestamp": "2025-11-15T12:06:50.375Z"
+      },
+      {
+        "latitude": 17.397289,
+        "longitude": 78.490097,
+        "timestamp": "2025-11-15T12:06:54.318Z"
+      },
+      {
+        "latitude": 17.397289,
+        "longitude": 78.490097,
+        "timestamp": "2025-11-15T12:06:55.413Z"
+      },
+      {
+        "latitude": 17.397764,
+        "longitude": 78.490761,
+        "timestamp": "2025-11-15T12:07:10.188Z"
+      },
+      {
+        "latitude": 17.397764,
+        "longitude": 78.490761,
+        "timestamp": "2025-11-15T12:07:10.619Z"
+      },
+      {
+        "latitude": 17.39728569540055,
+        "longitude": 78.49012433384102,
+        "timestamp": "2025-11-15T12:07:22.822Z"
+      },
+      {
+        "latitude": 17.39728569540055,
+        "longitude": 78.49012433384102,
+        "timestamp": "2025-11-15T12:07:23.203Z"
+      },
+      {
+        "latitude": 17.397344702144995,
+        "longitude": 78.49020423241925,
+        "timestamp": "2025-11-15T12:08:07.784Z"
+      },
+      {
+        "latitude": 17.397344702144995,
+        "longitude": 78.49020423241925,
+        "timestamp": "2025-11-15T12:08:08.716Z"
+      },
+      {
+        "latitude": 17.397342282145484,
+        "longitude": 78.49018588978693,
+        "timestamp": "2025-11-15T12:08:44.171Z"
+      },
+      {
+        "latitude": 17.397342282145484,
+        "longitude": 78.49018588978693,
+        "timestamp": "2025-11-15T12:08:45.169Z"
+      },
+      {
+        "latitude": 17.397377459961564,
+        "longitude": 78.49022033119795,
+        "timestamp": "2025-11-15T12:09:22.589Z"
+      },
+      {
+        "latitude": 17.397377459961564,
+        "longitude": 78.49022033119795,
+        "timestamp": "2025-11-15T12:09:23.582Z"
+      },
+      {
+        "latitude": 17.397422579361407,
+        "longitude": 78.49030897408608,
+        "timestamp": "2025-11-15T12:09:46.741Z"
+      },
+      {
+        "latitude": 17.397422579361407,
+        "longitude": 78.49030897408608,
+        "timestamp": "2025-11-15T12:09:47.741Z"
+      },
+      {
+        "latitude": 17.397377459961564,
+        "longitude": 78.49022033119795,
+        "timestamp": "2025-11-15T12:10:10.672Z"
+      },
+      {
+        "latitude": 17.397377459961564,
+        "longitude": 78.49022033119795,
+        "timestamp": "2025-11-15T12:10:11.827Z"
+      },
+      {
+        "latitude": 17.397512456558776,
+        "longitude": 78.49037965985237,
+        "timestamp": "2025-11-15T12:11:50.398Z"
+      },
+      {
+        "latitude": 17.397512456558776,
+        "longitude": 78.49037965985237,
+        "timestamp": "2025-11-15T12:11:51.189Z"
+      },
+      {
+        "latitude": 17.397512456558776,
+        "longitude": 78.49037965985237,
+        "timestamp": "2025-11-15T12:11:52.169Z"
+      },
+      {
+        "latitude": 17.3977965,
+        "longitude": 78.4908105,
+        "timestamp": "2025-11-15T12:12:15.533Z"
+      },
+      {
+        "latitude": 17.3977965,
+        "longitude": 78.4908105,
+        "timestamp": "2025-11-15T12:12:17.426Z"
+      },
+      {
+        "latitude": 17.39744587961386,
+        "longitude": 78.49037529415105,
+        "timestamp": "2025-11-15T12:12:26.865Z"
+      },
+      {
+        "latitude": 17.39744587961386,
+        "longitude": 78.49037529415105,
+        "timestamp": "2025-11-15T12:12:27.912Z"
+      },
+      {
+        "latitude": 17.39744587961386,
+        "longitude": 78.49037529415105,
+        "timestamp": "2025-11-15T12:12:28.910Z"
+      },
+      {
+        "latitude": 17.39744587961386,
+        "longitude": 78.49037529415105,
+        "timestamp": "2025-11-15T12:12:29.893Z"
+      },
+      {
+        "latitude": 17.39736895738428,
+        "longitude": 78.49026892248348,
+        "timestamp": "2025-11-15T12:15:35.126Z"
+      },
+      {
+        "latitude": 17.39736895738428,
+        "longitude": 78.49026892248348,
+        "timestamp": "2025-11-15T12:15:36.124Z"
+      },
+      {
+        "latitude": 17.39736895738428,
+        "longitude": 78.49026892248348,
+        "timestamp": "2025-11-15T12:15:37.140Z"
+      },
+      {
+        "latitude": 17.39736895738428,
+        "longitude": 78.49026892248348,
+        "timestamp": "2025-11-15T12:15:40.163Z"
+      },
+      {
+        "latitude": 17.397344702144995,
+        "longitude": 78.49020423241925,
+        "timestamp": "2025-11-15T12:16:50.984Z"
+      },
+      {
+        "latitude": 17.397344702144995,
+        "longitude": 78.49020423241925,
+        "timestamp": "2025-11-15T12:16:51.267Z"
+      },
+      {
+        "latitude": 17.397344702144995,
+        "longitude": 78.49020423241925,
+        "timestamp": "2025-11-15T12:16:52.246Z"
+      },
+      {
+        "latitude": 17.397344702144995,
+        "longitude": 78.49020423241925,
+        "timestamp": "2025-11-15T12:16:53.241Z"
+      },
+      {
+        "latitude": 17.397385903747246,
+        "longitude": 78.49025021087436,
+        "timestamp": "2025-11-15T12:17:43.603Z"
+      },
+      {
+        "latitude": 17.397385903747246,
+        "longitude": 78.49025021087436,
+        "timestamp": "2025-11-15T12:17:44.683Z"
+      },
+      {
+        "latitude": 17.397385903747246,
+        "longitude": 78.49025021087436,
+        "timestamp": "2025-11-15T12:17:46.951Z"
+      },
+      {
+        "latitude": 17.397385903747246,
+        "longitude": 78.49025021087436,
+        "timestamp": "2025-11-15T12:17:47.461Z"
+      },
+      {
+        "latitude": 17.397385903747246,
+        "longitude": 78.49025021087436,
+        "timestamp": "2025-11-15T12:17:48.253Z"
+      },
+      {
+        "latitude": 17.397344702144995,
+        "longitude": 78.49020423241925,
+        "timestamp": "2025-11-15T12:18:34.242Z"
+      },
+      {
+        "latitude": 17.397344702144995,
+        "longitude": 78.49020423241925,
+        "timestamp": "2025-11-15T12:18:35.238Z"
+      },
+      {
+        "latitude": 17.397344702144995,
+        "longitude": 78.49020423241925,
+        "timestamp": "2025-11-15T12:18:36.256Z"
+      },
+      {
+        "latitude": 17.397344702144995,
+        "longitude": 78.49020423241925,
+        "timestamp": "2025-11-15T12:18:37.255Z"
+      },
+      {
+        "latitude": 17.39736895738428,
+        "longitude": 78.49026892248348,
+        "timestamp": "2025-11-15T12:19:01.488Z"
+      },
+      {
+        "latitude": 17.39736895738428,
+        "longitude": 78.49026892248348,
+        "timestamp": "2025-11-15T12:19:02.488Z"
+      },
+      {
+        "latitude": 17.39736895738428,
+        "longitude": 78.49026892248348,
+        "timestamp": "2025-11-15T12:19:03.535Z"
+      },
+      {
+        "latitude": 17.39736895738428,
+        "longitude": 78.49026892248348,
+        "timestamp": "2025-11-15T12:19:06.461Z"
+      },
+      {
+        "latitude": 17.397344702144995,
+        "longitude": 78.49020423241925,
+        "timestamp": "2025-11-15T12:22:56.275Z"
+      },
+      {
+        "latitude": 17.397344702144995,
+        "longitude": 78.49020423241925,
+        "timestamp": "2025-11-15T12:22:57.294Z"
+      },
+      {
+        "latitude": 17.397344702144995,
+        "longitude": 78.49020423241925,
+        "timestamp": "2025-11-15T12:22:58.321Z"
+      },
+      {
+        "latitude": 17.397344702144995,
+        "longitude": 78.49020423241925,
+        "timestamp": "2025-11-15T12:22:59.334Z"
+      },
+      {
+        "latitude": 17.397344702144995,
+        "longitude": 78.49020423241925,
+        "timestamp": "2025-11-15T12:23:00.396Z"
+      },
+      {
+        "latitude": 17.397412029390157,
+        "longitude": 78.4902717468773,
+        "timestamp": "2025-11-15T12:24:30.733Z"
+      },
+      {
+        "latitude": 17.397412029390157,
+        "longitude": 78.4902717468773,
+        "timestamp": "2025-11-15T12:24:31.701Z"
+      },
+      {
+        "latitude": 17.397412029390157,
+        "longitude": 78.4902717468773,
+        "timestamp": "2025-11-15T12:24:32.752Z"
+      },
+      {
+        "latitude": 17.397412029390157,
+        "longitude": 78.4902717468773,
+        "timestamp": "2025-11-15T12:24:33.719Z"
+      },
+      {
+        "latitude": 17.397486262350938,
+        "longitude": 78.49040858262352,
+        "timestamp": "2025-11-15T12:24:57.234Z"
+      },
+      {
+        "latitude": 17.397486262350938,
+        "longitude": 78.49040858262352,
+        "timestamp": "2025-11-15T12:24:58.220Z"
+      },
+      {
+        "latitude": 17.397486262350938,
+        "longitude": 78.49040858262352,
+        "timestamp": "2025-11-15T12:24:59.196Z"
+      },
+      {
+        "latitude": 17.397486262350938,
+        "longitude": 78.49040858262352,
+        "timestamp": "2025-11-15T12:25:00.180Z"
+      },
+      {
+        "latitude": 17.39736895738428,
+        "longitude": 78.49026892248348,
+        "timestamp": "2025-11-15T12:25:09.308Z"
+      },
+      {
+        "latitude": 17.39736895738428,
+        "longitude": 78.49026892248348,
+        "timestamp": "2025-11-15T12:25:10.276Z"
+      },
+      {
+        "latitude": 17.39736895738428,
+        "longitude": 78.49026892248348,
+        "timestamp": "2025-11-15T12:25:11.234Z"
+      },
+      {
+        "latitude": 17.39736895738428,
+        "longitude": 78.49026892248348,
+        "timestamp": "2025-11-15T12:25:12.262Z"
+      },
+      {
+        "latitude": 17.397344702144995,
+        "longitude": 78.49020423241925,
+        "timestamp": "2025-11-15T12:26:01.768Z"
+      },
+      {
+        "latitude": 17.397344702144995,
+        "longitude": 78.49020423241925,
+        "timestamp": "2025-11-15T12:26:02.763Z"
+      },
+      {
+        "latitude": 17.397344702144995,
+        "longitude": 78.49020423241925,
+        "timestamp": "2025-11-15T12:26:03.970Z"
+      },
+      {
+        "latitude": 17.397344702144995,
+        "longitude": 78.49020423241925,
+        "timestamp": "2025-11-15T12:26:04.836Z"
+      },
+      {
+        "latitude": 17.397342282145484,
+        "longitude": 78.49018588978693,
+        "timestamp": "2025-11-15T12:26:27.631Z"
+      },
+      {
+        "latitude": 17.397342282145484,
+        "longitude": 78.49018588978693,
+        "timestamp": "2025-11-15T12:26:28.624Z"
+      },
+      {
+        "latitude": 17.397342282145484,
+        "longitude": 78.49018588978693,
+        "timestamp": "2025-11-15T12:26:29.619Z"
+      },
+      {
+        "latitude": 17.397342282145484,
+        "longitude": 78.49018588978693,
+        "timestamp": "2025-11-15T12:26:30.614Z"
+      },
+      {
+        "latitude": 17.397362684817427,
+        "longitude": 78.49023664541961,
+        "timestamp": "2025-11-15T12:28:13.075Z"
+      },
+      {
+        "latitude": 17.397362684817427,
+        "longitude": 78.49023664541961,
+        "timestamp": "2025-11-15T12:28:14.055Z"
+      },
+      {
+        "latitude": 17.397362684817427,
+        "longitude": 78.49023664541961,
+        "timestamp": "2025-11-15T12:28:15.080Z"
+      },
+      {
+        "latitude": 17.397362684817427,
+        "longitude": 78.49023664541961,
+        "timestamp": "2025-11-15T12:28:16.074Z"
+      },
+      {
+        "latitude": 17.397362684817427,
+        "longitude": 78.49023664541961,
+        "timestamp": "2025-11-15T12:28:17.095Z"
+      },
+      {
+        "latitude": 17.39736895738428,
+        "longitude": 78.49026892248348,
+        "timestamp": "2025-11-15T12:28:35.105Z"
+      },
+      {
+        "latitude": 17.39736895738428,
+        "longitude": 78.49026892248348,
+        "timestamp": "2025-11-15T12:28:36.094Z"
+      },
+      {
+        "latitude": 17.39736895738428,
+        "longitude": 78.49026892248348,
+        "timestamp": "2025-11-15T12:28:37.173Z"
+      },
+      {
+        "latitude": 17.39736895738428,
+        "longitude": 78.49026892248348,
+        "timestamp": "2025-11-15T12:28:38.188Z"
+      },
+      {
+        "latitude": 17.39744587961386,
+        "longitude": 78.49037529415105,
+        "timestamp": "2025-11-15T12:29:04.265Z"
+      },
+      {
+        "latitude": 17.39744587961386,
+        "longitude": 78.49037529415105,
+        "timestamp": "2025-11-15T12:29:05.284Z"
+      },
+      {
+        "latitude": 17.39744587961386,
+        "longitude": 78.49037529415105,
+        "timestamp": "2025-11-15T12:29:06.251Z"
+      },
+      {
+        "latitude": 17.39744587961386,
+        "longitude": 78.49037529415105,
+        "timestamp": "2025-11-15T12:29:07.264Z"
+      },
+      {
+        "latitude": 17.397422579361407,
+        "longitude": 78.49030897408608,
+        "timestamp": "2025-11-15T12:30:05.550Z"
+      },
+      {
+        "latitude": 17.397422579361407,
+        "longitude": 78.49030897408608,
+        "timestamp": "2025-11-15T12:30:06.517Z"
+      },
+      {
+        "latitude": 17.397422579361407,
+        "longitude": 78.49030897408608,
+        "timestamp": "2025-11-15T12:30:08.537Z"
+      },
+      {
+        "latitude": 17.397422579361407,
+        "longitude": 78.49030897408608,
+        "timestamp": "2025-11-15T12:30:09.545Z"
+      },
+      {
+        "latitude": 17.397422579361407,
+        "longitude": 78.49030897408608,
+        "timestamp": "2025-11-15T12:32:26.621Z"
+      },
+      {
+        "latitude": 17.397422579361407,
+        "longitude": 78.49030897408608,
+        "timestamp": "2025-11-15T12:32:27.654Z"
+      },
+      {
+        "latitude": 17.397422579361407,
+        "longitude": 78.49030897408608,
+        "timestamp": "2025-11-15T12:32:28.639Z"
+      },
+      {
+        "latitude": 17.397422579361407,
+        "longitude": 78.49030897408608,
+        "timestamp": "2025-11-15T12:32:29.614Z"
+      },
+      {
+        "latitude": 17.397422579361407,
+        "longitude": 78.49030897408608,
+        "timestamp": "2025-11-15T12:32:30.622Z"
+      },
+      {
+        "latitude": 17.397637666666668,
+        "longitude": 78.49054600000001,
+        "timestamp": "2025-11-15T12:33:58.784Z"
+      },
+      {
+        "latitude": 17.397637666666668,
+        "longitude": 78.49054600000001,
+        "timestamp": "2025-11-15T12:33:59.801Z"
+      },
+      {
+        "latitude": 17.397637666666668,
+        "longitude": 78.49054600000001,
+        "timestamp": "2025-11-15T12:34:00.777Z"
+      },
+      {
+        "latitude": 17.397637666666668,
+        "longitude": 78.49054600000001,
+        "timestamp": "2025-11-15T12:34:01.788Z"
+      },
+      {
+        "latitude": 17.397377459961564,
+        "longitude": 78.49022033119795,
+        "timestamp": "2025-11-15T12:46:08.426Z"
+      },
+      {
+        "latitude": 17.397377459961564,
+        "longitude": 78.49022033119795,
+        "timestamp": "2025-11-15T12:46:08.683Z"
+      },
+      {
+        "latitude": 17.397377459961564,
+        "longitude": 78.49022033119795,
+        "timestamp": "2025-11-15T12:46:20.576Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T12:46:21.855Z"
+  },
+  {
+    "sessionId": "session_1763210909353_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      },
+      {
+        "name": "hindhuja",
+        "phone": "9381503017"
+      },
+      {
+        "name": "hindhu",
+        "phone": "+16267279367"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T12:48:29.353Z",
+    "lastUpdated": "2025-11-15T12:48:50.938Z",
+    "locations": [
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T12:48:49.965Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T12:48:50.938Z"
+      }
+    ],
+    "sosAlert": {
+      "isActive": true,
+      "checkInIntervalMinutes": 10,
+      "nextCheckIn": "2025-11-15T12:58:47.748Z",
+      "lastCheckIn": null,
+      "checkInHistory": [],
+      "emergencyTriggered": false
+    },
+    "stoppedAt": "2025-11-15T12:48:54.181Z"
+  },
+  {
+    "sessionId": "session_1763210944597_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "Devika",
+        "phone": "+91XXXXXXX1"
+      },
+      {
+        "name": "Rohit",
+        "phone": "+91XXXXXXX2"
+      },
+      {
+        "name": "Sravya",
+        "phone": "+91XXXXXXX3"
+      },
+      {
+        "name": "hindhuja",
+        "phone": "9381503017"
+      },
+      {
+        "name": "hindhu",
+        "phone": "+16267279367"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T12:49:04.597Z",
+    "lastUpdated": "2025-11-15T12:49:47.190Z",
+    "locations": [
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T12:49:46.181Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T12:49:47.190Z"
+      }
+    ],
+    "sosAlert": {
+      "isActive": true,
+      "checkInIntervalMinutes": 5,
+      "nextCheckIn": "2025-11-15T12:54:09.887Z",
+      "lastCheckIn": null,
+      "checkInHistory": [],
+      "emergencyTriggered": false
+    },
+    "stoppedAt": "2025-11-15T12:49:50.235Z"
+  },
+  {
+    "sessionId": "session_1763211182083_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "hindu",
+        "phone": "+16267279367"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T12:53:02.083Z",
+    "lastUpdated": "2025-11-15T13:00:02.823Z",
+    "locations": [
+      {
+        "latitude": 17.397486262350938,
+        "longitude": 78.49040858262352,
+        "timestamp": "2025-11-15T12:53:10.352Z"
+      },
+      {
+        "latitude": 17.397829,
+        "longitude": 78.49086,
+        "timestamp": "2025-11-15T12:58:08.045Z"
+      },
+      {
+        "latitude": 17.397829,
+        "longitude": 78.49086,
+        "timestamp": "2025-11-15T12:58:09.035Z"
+      },
+      {
+        "latitude": 17.397404634827332,
+        "longitude": 78.4903050066128,
+        "timestamp": "2025-11-15T12:58:20.128Z"
+      },
+      {
+        "latitude": 17.39730090525409,
+        "longitude": 78.49018415460812,
+        "timestamp": "2025-11-15T12:59:06.727Z"
+      },
+      {
+        "latitude": 17.39730090525409,
+        "longitude": 78.49018415460812,
+        "timestamp": "2025-11-15T13:00:01.743Z"
+      },
+      {
+        "latitude": 17.39730090525409,
+        "longitude": 78.49018415460812,
+        "timestamp": "2025-11-15T13:00:02.823Z"
+      }
+    ],
+    "sosAlert": {
+      "isActive": false,
+      "checkInIntervalMinutes": 5,
+      "nextCheckIn": "2025-11-15T12:58:12.985Z",
+      "lastCheckIn": null,
+      "checkInHistory": [],
+      "emergencyTriggered": true
+    },
+    "stoppedAt": "2025-11-15T13:00:07.299Z"
+  },
+  {
+    "sessionId": "session_1763211656106_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "hindu",
+        "phone": "+16267279367"
+      },
+      {
+        "name": "hindu",
+        "phone": "+17254449844"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T13:00:56.106Z",
+    "lastUpdated": "2025-11-15T13:01:38.461Z",
+    "locations": [
+      {
+        "latitude": 17.39730090525409,
+        "longitude": 78.49018415460812,
+        "timestamp": "2025-11-15T13:01:37.370Z"
+      },
+      {
+        "latitude": 17.39730090525409,
+        "longitude": 78.49018415460812,
+        "timestamp": "2025-11-15T13:01:38.461Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T13:01:55.450Z"
+  },
+  {
+    "sessionId": "session_1763211772366_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "indu",
+        "phone": "+17254449844"
+      }
+    ],
+    "updateIntervalMinutes": 2,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T13:02:52.367Z",
+    "lastUpdated": "2025-11-15T13:07:57.915Z",
+    "locations": [
+      {
+        "latitude": 17.39730090525409,
+        "longitude": 78.49018415460812,
+        "timestamp": "2025-11-15T13:02:58.424Z"
+      },
+      {
+        "latitude": 17.39736895738428,
+        "longitude": 78.49026892248348,
+        "timestamp": "2025-11-15T13:05:01.979Z"
+      },
+      {
+        "latitude": 17.39736895738428,
+        "longitude": 78.49026892248348,
+        "timestamp": "2025-11-15T13:05:02.968Z"
+      },
+      {
+        "latitude": 17.39730090525409,
+        "longitude": 78.49018415460812,
+        "timestamp": "2025-11-15T13:07:02.906Z"
+      },
+      {
+        "latitude": 17.39730090525409,
+        "longitude": 78.49018415460812,
+        "timestamp": "2025-11-15T13:07:12.212Z"
+      },
+      {
+        "latitude": 17.39736895738428,
+        "longitude": 78.49026892248348,
+        "timestamp": "2025-11-15T13:07:57.915Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T13:07:59.719Z"
+  },
+  {
+    "sessionId": "session_1763212103151_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "indu",
+        "phone": "+17254449844"
+      },
+      {
+        "name": "hindhuja",
+        "phone": "9381503017"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T13:08:23.151Z",
+    "lastUpdated": "2025-11-15T13:10:45.390Z",
+    "locations": [
+      {
+        "latitude": 17.397362684817427,
+        "longitude": 78.49023664541961,
+        "timestamp": "2025-11-15T13:08:30.193Z"
+      },
+      {
+        "latitude": 17.39730090525409,
+        "longitude": 78.49018415460812,
+        "timestamp": "2025-11-15T13:10:45.390Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T13:11:00.083Z"
+  },
+  {
+    "sessionId": "session_1763212277997_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "indu",
+        "phone": "+17254449844"
+      },
+      {
+        "name": "hindhuja",
+        "phone": "9381503017"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T13:11:17.997Z",
+    "lastUpdated": "2025-11-15T13:11:17.998Z",
+    "locations": [],
+    "stoppedAt": "2025-11-15T13:12:36.460Z"
+  },
+  {
+    "sessionId": "session_1763212376049_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "indu",
+        "phone": "+17254449844"
+      },
+      {
+        "name": "hindhuja",
+        "phone": "9381503017"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T13:12:56.049Z",
+    "lastUpdated": "2025-11-15T13:39:16.607Z",
+    "locations": [
+      {
+        "latitude": 17.397303711241737,
+        "longitude": 78.49015959110947,
+        "timestamp": "2025-11-15T13:18:04.408Z"
+      },
+      {
+        "latitude": 17.397303711241737,
+        "longitude": 78.49015959110947,
+        "timestamp": "2025-11-15T13:18:05.464Z"
+      },
+      {
+        "latitude": 17.397303711241737,
+        "longitude": 78.49015959110947,
+        "timestamp": "2025-11-15T13:18:06.537Z"
+      },
+      {
+        "latitude": 17.39730090525409,
+        "longitude": 78.49018415460812,
+        "timestamp": "2025-11-15T13:18:43.052Z"
+      },
+      {
+        "latitude": 17.39730090525409,
+        "longitude": 78.49018415460812,
+        "timestamp": "2025-11-15T13:18:44.199Z"
+      },
+      {
+        "latitude": 17.397303711241737,
+        "longitude": 78.49015959110947,
+        "timestamp": "2025-11-15T13:18:55.617Z"
+      },
+      {
+        "latitude": 17.397303711241737,
+        "longitude": 78.49015959110947,
+        "timestamp": "2025-11-15T13:18:56.540Z"
+      },
+      {
+        "latitude": 17.39730090525409,
+        "longitude": 78.49018415460812,
+        "timestamp": "2025-11-15T13:21:03.432Z"
+      },
+      {
+        "latitude": 17.39730090525409,
+        "longitude": 78.49018415460812,
+        "timestamp": "2025-11-15T13:21:05.902Z"
+      },
+      {
+        "latitude": 17.397303711241737,
+        "longitude": 78.49015959110947,
+        "timestamp": "2025-11-15T13:22:42.450Z"
+      },
+      {
+        "latitude": 17.397303711241737,
+        "longitude": 78.49015959110947,
+        "timestamp": "2025-11-15T13:22:43.286Z"
+      },
+      {
+        "latitude": 17.397296480586483,
+        "longitude": 78.49012342872659,
+        "timestamp": "2025-11-15T13:23:30.256Z"
+      },
+      {
+        "latitude": 17.397296480586483,
+        "longitude": 78.49012342872659,
+        "timestamp": "2025-11-15T13:23:31.214Z"
+      },
+      {
+        "latitude": 17.397296480586483,
+        "longitude": 78.49012342872659,
+        "timestamp": "2025-11-15T13:23:34.286Z"
+      },
+      {
+        "latitude": 17.397293614986296,
+        "longitude": 78.4901363959793,
+        "timestamp": "2025-11-15T13:24:49.363Z"
+      },
+      {
+        "latitude": 17.397293614986296,
+        "longitude": 78.4901363959793,
+        "timestamp": "2025-11-15T13:24:50.363Z"
+      },
+      {
+        "latitude": 17.3972913203075,
+        "longitude": 78.49013696572712,
+        "timestamp": "2025-11-15T13:28:05.226Z"
+      },
+      {
+        "latitude": 17.3972913203075,
+        "longitude": 78.49013696572712,
+        "timestamp": "2025-11-15T13:28:06.475Z"
+      },
+      {
+        "latitude": 17.3972913203075,
+        "longitude": 78.49013696572712,
+        "timestamp": "2025-11-15T13:28:08.157Z"
+      },
+      {
+        "latitude": 17.397303711241737,
+        "longitude": 78.49015959110947,
+        "timestamp": "2025-11-15T13:30:10.270Z"
+      },
+      {
+        "latitude": 17.397303711241737,
+        "longitude": 78.49015959110947,
+        "timestamp": "2025-11-15T13:30:11.268Z"
+      },
+      {
+        "latitude": 17.39730090525409,
+        "longitude": 78.49018415460812,
+        "timestamp": "2025-11-15T13:30:21.446Z"
+      },
+      {
+        "latitude": 17.39730090525409,
+        "longitude": 78.49018415460812,
+        "timestamp": "2025-11-15T13:30:22.326Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T13:32:01.790Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T13:32:02.715Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:34:57.880Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:34:58.875Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:35:00.796Z"
+      },
+      {
+        "latitude": 17.396954,
+        "longitude": 78.490461,
+        "timestamp": "2025-11-15T13:38:04.889Z"
+      },
+      {
+        "latitude": 17.396954,
+        "longitude": 78.490461,
+        "timestamp": "2025-11-15T13:38:05.920Z"
+      },
+      {
+        "latitude": 17.396954,
+        "longitude": 78.490461,
+        "timestamp": "2025-11-15T13:38:08.005Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T13:38:19.195Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T13:38:20.272Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T13:39:02.478Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:39:16.607Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T13:39:28.777Z"
+  },
+  {
+    "sessionId": "session_1763214009812_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "indu",
+        "phone": "+17254449844"
+      },
+      {
+        "name": "hindhuja",
+        "phone": "9381503017"
+      },
+      {
+        "name": "hindu",
+        "phone": "+18046046553"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-15T13:40:09.812Z",
+    "lastUpdated": "2025-11-15T13:42:05.759Z",
+    "locations": [
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:40:31.565Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:40:32.168Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:40:37.771Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:40:38.449Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:42:04.733Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:42:05.759Z"
+      }
+    ],
+    "stoppedAt": "2025-11-15T13:46:27.037Z"
+  },
+  {
+    "sessionId": "session_1763214414932_1",
+    "userId": 1,
+    "selectedContacts": [
+      {
+        "name": "indu",
+        "phone": "+17254449844"
+      },
+      {
+        "name": "hindhuja",
+        "phone": "9381503017"
+      },
+      {
+        "name": "hindu",
+        "phone": "+18046046553"
+      },
+      {
+        "name": "hin",
+        "phone": "8046046553"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": true,
+    "startedAt": "2025-11-15T13:46:54.932Z",
+    "lastUpdated": "2025-11-15T14:00:05.305Z",
+    "locations": [
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:46:58.600Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:46:59.996Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:47:54.272Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:47:55.250Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T13:49:14.332Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T13:49:15.352Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:50:38.174Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:50:38.914Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:50:59.099Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:51:00.164Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:51:56.084Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T13:51:57.103Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T13:53:02.075Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T13:53:02.924Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T13:53:04.709Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T13:57:05.796Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T13:57:06.792Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T13:57:08.784Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T13:59:22.725Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T13:59:24.029Z"
+      },
+      {
+        "latitude": 17.397352383541516,
+        "longitude": 78.4902619346069,
+        "timestamp": "2025-11-15T13:59:25.634Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T14:00:01.234Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T14:00:02.260Z"
+      },
+      {
+        "latitude": 17.39732077088717,
+        "longitude": 78.49016221963825,
+        "timestamp": "2025-11-15T14:00:05.305Z"
+      }
+    ],
+    "sosAlert": {
+      "isActive": false,
+      "checkInIntervalMinutes": 5,
+      "nextCheckIn": "2025-11-15T14:02:59.426Z",
+      "lastCheckIn": "2025-11-15T13:57:59.426Z",
+      "checkInHistory": [
+        {
+          "timestamp": "2025-11-15T13:52:59.101Z",
+          "isSafe": true,
+          "location": {
+            "latitude": 17.39732077088717,
+            "longitude": 78.49016221963825,
+            "timestamp": "2025-11-15T13:51:57.103Z"
+          }
+        },
+        {
+          "timestamp": "2025-11-15T13:57:59.426Z",
+          "isSafe": false,
+          "location": {
+            "latitude": 17.397352383541516,
+            "longitude": 78.4902619346069,
+            "timestamp": "2025-11-15T13:57:08.784Z"
+          }
+        }
+      ],
+      "emergencyTriggered": true
+    }
+  }
+]
