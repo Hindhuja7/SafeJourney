@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import Login from "../components/Login";
 import LiveLocationShare from "../components/LiveLocationShare";
+import MapViewClient from "../components/MapViewClient";
+import NavigationView from "../components/navigation/NavigationView";
 import Navigation from "../components/Navigation";
 import UserReviews from "../components/UserReviews";
 import Navbar from "../components/Navbar";
@@ -14,6 +16,8 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("map");
   const [showLanding, setShowLanding] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [navigationData, setNavigationData] = useState(null);
 
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
@@ -51,6 +55,36 @@ export default function Home() {
     setToken(null);
     setShowLanding(true);
     setShowLogin(false);
+    setIsNavigating(false);
+    setNavigationData(null);
+  };
+
+  const handleStartNavigation = (navData) => {
+    console.log('Starting navigation with data:', navData);
+    
+    // Validate navigation data
+    if (!navData || !navData.route) {
+      console.error('Invalid navigation data:', navData);
+      alert('Error: Route information is missing. Please select a route and try again.');
+      return;
+    }
+    
+    if (!navData.origin || !navData.destination) {
+      console.error('Missing coordinates:', navData);
+      alert('Error: Source and destination coordinates are missing.');
+      return;
+    }
+    
+    setIsNavigating(true);
+    setNavigationData(navData);
+    setActiveTab("map"); // Switch to map tab when navigating
+  };
+
+  const handleExitNavigation = () => {
+    console.log('Exiting navigation');
+    setIsNavigating(false);
+    setNavigationData(null);
+    // Reset to show route planning view
   };
 
   // Get user initials for profile circle
@@ -100,9 +134,23 @@ export default function Home() {
   }
 
   const renderContent = () => {
+    // Show full-screen navigation view if navigating
+    if (isNavigating && navigationData) {
+      return (
+        <NavigationView
+          route={navigationData.route}
+          origin={navigationData.origin}
+          destination={navigationData.destination}
+          originName={navigationData.originName}
+          destinationName={navigationData.destinationName}
+          onExit={handleExitNavigation}
+        />
+      );
+    }
+
     switch (activeTab) {
       case "map":
-        return <LiveLocationShare userId={user.id} />;
+        return <LiveLocationShare userId={user.id} onStartNavigation={handleStartNavigation} />;
       
       case "safety":
         return (

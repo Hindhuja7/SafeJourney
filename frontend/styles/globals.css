@@ -1,17 +1,15 @@
 /* styles/globals.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer base {
   * {
     box-sizing: border-box;
   }
-  
+
   html {
     -webkit-tap-highlight-color: transparent;
   }
-  
+
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -19,36 +17,37 @@
 }
 
 @layer components {
+
   /* Glass morphism with purple theme */
   .glass-morphism {
     @apply bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-purple-100/50 dark:border-white/10;
   }
-  
+
   /* Purple gradient theme */
   .safety-gradient {
     @apply bg-gradient-to-r from-purple-600 via-purple-600 to-indigo-600;
   }
-  
+
   /* Primary button with purple gradient and hover effects */
   .btn-primary {
     @apply bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl hover:shadow-purple-500/50 dark:hover:shadow-purple-500/50 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-lg;
   }
-  
+
   /* Card with purple theme */
   .card {
     @apply bg-white/80 dark:bg-white/5 backdrop-blur-xl rounded-3xl shadow-lg border border-purple-100/50 dark:border-white/10 hover:shadow-xl hover:shadow-purple-200/50 dark:hover:shadow-purple-500/20 hover:border-purple-200 dark:hover:border-white/20 transition-all duration-300;
   }
-  
+
   /* Purple gradient text */
   .gradient-text {
     @apply bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent;
   }
-  
+
   /* Hover effect for interactive elements */
   .hover-lift {
     @apply transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/30 dark:hover:shadow-purple-500/50;
   }
-  
+
   /* Input with purple focus */
   .input-purple {
     @apply bg-white/80 dark:bg-white/5 border-purple-200 dark:border-white/20 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-purple-300/50 rounded-lg focus:border-purple-500 dark:focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 dark:focus:ring-purple-500/50 transition-all duration-300;
@@ -84,10 +83,13 @@
 
 /* Animation for SOS pulse */
 @keyframes sos-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
+
   50% {
     opacity: 0.8;
     transform: scale(1.05);

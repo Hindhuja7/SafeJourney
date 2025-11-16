@@ -85,5 +85,19 @@
       "batteryMode": "medium"
     },
     "createdAt": "2025-11-15T20:57:48.620Z"
+  },
+  {
+    "id": 5,
+    "name": "Gunavardhan Yakkati",
+    "phone": "9550403441",
+    "email": "bhavya123@gmail.com",
+    "password": "Bhavya123$",
+    "emergencyContacts": [],
+    "defaultContacts": [],
+    "preferences": {
+      "autoSelectSafest": true,
+      "batteryMode": "medium"
+    },
+    "createdAt": "2025-11-16T01:04:45.724Z"
   }
 ]

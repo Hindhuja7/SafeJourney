@@ -7,7 +7,7 @@ import MapViewClient from "./MapView";
 import RouteInfoCard from "./RouteInfoCard";
 import ReviewForm from "./ReviewForm";
 
-export default function LiveLocationShare({ userId = 1 }) {
+export default function LiveLocationShare({ userId = 1, onStartNavigation, navigationMode = false, navigationRoute = null, navigationCoords = null }) {
   const [isSharing, setIsSharing] = useState(false);
   const [updateInterval, setUpdateInterval] = useState(5);
   const [batteryPercent, setBatteryPercent] = useState(null);
@@ -25,8 +25,63 @@ export default function LiveLocationShare({ userId = 1 }) {
   const [loadingRoutes, setLoadingRoutes] = useState(false);
   const [contacts, setContacts] = useState([{ name: "", phone: "" }]);
   const [showContactsSection, setShowContactsSection] = useState(true); // Show by default
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const locationIntervalRef = useRef(null);
+
+  // Handle start navigation
+  const handleStartNavigation = (route) => {
+    console.log('LiveLocationShare: handleStartNavigation called with route:', route);
+    console.log('LiveLocationShare: routeInfo:', routeInfo);
+    
+    if (!route) {
+      setError("Route information is missing. Please select a route.");
+      console.error('No route provided to handleStartNavigation');
+      return;
+    }
+    
+    if (!routeInfo) {
+      setError("Route information is missing. Please fetch routes again.");
+      console.error('No routeInfo available');
+      return;
+    }
+
+    // Extract origin and destination from routeInfo
+    const origin = routeInfo.coords?.source;
+    const destination = routeInfo.coords?.destination;
+
+    console.log('LiveLocationShare: Extracted coordinates:', { origin, destination });
+
+    if (!origin || !destination) {
+      setError("Source and destination coordinates are missing. Please fetch routes again.");
+      console.error('Missing coordinates:', { origin, destination, routeInfo });
+      return;
+    }
+
+    // Verify route has geometry
+    if (!route.geometry) {
+      setError("Route geometry is missing. Please try a different route.");
+      console.error('Route missing geometry:', route);
+      return;
+    }
+
+    // Call parent's onStartNavigation if provided, otherwise use local state
+    if (onStartNavigation) {
+      const navData = {
+        route,
+        origin,
+        destination,
+        originName: routeInfo.source,
+        destinationName: routeInfo.destination
+      };
+      console.log('LiveLocationShare: Calling parent onStartNavigation with:', navData);
+      onStartNavigation(navData);
+    } else {
+      // Fallback: just set navigating state (basic implementation)
+      setIsNavigating(true);
+      setError("Navigation view not implemented yet. Please use the Start Journey Sharing button.");
+    }
+  };
 
   useEffect(() => {
     checkStatus();
@@ -542,6 +597,7 @@ export default function LiveLocationShare({ userId = 1 }) {
                           index={index}
                           isSelected={isSelected}
                           onSelect={handleRouteSelect}
+                          onStartNavigation={handleStartNavigation}
                         />
                       );
                     })}
@@ -811,9 +867,9 @@ export default function LiveLocationShare({ userId = 1 }) {
               {/* Map Container */}
               <div className="h-[500px] lg:h-[600px] relative">
                 <MapViewClient 
-                  routes={routeInfo?.routes || []} 
-                  coords={routeInfo?.coords || {}}
-                  selectedRoute={selectedRoute}
+                  routes={navigationMode && navigationRoute ? [navigationRoute] : (routeInfo?.routes || [])} 
+                  coords={navigationMode && navigationCoords ? navigationCoords : (routeInfo?.coords || {})}
+                  selectedRoute={navigationMode ? navigationRoute : selectedRoute}
                 />
               </div>
 

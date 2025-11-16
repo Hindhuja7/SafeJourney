@@ -16,6 +16,9 @@ export default function Document() {
         <meta name="msapplication-tap-highlight" content="no" />
         <meta name="theme-color" content="#7c3aed" />
 
+        {/* TomTom Maps SDK CSS is now loaded via npm package in _app.js */}
+        {/* Remove the CDN link since it's deprecated */}
+
         <link rel="apple-touch-icon" href="/icon-192.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/icon-192.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/icon-192.png" />

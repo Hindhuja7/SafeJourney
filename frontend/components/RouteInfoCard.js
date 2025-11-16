@@ -1,5 +1,5 @@
 // components/RouteInfoCard.js
-export default function RouteInfoCard({ route, index, isSelected, onSelect }) {
+export default function RouteInfoCard({ route, index, isSelected, onSelect, onStartNavigation }) {
   const getLabelColor = () => {
     if (route.label === "Safest (Recommended)") {
       return {
@@ -31,25 +31,24 @@ export default function RouteInfoCard({ route, index, isSelected, onSelect }) {
   const colors = getLabelColor();
 
   return (
-    <div 
-      className={`route-card p-4 border-2 rounded-lg shadow-lg cursor-pointer transition-all ${
-        isSelected 
-          ? `${colors.border} ${colors.bg} ring-4 ring-opacity-50 ${colors.border.replace('border-', 'ring-')}` 
-          : `${colors.border} ${colors.bg} hover:shadow-xl hover:scale-105`
-      }`}
+    <div
+      className={`route-card p-4 border-2 rounded-lg shadow-lg cursor-pointer transition-all ${isSelected
+        ? `${colors.border} ${colors.bg} ring-4 ring-opacity-50 ${colors.border.replace('border-', 'ring-')}`
+        : `${colors.border} ${colors.bg} hover:shadow-xl hover:scale-105`
+        }`}
       onClick={() => onSelect && onSelect(route)}
     >
       {/* Heading with Color */}
       <div className={`${colors.heading} px-4 py-2 rounded-t-lg -m-4 mb-3 font-bold text-center`}>
         {route.label || `Route ${index + 1}`}
       </div>
-      
+
       {isSelected && (
         <div className={`mb-3 p-2 ${colors.badge} border-2 rounded text-sm font-medium text-center`}>
           ✓ Selected Route
         </div>
       )}
-      
+
       <div className={`space-y-2 text-sm ${colors.text}`}>
         <div className="flex justify-between">
           <span className="font-semibold">Distance:</span>
@@ -69,6 +68,22 @@ export default function RouteInfoCard({ route, index, isSelected, onSelect }) {
           </div>
         )}
       </div>
+
+      {/* Start Navigation Button - Only show if selected and onStartNavigation is provided */}
+      {isSelected && onStartNavigation && (
+        <div className="mt-4 pt-4 border-t border-opacity-30">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onStartNavigation(route);
+            }}
+            className={`w-full py-2.5 px-4 rounded-lg font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${colors.heading} hover:opacity-90 flex items-center justify-center gap-2`}
+          >
+            <span className="text-lg">🧭</span>
+            <span>Start Navigation</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

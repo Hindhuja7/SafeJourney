@@ -1,8 +1,9 @@
 // pages/_app.js
 import { useEffect } from "react";
 import Head from "next/head";
+import Script from "next/script";
 import "../styles/globals.css";
-// Import MapLibre CSS (required for TomTom Maps SDK)
+// Import MapLibre CSS (required for maps)
 import "maplibre-gl/dist/maplibre-gl.css";
 
 export default function MyApp({ Component, pageProps }) {
@@ -11,12 +12,16 @@ export default function MyApp({ Component, pageProps }) {
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
       navigator.serviceWorker
         .register("/sw.js")
-        .then((registration) => {
-          console.log("Service Worker registered:", registration);
-        })
         .catch((error) => {
-          console.log("Service Worker registration failed:", error);
+          // Silently fail - service worker is optional
         });
+    }
+    
+    // MapLibre is already available from the import above
+    // We don't need to load it dynamically since it's a regular npm package
+    if (typeof window !== "undefined" && window.maplibregl) {
+      window.ttMapsSDKReady = true;
+      window.dispatchEvent(new Event('tomtom-sdk-ready'));
     }
   }, []);
 
@@ -29,6 +34,22 @@ export default function MyApp({ Component, pageProps }) {
         <link rel="icon" href="/favicon.ico" />
         <meta name="theme-color" content="#6366f1" />
       </Head>
+      
+      {/* Fallback check script - MapLibre should be available via import */}
+      <Script
+        id="maplibre-check"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              if (window.maplibregl) {
+                window.ttMapsSDKReady = true;
+                window.dispatchEvent(new Event('tomtom-sdk-ready'));
+              }
+            })();
+          `
+        }}
+      />
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
         <Component {...pageProps} />
       </div>

@@ -3539,5 +3539,28 @@
       "emergencyTriggered": true
     },
     "stoppedAt": "2025-11-16T00:30:12.644Z"
+  },
+  {
+    "sessionId": "session_1763258858085_5",
+    "userId": 5,
+    "selectedContacts": [
+      {
+        "name": "guna",
+        "phone": "+17792497968"
+      }
+    ],
+    "updateIntervalMinutes": 2,
+    "batteryPercent": 100,
+    "isActive": true,
+    "startedAt": "2025-11-16T02:07:38.085Z",
+    "lastUpdated": "2025-11-16T02:07:41.667Z",
+    "locations": [
+      {
+        "latitude": 17.481728,
+        "longitude": 78.4203776,
+        "timestamp": "2025-11-16T02:07:41.667Z"
+      }
+    ],
+    "lastSmsSent": "2025-11-16T02:07:44.049Z"
   }
 ]
