@@ -154,32 +154,32 @@ export default function Home() {
       
       case "safety":
         return (
-          <div className="space-y-6">
-            <div className="bg-white/80 dark:bg-white/5 backdrop-blur-xl rounded-xl shadow-lg border border-purple-100/50 dark:border-white/10 p-6 hover:shadow-xl hover:shadow-purple-200/30 dark:hover:shadow-purple-500/20 transition-all duration-300">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Safety Features</h2>
+          <div className="space-y-6 bg-white dark:bg-purple-50/5 p-4 rounded-lg">
+            <div className="bg-purple-100/80 dark:bg-purple-100/40 backdrop-blur-xl rounded-xl shadow-md border border-purple-200/50 dark:border-purple-200/20 p-6 hover:shadow-lg hover:shadow-purple-300/30 dark:hover:shadow-green-400/20 transition-all duration-300">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-black mb-6">Safety Features</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="bg-white/60 dark:bg-white/5 rounded-xl p-5 border border-purple-100/50 dark:border-white/10 hover:border-purple-300 dark:hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-200/30 dark:hover:shadow-purple-500/20 hover:scale-105 transition-all duration-300">
+                <div className="bg-purple-100/80 dark:bg-purple-100/40 rounded-xl p-5 border border-purple-200/50 dark:border-purple-200/20 hover:border-purple-400 dark:hover:border-green-400/50 hover:shadow-lg hover:shadow-purple-300/30 dark:hover:shadow-green-400/20 hover:scale-105 transition-all duration-300">
                   <div className="w-12 h-12 bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30 rounded-xl flex items-center justify-center mb-3 shadow-md">
                     <span className="text-2xl">🚨</span>
                   </div>
-                  <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1">Emergency SOS</h3>
-                  <p className="text-gray-600 dark:text-purple-300 text-sm">Instant emergency alerts to your contacts</p>
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-black mb-1">Emergency SOS</h3>
+                  <p className="text-gray-600 dark:text-black text-sm">Instant emergency alerts to your contacts</p>
                 </div>
                 
-                <div className="bg-white/60 dark:bg-white/5 rounded-xl p-5 border border-purple-100/50 dark:border-white/10 hover:border-purple-300 dark:hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-200/30 dark:hover:shadow-purple-500/20 hover:scale-105 transition-all duration-300">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-indigo-200 dark:from-purple-900/30 dark:to-indigo-800/30 rounded-xl flex items-center justify-center mb-3 shadow-md">
+                <div className="bg-purple-100/80 dark:bg-purple-100/40 rounded-xl p-5 border border-purple-200/50 dark:border-purple-200/20 hover:border-purple-400 dark:hover:border-green-400/50 hover:shadow-lg hover:shadow-purple-300/30 dark:hover:shadow-green-400/20 hover:scale-105 transition-all duration-300">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-200 to-purple-300 dark:from-green-400/30 dark:to-yellow-300/30 rounded-xl flex items-center justify-center mb-3 shadow-md">
                     <span className="text-2xl">📍</span>
                   </div>
-                  <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1">Live Tracking</h3>
-                  <p className="text-gray-600 dark:text-purple-300 text-sm">Real-time location sharing with trusted contacts</p>
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-black mb-1">Live Tracking</h3>
+                  <p className="text-gray-600 dark:text-black text-sm">Real-time location sharing with trusted contacts</p>
                 </div>
                 
-                <div className="bg-white/60 dark:bg-white/5 rounded-xl p-5 border border-purple-100/50 dark:border-white/10 hover:border-purple-300 dark:hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-200/30 dark:hover:shadow-purple-500/20 hover:scale-105 transition-all duration-300">
+                <div className="bg-purple-100/80 dark:bg-purple-100/40 rounded-xl p-5 border border-purple-200/50 dark:border-purple-200/20 hover:border-purple-400 dark:hover:border-green-400/50 hover:shadow-lg hover:shadow-purple-300/30 dark:hover:shadow-green-400/20 hover:scale-105 transition-all duration-300">
                   <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 rounded-xl flex items-center justify-center mb-3 shadow-md">
                     <span className="text-2xl">⏰</span>
                   </div>
-                  <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1">Safety Check-ins</h3>
-                  <p className="text-gray-600 dark:text-purple-300 text-sm">Periodic safety confirmations during journeys</p>
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-black mb-1">Safety Check-ins</h3>
+                  <p className="text-gray-600 dark:text-black text-sm">Periodic safety confirmations during journeys</p>
                 </div>
               </div>
             </div>
@@ -199,10 +199,10 @@ export default function Home() {
                 </span>
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">{user.name}</h2>
-                <p className="text-purple-600 dark:text-purple-300 text-sm">{user.email}</p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-black">{user.name}</h2>
+                <p className="text-purple-600 dark:text-black text-sm">{user.email}</p>
                 {user.phone && (
-                  <p className="text-gray-500 dark:text-purple-400 text-sm">{user.phone}</p>
+                  <p className="text-gray-500 dark:text-black text-sm">{user.phone}</p>
                 )}
               </div>
             </div>
@@ -249,9 +249,9 @@ export default function Home() {
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-gradient-to-br from-white via-purple-50/30 to-indigo-50/40 dark:from-purple-950 dark:via-purple-900 dark:to-indigo-950 transition-all duration-300">
+      <div className="min-h-screen bg-white dark:bg-purple-50/10 transition-all duration-300">
       {/* Header */}
-      <header className="bg-white/80 dark:bg-white/5 backdrop-blur-xl border-b border-purple-100/50 dark:border-white/10 sticky top-0 z-50 shadow-lg hover:shadow-xl hover:shadow-purple-200/30 dark:hover:shadow-purple-500/20 transition-all duration-300">
+      <header className="bg-gradient-to-r from-purple-200 via-violet-200 to-purple-100 dark:from-purple-900 dark:via-purple-800 dark:to-indigo-900 backdrop-blur-xl border-b border-purple-300/30 dark:border-purple-700/50 sticky top-0 z-50 shadow-lg transition-all duration-300">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -259,23 +259,23 @@ export default function Home() {
                 <span className="text-xl">🛡️</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent dark:from-purple-400 dark:to-indigo-400">
+                <h1 className="text-xl font-bold text-black dark:text-purple-100">
                   SafeJourney
                 </h1>
-                <p className="text-xs text-purple-600 dark:text-purple-300 hidden sm:block">Your Safety Companion</p>
+                <p className="text-xs text-gray-800 dark:text-purple-200 hidden sm:block">Your Safety Companion</p>
               </div>
             </div>
             
             <div className="flex items-center space-x-3">
               <div className="hidden sm:flex sm:items-center sm:space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:shadow-purple-500/50 hover:scale-110 transition-all duration-300">
+                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-400 rounded-full flex items-center justify-center shadow-md hover:shadow-lg hover:shadow-purple-400/50 hover:scale-110 hover:bg-gradient-to-br hover:from-purple-600 hover:to-purple-500 dark:hover:from-green-400 dark:hover:to-yellow-300 transition-all duration-300 cursor-pointer">
                   <span className="text-xs text-white font-semibold">
                     {getUserInitials(user.name)}
                   </span>
                 </div>
                 <div className="hidden md:block">
-                  <p className="text-xs text-gray-500 dark:text-purple-300">Welcome back,</p>
-                  <p className="text-sm font-semibold text-gray-800 dark:text-white">{user.name}</p>
+                  <p className="text-xs text-gray-700 dark:text-purple-200">Welcome back,</p>
+                  <p className="text-sm font-semibold text-black dark:text-purple-100">{user.name}</p>
                 </div>
               </div>
             </div>
@@ -287,7 +287,7 @@ export default function Home() {
       <main className="container mx-auto px-4 py-6 pb-20 lg:pb-6">
         {/* Desktop Navigation */}
         <div className="hidden lg:flex justify-center mb-6">
-          <div className="bg-white/80 dark:bg-white/5 backdrop-blur-xl rounded-xl p-1.5 shadow-lg border border-purple-100/50 dark:border-white/10 hover:shadow-xl hover:shadow-purple-200/30 dark:hover:shadow-purple-500/20 transition-all duration-300">
+          <div className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/50 dark:to-indigo-900/50 backdrop-blur-xl rounded-xl p-1.5 shadow-lg border border-purple-200/50 dark:border-purple-700/30 hover:shadow-xl transition-all duration-300">
             <div className="flex space-x-1">
               {[
                 { id: "map", label: "Map", icon: "🗺️" },
@@ -298,14 +298,37 @@ export default function Home() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 ${
+                  className={`relative flex items-center space-x-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 ${
                     activeTab === tab.id
                       ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg hover:shadow-xl hover:shadow-purple-500/50 hover:scale-105"
-                      : "text-purple-700 dark:text-purple-300 hover:text-purple-900 dark:hover:text-white hover:bg-purple-50/50 dark:hover:bg-white/10"
+                      : "text-black dark:text-purple-200 hover:text-black dark:hover:text-purple-100 hover:bg-purple-50/50 dark:hover:bg-purple-900/30"
                   }`}
+                  onMouseEnter={(e) => {
+                    if (activeTab !== tab.id) {
+                      const underline = e.currentTarget.querySelector('span span');
+                      if (underline) {
+                        underline.style.width = '100%';
+                      }
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (activeTab !== tab.id) {
+                      const underline = e.currentTarget.querySelector('span span');
+                      if (underline) {
+                        underline.style.width = '0';
+                      }
+                    }
+                  }}
                 >
                   <span>{tab.icon}</span>
-                  <span>{tab.label}</span>
+                  <span className="relative">
+                    {tab.label}
+                    <span className={`absolute -bottom-1 left-0 h-0.5 bg-yellow-400 transition-all duration-300 ${
+                      activeTab === tab.id ? 'w-full' : 'w-0'
+                    }`} style={{
+                      width: activeTab === tab.id ? '100%' : '0'
+                    }}></span>
+                  </span>
                 </button>
               ))}
             </div>

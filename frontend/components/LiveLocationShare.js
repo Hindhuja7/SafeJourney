@@ -26,6 +26,7 @@ export default function LiveLocationShare({ userId = 1, onStartNavigation, navig
   const [contacts, setContacts] = useState([{ name: "", phone: "" }]);
   const [showContactsSection, setShowContactsSection] = useState(true); // Show by default
   const [isNavigating, setIsNavigating] = useState(false);
+  const [mapSelectionMode, setMapSelectionMode] = useState(null); // 'source', 'destination', or null
 
   const locationIntervalRef = useRef(null);
 
@@ -108,6 +109,39 @@ export default function LiveLocationShare({ userId = 1, onStartNavigation, navig
     } catch (err) {
       console.error("Reverse geocoding error:", err);
       return null;
+    }
+  };
+
+  // Handle map click for selecting source/destination
+  const handleMapClick = async (lat, lng) => {
+    if (!mapSelectionMode) return;
+
+    try {
+      // Reverse geocode to get address
+      const address = await reverseGeocode(lat, lng);
+      
+      if (address) {
+        if (mapSelectionMode === 'source') {
+          setSource(address);
+        } else if (mapSelectionMode === 'destination') {
+          setDestination(address);
+        }
+        
+        // Clear routes when selection changes
+        if (routeInfo) {
+          setRouteInfo(null);
+          setSelectedRoute(null);
+        }
+        
+        // Exit selection mode
+        setMapSelectionMode(null);
+        setError("");
+      } else {
+        setError("Could not get address for selected location. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error handling map click:", err);
+      setError("Error selecting location. Please try again.");
     }
   };
 
@@ -446,40 +480,85 @@ export default function LiveLocationShare({ userId = 1, onStartNavigation, navig
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                       🚩 Start Location
                     </label>
-                    <input
-                      type="text"
-                      value={source}
-                      onChange={(e) => {
-                        setSource(e.target.value);
-                        // Clear routes when source changes
-                        if (routeInfo) {
-                          setRouteInfo(null);
-                          setSelectedRoute(null);
-                        }
-                      }}
-                      placeholder="Where are you starting from?"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                    />
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={source}
+                        onChange={(e) => {
+                          setSource(e.target.value);
+                          // Clear routes when source changes
+                          if (routeInfo) {
+                            setRouteInfo(null);
+                            setSelectedRoute(null);
+                          }
+                        }}
+                        placeholder="Where are you starting from?"
+                        className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMapSelectionMode(mapSelectionMode === 'source' ? null : 'source');
+                          if (mapSelectionMode !== 'source') {
+                            setError("Click on the map to select source location");
+                          } else {
+                            setError("");
+                          }
+                        }}
+                        className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                          mapSelectionMode === 'source'
+                            ? 'bg-purple-600 text-white shadow-md'
+                            : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                        }`}
+                      >
+                        📍 {mapSelectionMode === 'source' ? 'Cancel' : 'Select on Map'}
+                      </button>
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                       🎯 Destination
                     </label>
-                    <input
-                      type="text"
-                      value={destination}
-                      onChange={(e) => {
-                        setDestination(e.target.value);
-                        // Clear routes when destination changes
-                        if (routeInfo) {
-                          setRouteInfo(null);
-                          setSelectedRoute(null);
-                        }
-                      }}
-                      placeholder="Where are you going?"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                    />
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={destination}
+                        onChange={(e) => {
+                          setDestination(e.target.value);
+                          // Clear routes when destination changes
+                          if (routeInfo) {
+                            setRouteInfo(null);
+                            setSelectedRoute(null);
+                          }
+                        }}
+                        placeholder="Where are you going?"
+                        className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMapSelectionMode(mapSelectionMode === 'destination' ? null : 'destination');
+                          if (mapSelectionMode !== 'destination') {
+                            setError("Click on the map to select destination location");
+                          } else {
+                            setError("");
+                          }
+                        }}
+                        className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                          mapSelectionMode === 'destination'
+                            ? 'bg-purple-600 text-white shadow-md'
+                            : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                        }`}
+                      >
+                        📍 {mapSelectionMode === 'destination' ? 'Cancel' : 'Select on Map'}
+                      </button>
+                    </div>
                   </div>
+                  {mapSelectionMode && (
+                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-sm text-purple-700">
+                      <p>📍 Click on the map below to select your {mapSelectionMode === 'source' ? 'start location' : 'destination'}.</p>
+                    </div>
+                  )}
                   
                   {/* Get Routes Button */}
                   <button
@@ -870,6 +949,8 @@ export default function LiveLocationShare({ userId = 1, onStartNavigation, navig
                   routes={navigationMode && navigationRoute ? [navigationRoute] : (routeInfo?.routes || [])} 
                   coords={navigationMode && navigationCoords ? navigationCoords : (routeInfo?.coords || {})}
                   selectedRoute={navigationMode ? navigationRoute : selectedRoute}
+                  onMapClick={mapSelectionMode ? handleMapClick : null}
+                  selectionMode={mapSelectionMode}
                 />
               </div>
 

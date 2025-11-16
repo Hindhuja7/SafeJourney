@@ -106,3 +106,38 @@
     linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
   background-size: 20px 20px;
 }
+
+/* Yellow underline hover effect for navbar */
+.nav-link {
+  position: relative;
+}
+
+.nav-link .underline-yellow {
+  position: absolute;
+  bottom: 2px;
+  left: 16px;
+  height: 2px;
+  background-color: #facc15;
+  transition: width 0.3s ease;
+  width: 0;
+}
+
+.nav-link:hover .underline-yellow {
+  width: calc(100% - 32px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .nav-link {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+
+  .nav-link .underline-yellow {
+    left: 12px;
+  }
+
+  .nav-link:hover .underline-yellow {
+    width: calc(100% - 24px);
+  }
+}

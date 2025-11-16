@@ -3551,7 +3551,7 @@
     ],
     "updateIntervalMinutes": 2,
     "batteryPercent": 100,
-    "isActive": true,
+    "isActive": false,
     "startedAt": "2025-11-16T02:07:38.085Z",
     "lastUpdated": "2025-11-16T02:07:41.667Z",
     "locations": [
@@ -3561,6 +3561,59 @@
         "timestamp": "2025-11-16T02:07:41.667Z"
       }
     ],
-    "lastSmsSent": "2025-11-16T02:07:44.049Z"
+    "lastSmsSent": "2025-11-16T02:07:44.049Z",
+    "stoppedAt": "2025-11-16T02:12:02.935Z"
+  },
+  {
+    "sessionId": "session_1763259205834_5",
+    "userId": 5,
+    "selectedContacts": [
+      {
+        "name": "bhavya",
+        "phone": "+17792497968"
+      }
+    ],
+    "updateIntervalMinutes": 5,
+    "batteryPercent": 100,
+    "isActive": false,
+    "startedAt": "2025-11-16T02:13:25.834Z",
+    "lastUpdated": "2025-11-16T02:14:41.665Z",
+    "locations": [
+      {
+        "latitude": 17.3967429,
+        "longitude": 78.4897547,
+        "timestamp": "2025-11-16T02:13:29.306Z"
+      },
+      {
+        "latitude": 17.3967429,
+        "longitude": 78.4897547,
+        "timestamp": "2025-11-16T02:14:32.546Z"
+      },
+      {
+        "latitude": 17.3967429,
+        "longitude": 78.4897547,
+        "timestamp": "2025-11-16T02:14:41.665Z"
+      }
+    ],
+    "lastSmsSent": "2025-11-16T02:13:31.425Z",
+    "sosAlert": {
+      "isActive": false,
+      "checkInIntervalMinutes": 2,
+      "nextCheckIn": "2025-11-16T02:17:46.749Z",
+      "lastCheckIn": "2025-11-16T02:15:46.749Z",
+      "checkInHistory": [
+        {
+          "timestamp": "2025-11-16T02:15:46.749Z",
+          "isSafe": false,
+          "location": {
+            "latitude": 17.3967429,
+            "longitude": 78.4897547,
+            "timestamp": "2025-11-16T02:14:41.665Z"
+          }
+        }
+      ],
+      "emergencyTriggered": true
+    },
+    "stoppedAt": "2025-11-16T02:15:58.139Z"
   }
 ]

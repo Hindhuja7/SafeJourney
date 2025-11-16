@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl from 'maplibre-gl';
 
 // Client-side only component to avoid SSR issues
-function MapContent({ routes, coords, selectedRoute }) {
+function MapContent({ routes, coords, selectedRoute, onMapClick, selectionMode }) {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const [isClient, setIsClient] = useState(false);
@@ -106,6 +106,7 @@ function MapContent({ routes, coords, selectedRoute }) {
             map.on('error', (error) => {
               console.error('MapViewClient: Map error:', error);
             });
+
           } catch (error) {
             console.error("MapViewClient: Error creating map:", error);
           }
@@ -177,6 +178,40 @@ function MapContent({ routes, coords, selectedRoute }) {
 
     initializeTomTomMap();
   }, [isClient, coords]);
+
+  // Update map click handler when selection mode changes
+  useEffect(() => {
+    if (!isMapReady || !mapInstanceRef.current) return;
+
+    const map = mapInstanceRef.current;
+    const mapLibreMap = map.mapLibreMap || map;
+
+    // Remove existing click handler
+    mapLibreMap.off('click');
+
+    // Add new click handler if in selection mode
+    if (onMapClick && selectionMode) {
+      mapLibreMap.on('click', (e) => {
+        const { lng, lat } = e.lngLat;
+        console.log('MapViewClient: Map clicked for selection', { lat, lng, selectionMode });
+        onMapClick(lat, lng);
+      });
+
+      // Change cursor to pointer when in selection mode
+      mapLibreMap.getCanvas().style.cursor = 'pointer';
+    } else {
+      // Reset cursor to default
+      mapLibreMap.getCanvas().style.cursor = '';
+    }
+
+    // Cleanup
+    return () => {
+      if (mapLibreMap) {
+        mapLibreMap.off('click');
+        mapLibreMap.getCanvas().style.cursor = '';
+      }
+    };
+  }, [isMapReady, onMapClick, selectionMode]);
 
   // Update map with routes and markers
   useEffect(() => {

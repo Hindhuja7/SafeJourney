@@ -388,10 +388,10 @@ const SafeJourney = ({ onGetStarted }) => {
                 padding: '15px 0',
                 transition: 'all 0.3s ease',
                 backdropFilter: isScrolled ? 'blur(20px)' : 'none',
-                backgroundColor: isScrolled ?
-                    (isDarkMode ? 'rgba(21, 2, 44, 0.9)' : 'rgba(248, 250, 255, 0.95)') :
-                    'transparent',
-                borderBottom: isScrolled ? `1px solid ${currentColors.border}` : 'none'
+                backgroundImage: isDarkMode 
+                    ? 'linear-gradient(135deg, rgba(88, 28, 135, 0.95) 0%, rgba(109, 40, 217, 0.95) 50%, rgba(79, 70, 229, 0.95) 100%)'
+                    : 'linear-gradient(135deg, rgba(233, 213, 255, 0.98) 0%, rgba(196, 181, 253, 0.98) 50%, rgba(221, 214, 254, 0.98) 100%)',
+                borderBottom: isScrolled ? `1px solid ${isDarkMode ? 'rgba(147, 51, 234, 0.3)' : 'rgba(196, 181, 253, 0.5)'}` : 'none'
             }}>
                 <div style={{
                     maxWidth: '1200px',
@@ -444,7 +444,7 @@ const SafeJourney = ({ onGetStarted }) => {
                         <span style={{
                             fontSize: '18px',
                             fontWeight: '700',
-                            color: currentColors.text
+                            color: isDarkMode ? '#e9d5ff' : '#000000'
                         }}>
                             SafeJourney
                         </span>
@@ -463,31 +463,45 @@ const SafeJourney = ({ onGetStarted }) => {
                                 { name: 'Showcase', id: 'showcase' },
                                 { name: 'Contact', id: 'contact' }
                             ].map((item) => (
-                                <a key={item.id} href={`#${item.id}`} style={{
-                                    color: activeNav === item.id ? currentColors.accent : currentColors.textSecondary,
-                                    textDecoration: 'none',
-                                    fontSize: '15px',
-                                    fontWeight: '500',
-                                    padding: '8px 16px',
-                                    borderRadius: '8px',
-                                    transition: 'all 0.3s ease',
-                                    backgroundColor: activeNav === item.id ?
-                                        (isDarkMode ? 'rgba(99, 102, 241, 0.1)' : 'rgba(79, 70, 229, 0.08)') : 'transparent'
-                                }}
+                                <a 
+                                    key={item.id} 
+                                    href={`#${item.id}`} 
+                                    className="nav-link"
+                                    style={{
+                                        color: activeNav === item.id 
+                                            ? (isDarkMode ? '#e9d5ff' : '#000000') 
+                                            : (isDarkMode ? '#c4b5fd' : '#000000'),
+                                        textDecoration: 'none',
+                                        fontSize: '15px',
+                                        fontWeight: '500',
+                                        padding: '8px 16px',
+                                        borderRadius: '8px',
+                                        transition: 'all 0.3s ease',
+                                        position: 'relative',
+                                        backgroundColor: 'transparent'
+                                    }}
                                     onMouseEnter={(e) => {
-                                        if (activeNav !== item.id) {
-                                            e.target.style.color = currentColors.accent;
-                                            e.target.style.backgroundColor = isDarkMode ? 'rgba(99, 102, 241, 0.1)' : 'rgba(79, 70, 229, 0.08)';
+                                        const span = e.currentTarget.querySelector('.underline-yellow');
+                                        if (span && activeNav !== item.id) {
+                                            span.style.width = '100%';
                                         }
                                     }}
                                     onMouseLeave={(e) => {
-                                        if (activeNav !== item.id) {
-                                            e.target.style.color = currentColors.textSecondary;
-                                            e.target.style.backgroundColor = 'transparent';
+                                        const span = e.currentTarget.querySelector('.underline-yellow');
+                                        if (span && activeNav !== item.id) {
+                                            span.style.width = '0';
                                         }
                                     }}
                                 >
                                     {item.name}
+                                    <span 
+                                        className={`underline-yellow absolute bottom-2 left-4 h-0.5 bg-yellow-400 transition-all duration-300 ${
+                                            activeNav === item.id ? 'w-[calc(100%-32px)]' : 'w-0'
+                                        }`}
+                                        style={{
+                                            width: activeNav === item.id ? 'calc(100% - 32px)' : '0'
+                                        }}
+                                    ></span>
                                 </a>
                             ))}
 
@@ -495,23 +509,27 @@ const SafeJourney = ({ onGetStarted }) => {
                             <button onClick={() => setIsDarkMode(!isDarkMode)} style={{
                                 background: 'none',
                                 border: 'none',
-                                color: currentColors.textSecondary,
+                                color: isDarkMode ? '#c4b5fd' : '#000000',
                                 cursor: 'pointer',
                                 padding: '8px',
                                 borderRadius: '8px',
                                 fontSize: '16px',
-                                transition: 'all 0.3s ease'
+                                transition: 'all 0.3s ease',
+                                position: 'relative'
                             }}
                                 onMouseEnter={(e) => {
-                                    e.target.style.color = currentColors.accent;
-                                    e.target.style.backgroundColor = isDarkMode ? 'rgba(99, 102, 241, 0.1)' : 'rgba(79, 70, 229, 0.08)';
+                                    e.target.style.color = isDarkMode ? '#e9d5ff' : '#000000';
+                                    const underline = e.target.querySelector('.underline-yellow');
+                                    if (underline) underline.style.width = '100%';
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.target.style.color = currentColors.textSecondary;
-                                    e.target.style.backgroundColor = 'transparent';
+                                    e.target.style.color = isDarkMode ? '#c4b5fd' : '#000000';
+                                    const underline = e.target.querySelector('.underline-yellow');
+                                    if (underline) underline.style.width = '0';
                                 }}
                             >
                                 {isDarkMode ? '☀️' : '🌙'}
+                                <span className="underline-yellow absolute bottom-0 left-0 h-0.5 bg-yellow-400 transition-all duration-300 w-0"></span>
                             </button>
 
                             <button onClick={handleGetStartedClick} style={{
