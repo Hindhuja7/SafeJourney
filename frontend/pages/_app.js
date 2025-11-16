@@ -2,7 +2,8 @@
 import { useEffect } from "react";
 import Head from "next/head";
 import "../styles/globals.css";
-import "leaflet/dist/leaflet.css";
+// Import MapLibre CSS (required for TomTom Maps SDK)
+import "maplibre-gl/dist/maplibre-gl.css";
 
 export default function MyApp({ Component, pageProps }) {
   useEffect(() => {

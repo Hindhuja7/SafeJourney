@@ -170,5 +170,294 @@
       "completedAt": "2025-11-15T18:32:41.791Z",
       "duration": 3
     }
+  },
+  {
+    "id": "review_1763249856470_4",
+    "userId": 4,
+    "sessionId": "session_1763249778255_4",
+    "reviewText": "",
+    "timestamp": "2025-11-15T23:37:36.470Z",
+    "date": "11/16/2025",
+    "time": "5:07:36 AM",
+    "proof": {
+      "finalLocation": {
+        "latitude": 17.39698179762084,
+        "longitude": 78.48999323893064,
+        "timestamp": "2025-11-15T23:36:19.879Z",
+        "address": "Harivihar Colony Rd, Narayanguda, Ward 79 Himayath Nagar, Greater Hyderabad Municipal Corporation Central Zone, Hyderabad, Himayatnagar mandal, Hyderabad, Telangana, 500027, India"
+      },
+      "finalAddress": "Harivihar Colony Rd, Narayanguda, Ward 79 Himayath Nagar, Greater Hyderabad Municipal Corporation Central Zone, Hyderabad, Himayatnagar mandal, Hyderabad, Telangana, 500027, India",
+      "arrivedAt": "2025-11-15T23:37:19.082Z",
+      "coordinates": {
+        "latitude": 17.39698179762084,
+        "longitude": 78.48999323893064
+      }
+    },
+    "route": {
+      "routeId": 1,
+      "distance": "8.83",
+      "duration": "12.60",
+      "safetyScore": 4.7,
+      "safetyReason": "Poorly lit sections",
+      "sourceAddress": "narayanaguda",
+      "destinationAddress": "tarnaka"
+    },
+    "locationHistory": [
+      {
+        "latitude": 17.39698179762084,
+        "longitude": 78.48999323893064,
+        "timestamp": "2025-11-15T23:36:19.879Z"
+      }
+    ],
+    "totalLocations": 1,
+    "journey": {
+      "startedAt": "2025-11-15T23:36:18.255Z",
+      "completedAt": "2025-11-15T23:37:19.082Z",
+      "duration": 1
+    }
+  },
+  {
+    "id": "review_1763250220227_4",
+    "userId": 4,
+    "sessionId": "session_1763250197276_4",
+    "reviewText": "",
+    "timestamp": "2025-11-15T23:43:40.227Z",
+    "date": "11/16/2025",
+    "time": "5:13:40 AM",
+    "proof": {
+      "finalLocation": {
+        "latitude": 17.397021561229554,
+        "longitude": 78.48994515727486,
+        "timestamp": "2025-11-15T23:43:20.202Z",
+        "address": "Harivihar Colony Rd, Narayanguda, Ward 79 Himayath Nagar, Greater Hyderabad Municipal Corporation Central Zone, Hyderabad, Himayatnagar mandal, Hyderabad, Telangana, 500027, India"
+      },
+      "finalAddress": "Harivihar Colony Rd, Narayanguda, Ward 79 Himayath Nagar, Greater Hyderabad Municipal Corporation Central Zone, Hyderabad, Himayatnagar mandal, Hyderabad, Telangana, 500027, India",
+      "arrivedAt": "2025-11-15T23:43:28.507Z",
+      "coordinates": {
+        "latitude": 17.397021561229554,
+        "longitude": 78.48994515727486
+      }
+    },
+    "route": {
+      "routeId": 1,
+      "distance": "8.83",
+      "duration": "12.60",
+      "safetyScore": 3.8,
+      "safetyReason": "High crime area, Poorly lit sections, Heavy traffic",
+      "sourceAddress": "narayanaguda",
+      "destinationAddress": "tarnaka"
+    },
+    "locationHistory": [
+      {
+        "latitude": 17.397021683225013,
+        "longitude": 78.48994513523326,
+        "timestamp": "2025-11-15T23:43:19.177Z"
+      },
+      {
+        "latitude": 17.397021561229554,
+        "longitude": 78.48994515727486,
+        "timestamp": "2025-11-15T23:43:20.202Z"
+      }
+    ],
+    "totalLocations": 2,
+    "journey": {
+      "startedAt": "2025-11-15T23:43:17.276Z",
+      "completedAt": "2025-11-15T23:43:28.507Z",
+      "duration": 0
+    }
+  },
+  {
+    "id": "review_1763250844650_4",
+    "userId": 4,
+    "sessionId": "session_1763250822604_4",
+    "reviewText": "",
+    "timestamp": "2025-11-15T23:54:04.650Z",
+    "date": "11/16/2025",
+    "time": "5:24:04 AM",
+    "proof": {
+      "finalLocation": {
+        "latitude": 17.396942413733672,
+        "longitude": 78.4899242613701,
+        "timestamp": "2025-11-15T23:53:45.604Z",
+        "address": "Harivihar Colony Rd, Narayanguda, Ward 79 Himayath Nagar, Greater Hyderabad Municipal Corporation Central Zone, Hyderabad, Himayatnagar mandal, Hyderabad, Telangana, 500027, India"
+      },
+      "finalAddress": "Harivihar Colony Rd, Narayanguda, Ward 79 Himayath Nagar, Greater Hyderabad Municipal Corporation Central Zone, Hyderabad, Himayatnagar mandal, Hyderabad, Telangana, 500027, India",
+      "arrivedAt": "2025-11-15T23:53:59.234Z",
+      "coordinates": {
+        "latitude": 17.396942413733672,
+        "longitude": 78.4899242613701
+      }
+    },
+    "route": {
+      "routeId": 1,
+      "distance": "4.55",
+      "duration": "6.58",
+      "safetyScore": 4.1,
+      "safetyReason": "High crime area, Heavy traffic",
+      "sourceAddress": "tarnaka",
+      "destinationAddress": "uppal"
+    },
+    "locationHistory": [
+      {
+        "latitude": 17.396926219323397,
+        "longitude": 78.48992212191816,
+        "timestamp": "2025-11-15T23:53:44.547Z"
+      },
+      {
+        "latitude": 17.396942413733672,
+        "longitude": 78.4899242613701,
+        "timestamp": "2025-11-15T23:53:45.604Z"
+      }
+    ],
+    "totalLocations": 2,
+    "journey": {
+      "startedAt": "2025-11-15T23:53:42.604Z",
+      "completedAt": "2025-11-15T23:53:59.234Z",
+      "duration": 0
+    }
+  },
+  {
+    "id": "review_1763251870553_4",
+    "userId": 4,
+    "sessionId": "session_1763251735510_4",
+    "reviewText": "",
+    "timestamp": "2025-11-16T00:11:10.553Z",
+    "date": "11/16/2025",
+    "time": "5:41:10 AM",
+    "proof": {
+      "finalLocation": {
+        "latitude": 17.396955631790995,
+        "longitude": 78.48995861659617,
+        "timestamp": "2025-11-16T00:11:02.510Z",
+        "address": "Harivihar Colony Rd, Narayanguda, Ward 79 Himayath Nagar, Greater Hyderabad Municipal Corporation Central Zone, Hyderabad, Himayatnagar mandal, Hyderabad, Telangana, 500027, India"
+      },
+      "finalAddress": "Harivihar Colony Rd, Narayanguda, Ward 79 Himayath Nagar, Greater Hyderabad Municipal Corporation Central Zone, Hyderabad, Himayatnagar mandal, Hyderabad, Telangana, 500027, India",
+      "arrivedAt": "2025-11-16T00:11:04.369Z",
+      "coordinates": {
+        "latitude": 17.396955631790995,
+        "longitude": 78.48995861659617
+      }
+    },
+    "route": null,
+    "locationHistory": [
+      {
+        "latitude": 17.39695562903085,
+        "longitude": 78.48995860920681,
+        "timestamp": "2025-11-16T00:08:57.464Z"
+      },
+      {
+        "latitude": 17.396955631790995,
+        "longitude": 78.48995861659617,
+        "timestamp": "2025-11-16T00:11:00.517Z"
+      },
+      {
+        "latitude": 17.396955631790995,
+        "longitude": 78.48995861659617,
+        "timestamp": "2025-11-16T00:11:01.490Z"
+      },
+      {
+        "latitude": 17.396955631790995,
+        "longitude": 78.48995861659617,
+        "timestamp": "2025-11-16T00:11:02.510Z"
+      }
+    ],
+    "totalLocations": 4,
+    "journey": {
+      "startedAt": "2025-11-16T00:08:55.510Z",
+      "completedAt": "2025-11-16T00:11:04.369Z",
+      "duration": 2
+    }
+  },
+  {
+    "id": "review_1763252159403_4",
+    "userId": 4,
+    "sessionId": "session_1763251922473_4",
+    "reviewText": "its working",
+    "timestamp": "2025-11-16T00:15:59.403Z",
+    "date": "11/16/2025",
+    "time": "5:45:59 AM",
+    "proof": {
+      "finalLocation": {
+        "latitude": 17.396913453513648,
+        "longitude": 78.48995200918048,
+        "timestamp": "2025-11-16T00:13:31.323Z",
+        "address": "Harivihar Colony Rd, Narayanguda, Ward 79 Himayath Nagar, Greater Hyderabad Municipal Corporation Central Zone, Hyderabad, Himayatnagar mandal, Hyderabad, Telangana, 500027, India"
+      },
+      "finalAddress": "Harivihar Colony Rd, Narayanguda, Ward 79 Himayath Nagar, Greater Hyderabad Municipal Corporation Central Zone, Hyderabad, Himayatnagar mandal, Hyderabad, Telangana, 500027, India",
+      "arrivedAt": "2025-11-16T00:15:48.639Z",
+      "coordinates": {
+        "latitude": 17.396913453513648,
+        "longitude": 78.48995200918048
+      }
+    },
+    "route": null,
+    "locationHistory": [
+      {
+        "latitude": 17.39683179603424,
+        "longitude": 78.48986574386173,
+        "timestamp": "2025-11-16T00:12:03.984Z"
+      },
+      {
+        "latitude": 17.396831832953282,
+        "longitude": 78.48986577156671,
+        "timestamp": "2025-11-16T00:13:30.388Z"
+      },
+      {
+        "latitude": 17.396913453513648,
+        "longitude": 78.48995200918048,
+        "timestamp": "2025-11-16T00:13:31.323Z"
+      }
+    ],
+    "totalLocations": 3,
+    "journey": {
+      "startedAt": "2025-11-16T00:12:02.473Z",
+      "completedAt": "2025-11-16T00:15:48.639Z",
+      "duration": 4
+    }
+  },
+  {
+    "id": "review_1763253024826_4",
+    "userId": 4,
+    "sessionId": "session_1763252864297_4",
+    "reviewText": "all features r working as expected",
+    "timestamp": "2025-11-16T00:30:24.826Z",
+    "date": "11/16/2025",
+    "time": "6:00:24 AM",
+    "proof": {
+      "finalLocation": {
+        "latitude": 17.396831589082122,
+        "longitude": 78.48976890765343,
+        "timestamp": "2025-11-16T00:27:46.233Z",
+        "address": "Harivihar Colony Rd, Narayanguda, Ward 79 Himayath Nagar, Greater Hyderabad Municipal Corporation Central Zone, Hyderabad, Himayatnagar mandal, Hyderabad, Telangana, 500027, India"
+      },
+      "finalAddress": "Harivihar Colony Rd, Narayanguda, Ward 79 Himayath Nagar, Greater Hyderabad Municipal Corporation Central Zone, Hyderabad, Himayatnagar mandal, Hyderabad, Telangana, 500027, India",
+      "arrivedAt": "2025-11-16T00:30:12.644Z",
+      "coordinates": {
+        "latitude": 17.396831589082122,
+        "longitude": 78.48976890765343
+      }
+    },
+    "route": {
+      "routeId": 2,
+      "distance": "34.61",
+      "duration": "43.42",
+      "safetyScore": 4.2,
+      "safetyReason": "High crime area, Poorly lit sections",
+      "sourceAddress": "miyapur",
+      "destinationAddress": "lb nagar"
+    },
+    "locationHistory": [
+      {
+        "latitude": 17.396831589082122,
+        "longitude": 78.48976890765343,
+        "timestamp": "2025-11-16T00:27:46.233Z"
+      }
+    ],
+    "totalLocations": 1,
+    "journey": {
+      "startedAt": "2025-11-16T00:27:44.297Z",
+      "completedAt": "2025-11-16T00:30:12.644Z",
+      "duration": 2
+    }
   }
 ]

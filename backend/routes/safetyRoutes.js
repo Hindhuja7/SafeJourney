@@ -212,64 +212,132 @@ router.post("/routes", async (req, res) => {
     if (!sourceAddress || !destinationAddress)
       return res.status(400).json({ error: "sourceAddress and destinationAddress required" });
 
-    const source = await geocodeAddress(sourceAddress);
-    const destination = await geocodeAddress(destinationAddress);
+    // Use TomTom geocoding from src/tomtom.js
+    const { geocodeAddress: tomtomGeocode } = await import("../src/tomtom.js");
+    const source = await tomtomGeocode(sourceAddress);
+    const destination = await tomtomGeocode(destinationAddress);
 
     if (!source || !destination)
       return res.status(400).json({ error: "Failed to geocode addresses" });
 
-    let rawRoutes = await getRoutesFromOSRM(source, destination);
-    if (rawRoutes.length === 0)
+    // Convert to [lat, lon] format for compatibility
+    const sourceCoords = [source.lat, source.lon];
+    const destinationCoords = [destination.lat, destination.lon];
+
+    // Use routes from src/routes.js which uses TomTom/OSRM
+    const { fetchRoutes, fetchIncidents, fetchPOIs, calculateBoundingBox } = await import("../src/tomtom.js");
+    const { splitRouteIntoSegments, calculateSegmentRisk, calculateRouteRisk } = await import("../src/scoring.js");
+
+    // Fetch routes using TomTom/OSRM
+    const tomtomRoutes = await fetchRoutes(sourceCoords[0], sourceCoords[1], destinationCoords[0], destinationCoords[1]);
+    
+    if (!tomtomRoutes || tomtomRoutes.length === 0)
       return res.status(500).json({ error: "No routes found" });
 
-    // Score each route
-    for (let r of rawRoutes) {
-      const scoreData = await scoreWithGemini(r);
-      r.aiScore = scoreData.score;
-      r.reason = scoreData.reason;
-      r.scoringType = scoreData.type;
-    }
-
-    // Remove duplicate OSRM routes → only unique distance+duration+geometry
-    const uniqueRoutes = [];
-    const seen = new Set();
-
-    for (const r of rawRoutes) {
-      const key = `${r.distance_km}-${r.duration_min}-${r.geometry}`;
-      if (!seen.has(key)) {
-        seen.add(key);
-        uniqueRoutes.push(r);
+    // Collect all route coordinates for bounding box
+    const allCoordinates = [];
+    for (const route of tomtomRoutes) {
+      if (route.points && route.points.length > 0) {
+        for (const point of route.points) {
+          allCoordinates.push([point.longitude || point.lon, point.latitude || point.lat]);
+        }
       }
     }
 
-    // Sort safest → dangerous (descending order)
-    uniqueRoutes.sort((a, b) => b.aiScore - a.aiScore);
+    // Calculate bounding box and fetch incidents/POIs
+    const bbox = calculateBoundingBox(allCoordinates);
+    const incidents = await fetchIncidents(bbox.minLon, bbox.minLat, bbox.maxLon, bbox.maxLat);
+    const centerLat = (bbox.minLat + bbox.maxLat) / 2;
+    const centerLon = (bbox.minLon + bbox.maxLon) / 2;
+    const radius = Math.max(
+      Math.abs(bbox.maxLat - bbox.minLat) * 111000,
+      Math.abs(bbox.maxLon - bbox.minLon) * 111000 * Math.cos(centerLat * Math.PI / 180)
+    );
+    const pois = await fetchPOIs(centerLat, centerLon, Math.min(radius, 5000));
 
-    // Label routes: Safest (Recommended), Moderate, Unsafe
-    const labeledRoutes = uniqueRoutes.map((route, index) => {
-      let label = "";
-      if (index === 0) {
-        label = "Safest (Recommended)";
-      } else if (index === 1) {
-        label = "Moderate";
-      } else {
-        label = "Unsafe";
+    // Process and score each route
+    const scoredRoutes = [];
+    for (let i = 0; i < tomtomRoutes.length; i++) {
+      const route = tomtomRoutes[i];
+      
+      // Extract route points
+      const routePoints = [];
+      if (route.points && route.points.length > 0) {
+        for (const point of route.points) {
+          const lat = point.latitude || point.lat;
+          const lon = point.longitude || point.lon;
+          if (lat !== undefined && lon !== undefined) {
+            routePoints.push([lat, lon]);
+          }
+        }
       }
-      return { ...route, label };
-    });
+
+      if (routePoints.length === 0) continue;
+
+      // Split route into segments
+      const segments = splitRouteIntoSegments(routePoints);
+      if (segments.length === 0) continue;
+
+      // Calculate risk for each segment
+      const enrichedSegments = segments.map(segment => {
+        const riskScore = calculateSegmentRisk(segment, incidents, pois, null);
+        return {
+          ...segment,
+          riskScore
+        };
+      });
+
+      // Calculate overall route risk
+      const routeRisk = calculateRouteRisk(enrichedSegments);
+      
+      // Convert risk (0-1, lower is safer) to safety score (0-5, higher is safer)
+      const aiScore = Math.max(0, Math.min(5, (1 - routeRisk) * 5));
+
+      // Get route summary
+      const summary = route.summary || {};
+      const distance_km = ((summary.lengthInMeters || 0) / 1000).toFixed(2);
+      const duration_min = Math.round((summary.travelTimeInSeconds || 0) / 60);
+
+      // Create polyline string for geometry
+      const geometry = routePoints.map(p => `${p[0]},${p[1]}`).join('|');
+
+      scoredRoutes.push({
+        id: i,
+        distance_km: parseFloat(distance_km),
+        duration_min,
+        aiScore: parseFloat(aiScore.toFixed(2)),
+        geometry,
+        riskScore: routeRisk,
+        label: i === 0 ? "Safest (Recommended)" : i === 1 ? "Moderate" : "Unsafe",
+        reason: routeRisk < 0.3 ? "Very safe route" : routeRisk < 0.6 ? "Moderately safe route" : "Route has some safety concerns",
+        scoringType: "TomTom Safety Analysis"
+      });
+    }
+
+    // Sort by safety score (descending - highest score = safest)
+    scoredRoutes.sort((a, b) => b.aiScore - a.aiScore);
+
+    // Re-label after sorting
+    const labeledRoutes = scoredRoutes.map((route, index) => ({
+      ...route,
+      label: index === 0 ? "Safest (Recommended)" : index === 1 ? "Moderate" : "Unsafe"
+    }));
 
     const safestRoute = labeledRoutes[0] || null;
 
-    // IMPORTANT FIX: RETURN coords for frontend map
+    // Return coords in [lat, lon] format for frontend
     res.json({
-      coords: { source, destination },
+      coords: { 
+        source: sourceCoords, 
+        destination: destinationCoords 
+      },
       routes: labeledRoutes,
       safestRoute,
     });
 
   } catch (err) {
     console.error("Server error:", err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Server error", message: err.message });
   }
 });
 

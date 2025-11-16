@@ -1,197 +1,312 @@
+// components/MapViewClient.js
 "use client";
 
-import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap } from "react-leaflet";
 import { useEffect, useRef, useState } from "react";
 
 // Client-side only component to avoid SSR issues
-function MapContent({ routes, coords }) {
-  const mapRef = useRef();
+function MapContent({ routes, coords, selectedRoute }) {
+  const mapRef = useRef(null);
+  const mapInstanceRef = useRef(null);
   const [isClient, setIsClient] = useState(false);
+  const [isMapReady, setIsMapReady] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // Dynamic imports for Leaflet and polyline
+  // Initialize TomTom Map
   useEffect(() => {
-    if (!isClient) return;
+    if (!isClient || mapRef.current === null) return;
 
-    const initializeMap = async () => {
-      const L = await import("leaflet");
-      const polyline = await import("@mapbox/polyline");
-      
-      // Fix default icon paths
-      delete L.Icon.Default.prototype._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-        iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
-        shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png"
-      });
+    const initializeTomTomMap = async () => {
+      try {
+        // Get API key from environment or use a default (should be set in .env.local)
+        const TOMTOM_API_KEY = process.env.NEXT_PUBLIC_TOMTOM_API_KEY || "YOUR_TOMTOM_API_KEY";
+
+        if (TOMTOM_API_KEY === "YOUR_TOMTOM_API_KEY") {
+          console.warn("⚠️ TomTom API key not set. Please set NEXT_PUBLIC_TOMTOM_API_KEY in .env.local");
+        }
+
+        // Calculate center point
+        let center = [78.4867, 17.3850]; // Default to Hyderabad [lon, lat]
+        if (coords?.source && Array.isArray(coords.source) && coords.source.length === 2) {
+          center = [coords.source[1], coords.source[0]]; // [lon, lat]
+        }
+
+        // Initialize map - TomTom SDK v0.32+ uses TomTomMap class
+        // Import TomTomMap from the map module
+        // Use direct path to avoid Next.js subpath export issues
+        const mapModule = await import("@tomtom-org/maps-sdk/map/dist/map.es.js");
+        const { TomTomMap } = mapModule;
+        
+        // Create TomTomMap instance
+        // Constructor takes: (mapLibreOptions, tomtomParams)
+        const map = new TomTomMap(
+          {
+            container: mapRef.current,
+            center: center,
+            zoom: 13
+          },
+          {
+            key: TOMTOM_API_KEY,
+            style: "standardLight" // Use standard light style
+          }
+        );
+
+        mapInstanceRef.current = map;
+
+        // Wait for map to be ready
+        // TomTomMap uses mapReady property and mapLibreMap for events
+        const checkMapReady = () => {
+          if (map.mapReady) {
+            setIsMapReady(true);
+          } else {
+            // Wait for style to load
+            map.mapLibreMap.once("style.load", () => {
+              setIsMapReady(true);
+            });
+          }
+        };
+        
+        checkMapReady();
+
+        // Cleanup function
+        return () => {
+          if (mapInstanceRef.current && mapInstanceRef.current.mapLibreMap) {
+            mapInstanceRef.current.mapLibreMap.remove();
+            mapInstanceRef.current = null;
+          }
+        };
+      } catch (error) {
+        console.error("Error initializing TomTom map:", error);
+      }
     };
 
-    initializeMap();
-  }, [isClient]);
+    initializeTomTomMap();
+  }, [isClient, coords]);
+
+  // Update map with routes and markers
+  useEffect(() => {
+    if (!isMapReady || !mapInstanceRef.current || !routes || routes.length === 0) return;
+
+    const updateMap = async () => {
+      try {
+        const map = mapInstanceRef.current;
+        if (!map || !map.mapLibreMap) return;
+        
+        // Use the underlying MapLibre map for layer operations
+        const mapLibreMap = map.mapLibreMap;
+
+        // Remove existing sources and layers
+        if (mapLibreMap.getSource("routes")) {
+          if (mapLibreMap.getLayer("routes-layer")) {
+            mapLibreMap.removeLayer("routes-layer");
+          }
+          mapLibreMap.removeSource("routes");
+        }
+        if (mapLibreMap.getSource("markers")) {
+          if (mapLibreMap.getLayer("markers-layer")) {
+            mapLibreMap.removeLayer("markers-layer");
+          }
+          mapLibreMap.removeSource("markers");
+        }
+
+        // Prepare route coordinates
+        const allCoordinates = [];
+        const routeFeatures = [];
+
+        routes.forEach((route, i) => {
+          const isSelected = selectedRoute?.id === route.id;
+          const isSafest = route.label === "Safest (Recommended)";
+          
+          // Parse geometry
+          let routeCoords = [];
+          if (route.geometry) {
+            if (typeof route.geometry === 'string') {
+              // Format: "lat,lon|lat,lon|..."
+              routeCoords = route.geometry.split('|').map(point => {
+                const [lat, lon] = point.split(',').map(Number);
+                return [lon, lat]; // TomTom uses [lon, lat]
+              });
+            } else if (Array.isArray(route.geometry)) {
+              routeCoords = route.geometry.map(p => [p[1] || p.lon, p[0] || p.lat]);
+            }
+          }
+
+          if (routeCoords.length > 0) {
+            // Add to all coordinates for bounds
+            routeCoords.forEach(coord => allCoordinates.push(coord));
+
+            // Determine color based on selection
+            let color = "#6b7280"; // gray
+            let width = 4;
+            if (isSelected) {
+              color = "#7c3aed"; // purple
+              width = 6;
+            } else if (isSafest) {
+              color = "#2563EB"; // blue
+              width = 5;
+            }
+
+            // Create GeoJSON LineString
+            routeFeatures.push({
+              type: "Feature",
+              properties: {
+                routeId: route.id,
+                isSelected,
+                isSafest,
+                color,
+                width
+              },
+              geometry: {
+                type: "LineString",
+                coordinates: routeCoords
+              }
+            });
+          }
+        });
+
+        // Add routes as GeoJSON source
+        if (routeFeatures.length > 0) {
+          mapLibreMap.addSource("routes", {
+            type: "geojson",
+            data: {
+              type: "FeatureCollection",
+              features: routeFeatures
+            }
+          });
+
+          // Add route layer
+          mapLibreMap.addLayer({
+            id: "routes-layer",
+            type: "line",
+            source: "routes",
+            paint: {
+              "line-color": ["get", "color"],
+              "line-width": ["get", "width"],
+              "line-opacity": 0.8
+            }
+          });
+        }
+
+        // Add markers for source and destination
+        const markerFeatures = [];
+        
+        if (coords?.source && Array.isArray(coords.source) && coords.source.length === 2) {
+          markerFeatures.push({
+            type: "Feature",
+            properties: {
+              type: "source",
+              title: "Start Point"
+            },
+            geometry: {
+              type: "Point",
+              coordinates: [coords.source[1], coords.source[0]] // [lon, lat]
+            }
+          });
+          allCoordinates.push([coords.source[1], coords.source[0]]);
+        }
+
+        if (coords?.destination && Array.isArray(coords.destination) && coords.destination.length === 2) {
+          markerFeatures.push({
+            type: "Feature",
+            properties: {
+              type: "destination",
+              title: "Destination"
+            },
+            geometry: {
+              type: "Point",
+              coordinates: [coords.destination[1], coords.destination[0]] // [lon, lat]
+            }
+          });
+          allCoordinates.push([coords.destination[1], coords.destination[0]]);
+        }
+
+        if (markerFeatures.length > 0) {
+          mapLibreMap.addSource("markers", {
+            type: "geojson",
+            data: {
+              type: "FeatureCollection",
+              features: markerFeatures
+            }
+          });
+
+          // Add marker layer
+          mapLibreMap.addLayer({
+            id: "markers-layer",
+            type: "circle",
+            source: "markers",
+            paint: {
+              "circle-radius": 8,
+              "circle-color": [
+                "case",
+                ["==", ["get", "type"], "source"],
+                "#10b981", // green for source
+                "#ef4444"  // red for destination
+              ],
+              "circle-stroke-width": 2,
+              "circle-stroke-color": "#ffffff"
+            }
+          });
+        }
+
+        // Fit map to show all routes and markers
+        if (allCoordinates.length > 0) {
+          // Calculate bounds manually
+          let minLon = allCoordinates[0][0];
+          let maxLon = allCoordinates[0][0];
+          let minLat = allCoordinates[0][1];
+          let maxLat = allCoordinates[0][1];
+          
+          allCoordinates.forEach(coord => {
+            minLon = Math.min(minLon, coord[0]);
+            maxLon = Math.max(maxLon, coord[0]);
+            minLat = Math.min(minLat, coord[1]);
+            maxLat = Math.max(maxLat, coord[1]);
+          });
+
+          // Fit bounds using MapLibre API
+          const { LngLatBounds } = await import("maplibre-gl");
+          const bounds = new LngLatBounds([minLon, minLat], [maxLon, maxLat]);
+          mapLibreMap.fitBounds(bounds, {
+            padding: { top: 50, bottom: 50, left: 50, right: 50 }
+          });
+        }
+      } catch (error) {
+        console.error("Error updating map:", error);
+      }
+    };
+
+    updateMap();
+  }, [isMapReady, routes, coords, selectedRoute]);
 
   if (!isClient) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 text-gray-500">
+      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950 dark:to-purple-900 text-gray-500 dark:text-purple-300">
         <div className="text-6xl mb-4">🗺️</div>
         <p className="text-lg font-semibold mb-2">Loading Map...</p>
-        <p className="text-sm">Initializing map components</p>
+        <p className="text-sm">Preparing your navigation</p>
       </div>
     );
   }
 
   if (!coords || !routes || routes.length === 0) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 text-gray-500">
+      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950 dark:to-purple-900 text-gray-500 dark:text-purple-300">
         <div className="text-6xl mb-4">🗺️</div>
         <p className="text-lg font-semibold mb-2">Ready to Navigate</p>
-        <p className="text-sm">Start your journey to see the map</p>
+        <p className="text-sm">Enter source and destination to see routes</p>
       </div>
     );
   }
 
-  const center = coords?.source || [17.3850, 78.4867];
-
   return (
-    <MapContainer
-      center={center}
-      zoom={13}
-      style={{ height: "100%", width: "100%" }}
-      className="rounded-lg z-0"
-    >
-      <TileLayer 
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" 
-      />
-      
-      <MapController routes={routes} coords={coords} />
-
-      {/* Source Marker */}
-      {coords?.source && (
-        <Marker position={coords.source}>
-          <Popup>
-            <div className="text-center">
-              <strong>🚩 Start Point</strong>
-              <br />
-              <span className="text-sm text-green-600">Your journey begins here</span>
-            </div>
-          </Popup>
-        </Marker>
-      )}
-
-      {/* Destination Marker */}
-      {coords?.destination && (
-        <Marker position={coords.destination}>
-          <Popup>
-            <div className="text-center">
-              <strong>🎯 Destination</strong>
-              <br />
-              <span className="text-sm text-red-600">Your journey ends here</span>
-            </div>
-          </Popup>
-        </Marker>
-      )}
-
-      {/* Draw all route polylines */}
-      {routes.map((r, i) => {
-        if (!r.geometry) return null;
-        
-        const isSafest = i === 0;
-        const color = isSafest ? "#2563EB" : i === 1 ? "#16A34A" : "#EF4444";
-        const weight = isSafest ? 6 : 4;
-        const opacity = isSafest ? 0.9 : 0.6;
-        
-        return (
-          <Polyline 
-            key={r.id || i} 
-            positions={decodePolyline(r.geometry)} 
-            pathOptions={{ 
-              color, 
-              weight, 
-              opacity,
-              lineJoin: 'round',
-              lineCap: 'round'
-            }} 
-          />
-        );
-      })}
-    </MapContainer>
+    <div className="w-full h-full relative">
+      <div ref={mapRef} className="w-full h-full rounded-lg" style={{ minHeight: "400px" }} />
+    </div>
   );
 }
 
-// Map controller component to fit bounds
-function MapController({ routes, coords }) {
-  const map = useMap();
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isClient || !routes || routes.length === 0 || !coords) return;
-
-    const fitMapToBounds = async () => {
-      const L = await import("leaflet");
-      
-      const allPoints = [];
-      
-      // Add route points
-      routes.forEach((r) => {
-        if (r.geometry) {
-          const pts = decodePolyline(r.geometry);
-          pts.forEach((p) => allPoints.push([p[0], p[1]]));
-        }
-      });
-
-      // Add source and destination
-      if (coords.source) allPoints.push(coords.source);
-      if (coords.destination) allPoints.push(coords.destination);
-
-      if (allPoints.length > 0) {
-        const bounds = L.latLngBounds(allPoints);
-        map.fitBounds(bounds, { padding: [20, 20] });
-      }
-    };
-
-    fitMapToBounds();
-  }, [map, routes, coords, isClient]);
-
-  return null;
-}
-
-// Decode polyline function
-const decodePolyline = (geom) => {
-  if (!geom) return [];
-  try {
-    // Simple mock coordinates for demonstration
-    // In a real app, you'd use @mapbox/polyline.decode(geom)
-    if (geom.includes("mock")) {
-      return [
-        [17.3850, 78.4867], // Hyderabad
-        [17.4000, 78.4900],
-        [17.4100, 78.4950],
-        [17.4200, 78.5000],
-        [17.4419, 78.4989]  // Destination
-      ];
-    }
-    
-    // Fallback coordinates
-    return [
-      [17.3850, 78.4867],
-      [17.4419, 78.4989]
-    ];
-  } catch (e) {
-    console.error("Polyline decode error:", e);
-    return [
-      [17.3850, 78.4867],
-      [17.4419, 78.4989]
-    ];
-  }
-};
-
-export default function MapViewClient({ routes, coords }) {
-  return <MapContent routes={routes} coords={coords} />;
+export default function MapViewClient({ routes, coords, selectedRoute }) {
+  return <MapContent routes={routes} coords={coords} selectedRoute={selectedRoute} />;
 }

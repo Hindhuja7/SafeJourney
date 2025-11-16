@@ -1,11 +1,170 @@
+// components/SOSAlert.js
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
 
-// ... (keep all your existing imports and state)
-
 export default function SOSAlert({ userId, isLocationSharing }) {
-  // ... (keep all your existing state and functions)
+  const [sosActive, setSosActive] = useState(false);
+  const [emergencyTriggered, setEmergencyTriggered] = useState(false);
+  const [showCheckInPrompt, setShowCheckInPrompt] = useState(false);
+  const [checkInInterval, setCheckInInterval] = useState(5);
+  const [timeRemaining, setTimeRemaining] = useState(null);
+  const [noResponseCountdown, setNoResponseCountdown] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [alertResults, setAlertResults] = useState(null);
+
+  const checkInIntervalRef = useRef(null);
+  const noResponseTimerRef = useRef(null);
+
+  useEffect(() => {
+    checkSOSStatus();
+    
+    return () => {
+      if (checkInIntervalRef.current) {
+        clearInterval(checkInIntervalRef.current);
+      }
+      if (noResponseTimerRef.current) {
+        clearTimeout(noResponseTimerRef.current);
+      }
+    };
+  }, [userId]);
+
+  const checkSOSStatus = async () => {
+    try {
+      const res = await axios.get(API_ENDPOINTS.liveLocation.sos.status(userId));
+      
+      if (res.data.isActive) {
+        setSosActive(true);
+        setCheckInInterval(res.data.checkInIntervalMinutes || 5);
+        
+        if (res.data.nextCheckIn) {
+          startCountdown(res.data.nextCheckIn);
+        }
+        
+        if (res.data.emergencyTriggered) {
+          setEmergencyTriggered(true);
+          setSosActive(false);
+        }
+      }
+    } catch (err) {
+      console.error("Error checking SOS status:", err);
+    }
+  };
+
+  const startCountdown = (nextCheckIn) => {
+    if (checkInIntervalRef.current) {
+      clearInterval(checkInIntervalRef.current);
+    }
+
+    const updateCountdown = () => {
+      const now = new Date().getTime();
+      const checkInTime = new Date(nextCheckIn).getTime();
+      const remaining = Math.max(0, Math.floor((checkInTime - now) / 1000));
+      
+      setTimeRemaining(remaining);
+
+      if (remaining <= 0) {
+        setShowCheckInPrompt(true);
+        startNoResponseCountdown();
+        clearInterval(checkInIntervalRef.current);
+      }
+    };
+
+    updateCountdown();
+    checkInIntervalRef.current = setInterval(updateCountdown, 1000);
+  };
+
+  const startNoResponseCountdown = () => {
+    setNoResponseCountdown(180); // 3 minutes
+    
+    if (noResponseTimerRef.current) {
+      clearInterval(noResponseTimerRef.current);
+    }
+
+    noResponseTimerRef.current = setInterval(() => {
+      setNoResponseCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(noResponseTimerRef.current);
+          handleNoResponse();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const handleNoResponse = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.post(API_ENDPOINTS.liveLocation.sos.emergency, { userId });
+      
+      setEmergencyTriggered(true);
+      setShowCheckInPrompt(false);
+      setAlertResults(res.data.alertResults);
+      
+      if (checkInIntervalRef.current) {
+        clearInterval(checkInIntervalRef.current);
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to trigger emergency alert");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStartSOS = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      
+      await axios.post(API_ENDPOINTS.liveLocation.sos.start, {
+        userId,
+        checkInIntervalMinutes: checkInInterval
+      });
+
+      setSosActive(true);
+      startCountdown(new Date(Date.now() + checkInInterval * 60 * 1000).toISOString());
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to start SOS alert system");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCheckIn = async (isSafe) => {
+    try {
+      setLoading(true);
+      setError("");
+      
+      const res = await axios.post(API_ENDPOINTS.liveLocation.sos.checkin, {
+        userId,
+        isSafe
+      });
+
+      if (isSafe) {
+        setShowCheckInPrompt(false);
+        setNoResponseCountdown(null);
+        if (noResponseTimerRef.current) {
+          clearInterval(noResponseTimerRef.current);
+        }
+        
+        // Restart countdown for next check-in
+        if (res.data.nextCheckIn) {
+          startCountdown(res.data.nextCheckIn);
+        }
+      } else {
+        setEmergencyTriggered(true);
+        setShowCheckInPrompt(false);
+        setSosActive(false);
+        setAlertResults(res.data.alertResults);
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to process check-in");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Format time for responsive display
   const formatTime = (seconds) => {
