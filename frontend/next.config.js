@@ -3,11 +3,14 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  // Use standalone output for better Render deployment
+  output: 'standalone',
   experimental: {
     esmExternals: true
   },
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_TOMTOM_API_KEY: process.env.NEXT_PUBLIC_TOMTOM_API_KEY,
   },
   webpack: (config, { isServer }) => {
     // Handle @tomtom-org/maps-sdk subpath exports

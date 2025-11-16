@@ -4,23 +4,37 @@
 
 // Get backend URL from environment or use defaults
 const getBackendUrl = () => {
+  // Check if NEXT_PUBLIC_API_URL is explicitly set (highest priority)
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+
+  // Production - Render deployment
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    // If frontend is on Render, use Render backend URL pattern
+    if (hostname.includes('onrender.com')) {
+      // Extract subdomain and construct backend URL
+      // Frontend: safejourney-frontend.onrender.com
+      // Backend: safejourney-backend.onrender.com
+      return 'https://safejourney-backend.onrender.com';
+    }
+  }
+
   // In mobile (Capacitor), use environment variable or default to production
   if (typeof window !== 'undefined' && window.Capacitor) {
     // Mobile app - use environment variable or production URL
-    return process.env.NEXT_PUBLIC_API_URL || 
-           process.env.REACT_APP_API_URL || 
-           'https://your-backend-url.com';
+    return process.env.REACT_APP_API_URL ||
+      'https://safejourney-backend.onrender.com';
   }
-  
+
   // Web development - use localhost or environment variable
   if (typeof window !== 'undefined') {
-    return process.env.NEXT_PUBLIC_API_URL || 
-           process.env.REACT_APP_API_URL || 
-           'http://localhost:5010';
+    return 'http://localhost:5010';
   }
-  
-  // Server-side (Next.js SSR)
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5010';
+
+  // Server-side (Next.js SSR) - default to localhost for dev
+  return 'http://localhost:5010';
 };
 
 export const API_BASE_URL = getBackendUrl();

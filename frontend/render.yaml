@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: safejourney-frontend
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    rootDir: frontend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+      - key: NEXT_PUBLIC_TOMTOM_API_KEY
+        sync: false
+
