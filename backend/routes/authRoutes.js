@@ -1,55 +1,25 @@
 import express from "express";
-import fs from "fs/promises";
-import path from "path";
-import { fileURLToPath } from "url";
 import crypto from "crypto";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import User from "../models/User.js";
+import Session from "../models/Session.js";
 
 const router = express.Router();
-
-const USERS_FILE = path.join(__dirname, "../data/users.json");
-const SESSIONS_FILE = path.join(__dirname, "../data/sessions.json");
-
-// Ensure data directory exists
-async function ensureDataDirectory() {
-  const dataDir = path.dirname(USERS_FILE);
-  try {
-    await fs.mkdir(dataDir, { recursive: true });
-  } catch (err) {
-    if (err.code !== 'EEXIST') throw err;
-  }
-}
-
-// Helper functions
-async function readJSON(filePath) {
-  try {
-    await ensureDataDirectory();
-    const data = await fs.readFile(filePath, "utf8");
-    return JSON.parse(data);
-  } catch (err) {
-    if (err.code === "ENOENT") {
-      // Return empty array if file doesn't exist
-      return [];
-    }
-    throw err;
-  }
-}
-
-async function writeJSON(filePath, data) {
-  try {
-    await ensureDataDirectory();
-    await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
-  } catch (err) {
-    console.error(`Error writing JSON file ${filePath}:`, err);
-    throw err;
-  }
-}
 
 // Generate session token
 function generateToken() {
   return crypto.randomBytes(32).toString("hex");
+}
+
+// Helper function to convert userId (handles both ObjectId and numeric string)
+function toUserId(userId) {
+  if (!userId) return null;
+  // If it's already an ObjectId or string that looks like ObjectId, return as is
+  if (typeof userId === 'string' && userId.length === 24 && /^[0-9a-fA-F]{24}$/.test(userId)) {
+    return userId;
+  }
+  // If it's a number or numeric string, we'll need to find the user by old numeric ID
+  // For now, return as string and let MongoDB handle it
+  return userId.toString();
 }
 
 // POST /api/auth/register - Register new user
@@ -76,14 +46,13 @@ router.post("/register", async (req, res) => {
       });
     }
 
-    const users = await readJSON(USERS_FILE);
-    console.log("Existing users count:", users.length);
-
     // Check if user already exists
-    const existingUser = users.find(u => 
-      u.email === email.trim().toLowerCase() || 
-      u.phone === phone.trim()
-    );
+    const existingUser = await User.findOne({
+      $or: [
+        { email: email.trim().toLowerCase() },
+        { phone: phone.trim() }
+      ]
+    });
 
     if (existingUser) {
       console.log("User already exists:", existingUser.email);
@@ -93,8 +62,7 @@ router.post("/register", async (req, res) => {
     }
 
     // Create new user
-    const newUser = {
-      id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
+    const newUser = new User({
       name: name.trim(),
       phone: phone.trim(),
       email: email.trim().toLowerCase(),
@@ -104,30 +72,26 @@ router.post("/register", async (req, res) => {
       preferences: {
         autoSelectSafest: true,
         batteryMode: "medium"
-      },
-      createdAt: new Date().toISOString()
-    };
+      }
+    });
 
-    users.push(newUser);
-    await writeJSON(USERS_FILE, users);
+    await newUser.save();
     console.log("User registered successfully:", newUser.email);
 
     // Create session
-    const sessions = await readJSON(SESSIONS_FILE);
     const token = generateToken();
-    const session = {
+    const session = new Session({
       token,
-      userId: newUser.id,
-      createdAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days
-    };
-    sessions.push(session);
-    await writeJSON(SESSIONS_FILE, sessions);
+      userId: newUser._id,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+    });
+
+    await session.save();
 
     res.json({
       message: "User registered successfully",
       user: {
-        id: newUser.id,
+        id: newUser._id.toString(),
         name: newUser.name,
         email: newUser.email,
         phone: newUser.phone
@@ -137,6 +101,15 @@ router.post("/register", async (req, res) => {
 
   } catch (err) {
     console.error("Error registering user:", err);
+    
+    // Handle MongoDB duplicate key error
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyPattern)[0];
+      return res.status(400).json({ 
+        error: `User already exists with this ${field}` 
+      });
+    }
+    
     res.status(500).json({ 
       error: "Failed to register user",
       details: err.message 
@@ -153,8 +126,7 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Email and password are required" });
     }
 
-    const users = await readJSON(USERS_FILE);
-    const user = users.find(u => u.email === email.trim().toLowerCase());
+    const user = await User.findOne({ email: email.trim().toLowerCase() });
 
     if (!user) {
       return res.status(401).json({ error: "Invalid email or password" });
@@ -165,30 +137,30 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    // Create or update session
-    const sessions = await readJSON(SESSIONS_FILE);
-    let session = sessions.find(s => s.userId === user.id && new Date(s.expiresAt) > new Date());
+    // Find existing active session or create new one
+    let session = await Session.findOne({ 
+      userId: user._id,
+      expiresAt: { $gt: new Date() }
+    });
 
     if (!session) {
       const token = generateToken();
-      session = {
+      session = new Session({
         token,
-        userId: user.id,
-        createdAt: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-      };
-      sessions.push(session);
+        userId: user._id,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+      });
+      await session.save();
     } else {
       // Update expiration
-      session.expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      session.expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      await session.save();
     }
-
-    await writeJSON(SESSIONS_FILE, sessions);
 
     res.json({
       message: "Login successful",
       user: {
-        id: user.id,
+        id: user._id.toString(),
         name: user.name,
         email: user.email,
         phone: user.phone
@@ -197,7 +169,7 @@ router.post("/login", async (req, res) => {
     });
   } catch (err) {
     console.error("Error logging in:", err);
-    res.status(500).json({ error: "Failed to login" });
+    res.status(500).json({ error: "Failed to login", details: err.message });
   }
 });
 
@@ -210,14 +182,12 @@ router.post("/logout", async (req, res) => {
       return res.status(400).json({ error: "Token is required" });
     }
 
-    const sessions = await readJSON(SESSIONS_FILE);
-    const filtered = sessions.filter(s => s.token !== token);
-    await writeJSON(SESSIONS_FILE, filtered);
+    await Session.deleteOne({ token });
 
     res.json({ message: "Logout successful" });
   } catch (err) {
     console.error("Error logging out:", err);
-    res.status(500).json({ error: "Failed to logout" });
+    res.status(500).json({ error: "Failed to logout", details: err.message });
   }
 });
 
@@ -230,15 +200,16 @@ router.get("/verify", async (req, res) => {
       return res.status(401).json({ error: "Token is required" });
     }
 
-    const sessions = await readJSON(SESSIONS_FILE);
-    const session = sessions.find(s => s.token === token && new Date(s.expiresAt) > new Date());
+    const session = await Session.findOne({ 
+      token,
+      expiresAt: { $gt: new Date() }
+    }).populate('userId', 'name email phone');
 
     if (!session) {
       return res.status(401).json({ error: "Invalid or expired token" });
     }
 
-    const users = await readJSON(USERS_FILE);
-    const user = users.find(u => u.id === session.userId);
+    const user = await User.findById(session.userId);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -246,7 +217,7 @@ router.get("/verify", async (req, res) => {
 
     res.json({
       user: {
-        id: user.id,
+        id: user._id.toString(),
         name: user.name,
         email: user.email,
         phone: user.phone
@@ -254,7 +225,7 @@ router.get("/verify", async (req, res) => {
     });
   } catch (err) {
     console.error("Error verifying token:", err);
-    res.status(500).json({ error: "Failed to verify token" });
+    res.status(500).json({ error: "Failed to verify token", details: err.message });
   }
 });
 

@@ -42,10 +42,16 @@ git push -u origin main
    - **Environment:** `Node`
    - **Region:** Choose closest to your users (e.g., `Oregon (US West)`)
    - **Branch:** `main`
-   - **Root Directory:** `backend`
-   - **Build Command:** `npm install`
+   - **Root Directory:** `backend` (⚠️ Important: Set this to `backend`)
+   - **Build Command:** `npm install` (⚠️ **CRITICAL:** Must be `npm install`, NOT `npm start`)
    - **Start Command:** `npm start`
    - **Plan:** `Free` (or upgrade for always-on)
+   
+   **⚠️ IMPORTANT FIX:** If you see the error "Cannot find package 'express'", it means Render is using `npm start` as the build command. 
+   - Go to your service → Settings → Build & Deploy
+   - Change Build Command to: `npm install`
+   - Start Command should be: `npm start`
+   - Save and redeploy
 
 4. **Add Environment Variables:**
    - `NODE_ENV` = `production`
@@ -77,8 +83,8 @@ git push -u origin main
    - **Environment:** `Node`
    - **Region:** Same as backend
    - **Branch:** `main`
-   - **Root Directory:** `frontend`
-   - **Build Command:** `npm install && npm run build`
+   - **Root Directory:** `frontend` (⚠️ Important: Set this to `frontend`)
+   - **Build Command:** `npm install && npm run build` (⚠️ Make sure this is set correctly)
    - **Start Command:** `npm start`
    - **Plan:** `Free` (or upgrade for always-on)
 

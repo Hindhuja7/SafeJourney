@@ -197,6 +197,7 @@ export async function fetchPOIs(lat, lon, radius = 500) {
         'User-Agent': 'SafeJourneyApp/1.0'
       }
     });
+   
 
     if (!response.ok) {
       console.warn('Overpass API error, returning empty POI list');
@@ -204,7 +205,6 @@ export async function fetchPOIs(lat, lon, radius = 500) {
     }
 
     const data = await response.json();
-
     // Convert Overpass format to TomTom-compatible format
     const pois = (data.elements || []).map(element => {
       const position = element.center || { lat: element.lat, lon: element.lon };

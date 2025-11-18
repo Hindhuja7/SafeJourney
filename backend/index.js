@@ -8,6 +8,7 @@ import safetyRoutes from "./routes/safetyRoutes.js";
 import liveLocationRoutes from "./routes/liveLocationRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import { connectDatabase } from "./config/database.js";
 
 dotenv.config();
 
@@ -72,8 +73,23 @@ app.use("/api/live-location", liveLocationRoutes);
 app.use("/api/reviews", reviewRoutes);
 
 const PORT = process.env.PORT || 5010;
-app.listen(PORT, () => {
-  console.log(`🚀 Backend running on http://localhost:${PORT}`);
-  console.log(`📡 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`🗺️  Routes API: http://localhost:${PORT}/api/routes`);
-});
+
+// Connect to MongoDB and start server
+async function startServer() {
+  try {
+    // Connect to MongoDB
+    await connectDatabase();
+    
+    // Start Express server
+    app.listen(PORT, () => {
+      console.log(`🚀 Backend running on http://localhost:${PORT}`);
+      console.log(`📡 Health check: http://localhost:${PORT}/api/health`);
+      console.log(`🗺️  Routes API: http://localhost:${PORT}/api/routes`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+startServer();
