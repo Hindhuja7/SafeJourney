@@ -9,7 +9,7 @@ You have **MongoDB Atlas** (cloud) connection in your `.env` file. Here's how to
 ### Current Connection String (from your .env):
 
 ```
-MONGODB_URI=mongodb+srv://gunavardhanyakkati_db_user:<loQmwowkcphu03bb>@cluster0.kldd9cw.mongodb.net/?appName=Cluster0
+MONGODB_URI=mongodb+srv://
 ```
 
 ### ⚠️ Fix Required:
